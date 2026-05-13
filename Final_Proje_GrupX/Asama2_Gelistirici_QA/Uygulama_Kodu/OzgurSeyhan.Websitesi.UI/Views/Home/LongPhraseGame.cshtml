@@ -1,0 +1,479 @@
+@using System.Text.Json
+@model List<OzgurSeyhan.Websitesi.UI.Controllers.FlowPuzzleLongPhraseDto>
+@{
+    ViewData["Title"] = "Uzun Tamlama Oyunu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var activeItems = (Model ?? new List<OzgurSeyhan.Websitesi.UI.Controllers.FlowPuzzleLongPhraseDto>())
+        .Where(x => x.IsActive)
+        .OrderBy(x => x.DisplayOrder)
+        .ThenBy(x => x.Id)
+        .Select(x => new
+        {
+            id = x.Id,
+            displayOrder = x.DisplayOrder,
+            headNounEn = x.HeadNounEn,
+            ofPhraseEn = x.OfPhraseEn,
+            detailPhraseEn = x.DetailPhraseEn,
+            contextPhraseEn = x.ContextPhraseEn,
+            fullPhraseEn = x.FullPhraseEn,
+            turkishTranslation = x.TurkishTranslation
+        })
+        .ToList();
+
+    var serializedData = JsonSerializer.Serialize(activeItems);
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #6a85f1 0%, #8f67c8 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .flow-container {
+        max-width: 1750px;
+        margin: 20px auto;
+        padding: 20px;
+    }
+
+    .game-header {
+        text-align: center;
+        color: white;
+        margin-bottom: 14px;
+    }
+
+    .game-header h1 {
+        font-size: 2.4rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .game-header p {
+        font-size: 1rem;
+        opacity: .95;
+    }
+
+    .status-card {
+        background: white;
+        border-radius: 16px;
+        padding: 14px;
+        text-align: center;
+        box-shadow: 0 8px 30px rgba(0,0,0,.2);
+        margin-bottom: 14px;
+    }
+
+    .status-title {
+        color: #4b55d6;
+        font-weight: 800;
+        font-size: 1.5rem;
+        margin-bottom: 6px;
+    }
+
+    .status-text {
+        font-weight: 700;
+        color: #45506e;
+    }
+
+    .status-progress {
+        margin-top: 6px;
+        font-weight: 800;
+        color: #4b55d6;
+    }
+
+    .pagination-controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin: 10px 0 16px;
+    }
+
+    .btn-page {
+        padding: 8px 14px;
+        border-radius: 999px;
+        border: 2px solid #fff;
+        background: transparent;
+        color: #fff;
+        font-weight: 700;
+    }
+
+    .btn-page:disabled { opacity: .45; }
+
+    .page-info {
+        color: #fff;
+        background: rgba(255,255,255,.2);
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-weight: 800;
+    }
+
+    .modules-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+    }
+
+    .module-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 12px;
+        box-shadow: 0 8px 30px rgba(0,0,0,.22);
+    }
+
+    .module-title {
+        text-align: center;
+        font-weight: 800;
+        font-size: 1.15rem;
+        margin-bottom: 6px;
+        min-height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .title-1 { color: #1d68be; }
+    .title-2 { color: #7e57c2; }
+    .title-3 { color: #ff8f00; }
+    .title-4 { color: #00897b; }
+    .title-5 { color: #ad1457; }
+
+    .pair-col {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .pair-col-title {
+        text-align: center;
+        border-radius: 8px;
+        padding: 6px;
+        font-weight: 700;
+    }
+
+    .pair-col-title.en { background: #e3f2fd; color: #1565c0; }
+    .pair-col-title.tr { background: #fce4ec; color: #ad1457; }
+
+    .pair-item {
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        padding: 8px 9px;
+        text-align: center;
+        font-size: .95rem;
+        font-weight: 600;
+        cursor: pointer;
+        line-height: 1.3;
+        min-height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: .2s ease;
+        position: relative;
+    }
+
+    .pair-item:hover:not(.matched) { transform: translateY(-1px); }
+    .pair-item.en { background: #eef6ff; color: #1a5ea5; border-color: #9dc6f6; }
+    .pair-item.tr { background: #fff1f6; color: #b71c59; border-color: #f7b9d2; }
+
+    .pair-item.in-chain {
+        border-color: #ff9800 !important;
+        background: #fff3cd !important;
+        color: #8a5b00 !important;
+    }
+
+    .pair-item.matched {
+        border-color: #66bb6a !important;
+        background: #e8f5e9 !important;
+        color: #2e7d32 !important;
+        cursor: default;
+        pointer-events: none;
+    }
+
+    .pair-item.in-chain::after,
+    .pair-item.matched::after {
+        content: attr(data-chain-mark);
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .78rem;
+        font-weight: 800;
+        background: #fff;
+        box-shadow: 0 5px 12px rgba(0,0,0,.15);
+    }
+
+    .pair-item.in-chain::after { color: #b06a00; border: 2px solid #ff9800; }
+    .pair-item.matched::after { color: #2e7d32; border: 2px solid #66bb6a; }
+
+    .module-progress {
+        text-align: center;
+        color: #4b3fbf;
+        font-weight: 800;
+        margin-top: 8px;
+    }
+
+    @@media (max-width: 1500px) {
+        .modules-grid { grid-template-columns: 1fr; }
+    }
+</style>
+
+<div class="flow-container">
+    <div class="game-header">
+        <h1><i class="fas fa-layer-group me-2"></i>Uzun Tamlama Oyunu</h1>
+        <p>Parcalari dogru sirada birlestir, uzun ingilizce tamlamayi tamamla.</p>
+    </div>
+
+    @if (!activeItems.Any())
+    {
+        <div class="alert alert-info">Uzun tamlama oyunu icin henuz aktif veri yok. Ornekler eklendiginde oyun otomatik acilir.</div>
+    }
+    else
+    {
+        <div class="status-card">
+            <div class="status-title">Uzun Tamlama Zinciri</div>
+            <div id="statusText" class="status-text">1. alandan baslayip 4. alana kadar dogru kartlari sec.</div>
+            <div id="statusProgress" class="status-progress">0 / 5 zincir tamamlandi</div>
+        </div>
+
+        <div class="pagination-controls">
+            <button id="prevPageBtn" class="btn-page" type="button">&lt; Onceki 5</button>
+            <span id="pageInfoText" class="page-info">Sayfa 1 / 1</span>
+            <button id="nextPageBtn" class="btn-page" type="button">Sonraki 5 &gt;</button>
+        </div>
+
+        <div class="modules-grid">
+            <div class="module-card">
+                <div class="module-title title-1">1) Bas Isim</div>
+                <div class="pair-col" id="col1"><div class="pair-col-title en">Ingilizce</div></div>
+                <div class="module-progress" id="p1">0 / 5 zincir tamamlandi</div>
+            </div>
+            <div class="module-card">
+                <div class="module-title title-2">2) Tamlayan Ifade</div>
+                <div class="pair-col" id="col2"><div class="pair-col-title en">Ingilizce</div></div>
+                <div class="module-progress" id="p2">0 / 5 zincir tamamlandi</div>
+            </div>
+            <div class="module-card">
+                <div class="module-title title-3">3) Detay Ifade</div>
+                <div class="pair-col" id="col3"><div class="pair-col-title en">Ingilizce</div></div>
+                <div class="module-progress" id="p3">0 / 5 zincir tamamlandi</div>
+            </div>
+            <div class="module-card">
+                <div class="module-title title-5">4) Tam Turkce</div>
+                <div class="pair-col" id="col4"><div class="pair-col-title tr">Tam Turkce</div></div>
+                <div class="module-progress" id="p4">0 / 5 zincir tamamlandi</div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (activeItems.Any())
+{
+<script>
+    const allItems = @Html.Raw(serializedData);
+
+    const state = {
+        currentPage: 1,
+        totalPages: Math.max(1, Math.ceil(allItems.length / 5)),
+        pageItems: [],
+        matchedIds: new Set(),
+        step: 1,
+        selected: { c1: null, c2: null, c3: null, c4: null }
+    };
+
+    const dom = {
+        col1: document.getElementById('col1'),
+        col2: document.getElementById('col2'),
+        col3: document.getElementById('col3'),
+        col4: document.getElementById('col4'),
+        p1: document.getElementById('p1'),
+        p2: document.getElementById('p2'),
+        p3: document.getElementById('p3'),
+        p4: document.getElementById('p4'),
+        statusText: document.getElementById('statusText'),
+        statusProgress: document.getElementById('statusProgress'),
+        pageInfoText: document.getElementById('pageInfoText'),
+        prevPageBtn: document.getElementById('prevPageBtn'),
+        nextPageBtn: document.getElementById('nextPageBtn')
+    };
+
+    function shuffle(list) {
+        const copy = [...list];
+        for (let i = copy.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+    }
+
+    function setStatus(text) {
+        dom.statusText.textContent = text;
+    }
+
+    function updateProgress() {
+        const total = state.pageItems.length;
+        const done = state.pageItems.filter(x => state.matchedIds.has(x.id)).length;
+        const text = `${done} / ${total} zincir tamamlandi`;
+        dom.statusProgress.textContent = text;
+        dom.p1.textContent = text;
+        dom.p2.textContent = text;
+        dom.p3.textContent = text;
+        dom.p4.textContent = text;
+    }
+
+    function updatePageInfo() {
+        dom.pageInfoText.textContent = `Sayfa ${state.currentPage} / ${state.totalPages}`;
+        dom.prevPageBtn.disabled = state.currentPage <= 1;
+        dom.nextPageBtn.disabled = state.currentPage >= state.totalPages;
+    }
+
+    function clearSelectionVisuals() {
+        document.querySelectorAll('.pair-item.in-chain').forEach(el => {
+            el.classList.remove('in-chain');
+            el.removeAttribute('data-chain-mark');
+        });
+    }
+
+    function resetChain() {
+        state.step = 1;
+        state.selected = { c1: null, c2: null, c3: null, c4: null };
+        clearSelectionVisuals();
+    }
+
+    function card(type, item, text, cssType) {
+        const div = document.createElement('div');
+        div.className = `pair-item ${cssType}`;
+        div.dataset.type = type;
+        div.dataset.id = String(item.id);
+        div.textContent = text;
+
+        if (state.matchedIds.has(item.id)) {
+            div.classList.add('matched');
+            div.setAttribute('data-chain-mark', '✓');
+        }
+
+        div.addEventListener('click', () => clickCard(type, item.id));
+        return div;
+    }
+
+    function renderPage() {
+        const start = (state.currentPage - 1) * 5;
+        state.pageItems = allItems.slice(start, start + 5);
+        state.matchedIds = new Set();
+        resetChain();
+
+        dom.col1.innerHTML = '<div class="pair-col-title en">Ingilizce</div>';
+        dom.col2.innerHTML = '<div class="pair-col-title en">Ingilizce</div>';
+        dom.col3.innerHTML = '<div class="pair-col-title en">Ingilizce</div>';
+        dom.col4.innerHTML = '<div class="pair-col-title tr">Tam Turkce</div>';
+
+        shuffle(state.pageItems).forEach(x => dom.col1.appendChild(card('c1', x, x.headNounEn, 'en')));
+        shuffle(state.pageItems).forEach(x => dom.col2.appendChild(card('c2', x, x.ofPhraseEn, 'en')));
+        shuffle(state.pageItems).forEach(x => dom.col3.appendChild(card('c3', x, x.detailPhraseEn, 'en')));
+        shuffle(state.pageItems).forEach(x => dom.col4.appendChild(card('c4', x, x.turkishTranslation, 'tr')));
+
+        updatePageInfo();
+        updateProgress();
+        setStatus('1. alandan baslayip 4. alana kadar dogru kartlari sec.');
+    }
+
+    function markInChain(type, id, mark) {
+        const el = document.querySelector(`.pair-item[data-type="${type}"][data-id="${id}"]`);
+        if (!el || el.classList.contains('matched')) return;
+        el.classList.add('in-chain');
+        el.setAttribute('data-chain-mark', String(mark));
+    }
+
+    function markMatched(id) {
+        ['c1', 'c2', 'c3', 'c4'].forEach(t => {
+            const el = document.querySelector(`.pair-item[data-type="${t}"][data-id="${id}"]`);
+            if (!el) return;
+            el.classList.remove('in-chain');
+            el.classList.add('matched');
+            el.setAttribute('data-chain-mark', '✓');
+        });
+    }
+
+    function wrong() {
+        setStatus('Yanlis eslestirme. Zincir sifirlandi, tekrar 1. alandan basla.');
+        resetChain();
+    }
+
+    function completeIfPossible() {
+        const s = state.selected;
+        if (!s.c1 || !s.c2 || !s.c3 || !s.c4) return;
+
+        if (s.c1 === s.c2 && s.c2 === s.c3 && s.c3 === s.c4) {
+            state.matchedIds.add(s.c1);
+            markMatched(s.c1);
+            const done = state.pageItems.filter(x => state.matchedIds.has(x.id)).length;
+            if (done === state.pageItems.length) {
+                setStatus('Harika! Bu sayfadaki tum zincirler tamamlandi.');
+            } else {
+                setStatus('Dogru zincir! Siradaki zincire gec.');
+            }
+            resetChain();
+            updateProgress();
+        } else {
+            wrong();
+        }
+    }
+
+    function clickCard(type, id) {
+        if (state.matchedIds.has(id)) return;
+
+        if (state.step === 1) {
+            if (type !== 'c1') { setStatus('Baslangic 1. alandan olmali.'); return; }
+            resetChain();
+            state.selected.c1 = id;
+            state.step = 2;
+            markInChain('c1', id, 1);
+            setStatus('2. alandan dogru parcayi sec.');
+            return;
+        }
+
+        if (state.step === 2) {
+            if (type !== 'c2' || id !== state.selected.c1) { wrong(); return; }
+            state.selected.c2 = id;
+            state.step = 3;
+            markInChain('c2', id, 2);
+            setStatus('3. alandan dogru parcayi sec.');
+            return;
+        }
+
+        if (state.step === 3) {
+            if (type !== 'c3' || id !== state.selected.c1) { wrong(); return; }
+            state.selected.c3 = id;
+            state.step = 4;
+            markInChain('c3', id, 3);
+            setStatus('Son adim: 4. alandan Turkce karsiligi sec.');
+            return;
+        }
+
+        if (state.step === 4) {
+            if (type !== 'c4') { wrong(); return; }
+            state.selected.c4 = id;
+            markInChain('c4', id, 4);
+            completeIfPossible();
+        }
+    }
+
+    dom.prevPageBtn.addEventListener('click', function () {
+        if (state.currentPage <= 1) return;
+        state.currentPage -= 1;
+        renderPage();
+    });
+
+    dom.nextPageBtn.addEventListener('click', function () {
+        if (state.currentPage >= state.totalPages) return;
+        state.currentPage += 1;
+        renderPage();
+    });
+
+    renderPage();
+</script>
+}

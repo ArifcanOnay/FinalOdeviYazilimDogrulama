@@ -1,0 +1,748 @@
+@using System.Text.Json
+@model List<OzgurSeyhan.Websitesi.UI.Controllers.FlowPuzzleRelativeClauseDto>
+@{
+    ViewData["Title"] = "Cümlenin Arkası - Relative Clauses";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var activeItems = (Model ?? new List<OzgurSeyhan.Websitesi.UI.Controllers.FlowPuzzleRelativeClauseDto>())
+        .Where(x => x.IsActive)
+        .OrderBy(x => x.DisplayOrder)
+        .ThenBy(x => x.Id)
+        .Select(x => new
+        {
+            id = x.Id,
+            displayOrder = x.DisplayOrder,
+            sourcePairEn = x.SourcePairEn,
+            relativeClauseEn = x.RelativeClauseEn,
+            turkishTranslation = x.TurkishTranslation
+        })
+        .ToList();
+
+    var serializedData = JsonSerializer.Serialize(activeItems);
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .flow-container {
+        max-width: 1600px;
+        margin: 20px auto;
+        padding: 20px;
+    }
+
+    .game-header {
+        text-align: center;
+        color: white;
+        margin-bottom: 18px;
+    }
+
+    .game-header h1 {
+        font-size: 2.6rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .game-header p {
+        font-size: 1.05rem;
+        opacity: 0.95;
+    }
+
+    .current-noun-display {
+        background: white;
+        border-radius: 18px;
+        padding: 18px;
+        margin-bottom: 18px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+        text-align: center;
+    }
+
+    .current-noun-display h2 {
+        color: #5a63d8;
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+    }
+
+    .chain-status {
+        margin-top: 8px;
+        font-size: 0.96rem;
+        font-weight: 700;
+        color: #45506e;
+    }
+
+    .chain-summary {
+        margin-top: 8px;
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #4b55d6;
+    }
+
+    .tense-tabs-nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        margin-bottom: 20px;
+    }
+
+    .tense-tab-btn {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        border: 2px solid white;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all .2s ease;
+        background: transparent;
+        color: white;
+    }
+
+    .tense-tab-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .tense-tab-btn.active {
+        background: white;
+        color: #667eea;
+        border-color: white;
+    }
+
+    .pagination-controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 14px;
+        margin: -6px 0 18px;
+    }
+
+    .btn-page {
+        padding: 8px 14px;
+        font-size: 0.92rem;
+        font-weight: 700;
+        border: 2px solid #fff;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: all .2s ease;
+        background: transparent;
+        color: #fff;
+    }
+
+    .btn-page:hover:not(:disabled) {
+        background: rgba(255,255,255,.2);
+    }
+
+    .btn-page:disabled {
+        opacity: .5;
+        cursor: default;
+    }
+
+    .page-info {
+        color: white;
+        font-size: 0.96rem;
+        font-weight: 700;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.18);
+    }
+
+    .modules-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1.2fr;
+        gap: 18px;
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    .chain-overlay {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        overflow: visible;
+        z-index: 5;
+    }
+
+    .module-card {
+        background: white;
+        border-radius: 18px;
+        padding: 16px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+        position: relative;
+        z-index: 2;
+    }
+
+    .module-title {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 6px;
+        text-align: center;
+        min-height: 112px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.2;
+    }
+
+    .module-title.left { color: #1d68be; }
+    .module-title.middle { color: #8e44ad; }
+    .module-title.right { color: #0d8a61; }
+
+    .module-subtitle {
+        text-align: center;
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+        min-height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.3;
+    }
+
+    .pair-col {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .pair-col-title {
+        text-align: center;
+        font-size: 1.1rem;
+        font-weight: 700;
+        border-radius: 10px;
+        padding: 6px;
+    }
+
+    .pair-col-title.en { background: #e3f2fd; color: #1565c0; }
+    .pair-col-title.tr { background: #fce4ec; color: #ad1457; }
+
+    .pair-item {
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        padding: 9px 10px;
+        text-align: center;
+        font-size: 1.05rem;
+        font-weight: 600;
+        cursor: pointer;
+        user-select: none;
+        transition: all .2s ease;
+        line-height: 1.35;
+        position: relative;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .pair-item:hover:not(.matched) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+    }
+
+    .pair-item.en { background: #eef6ff; color: #1a5ea5; border-color: #9dc6f6; }
+    .pair-item.tr { background: #fff1f6; color: #b71c59; border-color: #f7b9d2; }
+
+    .pair-item.startable {
+        box-shadow: inset 0 0 0 1px rgba(90, 99, 216, 0.35);
+    }
+
+    .pair-item.in-chain {
+        border-color: #ffa000 !important;
+        background: #fff3cd !important;
+        color: #8a5b00 !important;
+    }
+
+    .pair-item.matched {
+        background: #e8f5e9 !important;
+        border-color: #66bb6a !important;
+        color: #2e7d32 !important;
+        cursor: default;
+        pointer-events: none;
+    }
+
+    body.chain-dragging {
+        cursor: grabbing;
+    }
+
+    .pair-item.startable::after,
+    .pair-item.in-chain::after,
+    .pair-item.matched::after {
+        content: attr(data-chain-mark);
+        position: absolute;
+        top: -12px;
+        right: -12px;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.82rem;
+        font-weight: 800;
+        background: white;
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+    }
+
+    .pair-item.startable::after {
+        border: 2px solid #5a63d8;
+        color: #5a63d8;
+    }
+
+    .pair-item.in-chain::after {
+        border: 2px solid #ffa000;
+        color: #b06a00;
+    }
+
+    .pair-item.matched::after {
+        border: 2px solid #66bb6a;
+        color: #2e7d32;
+    }
+
+    .module-progress {
+        margin-top: 12px;
+        text-align: center;
+        font-weight: 700;
+        color: #4b3fbf;
+        font-size: 1.05rem;
+    }
+
+    @@media (max-width: 1200px) {
+        .modules-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .module-title {
+            font-size: 1.7rem;
+            min-height: auto;
+        }
+
+        .module-subtitle {
+            min-height: auto;
+        }
+    }
+</style>
+
+<div class="flow-container">
+    <div class="game-header">
+        <h1><i class="fas fa-link me-2"></i>Relative Clause Oyunu</h1>
+        <p>Soldan basla, zinciri ortadan gecir ve Turkce kartta tamamla.</p>
+    </div>
+
+    @if (!activeItems.Any())
+    {
+        <div class="alert alert-info">Henuz aktif ornek yok.</div>
+    }
+    else
+    {
+        <div class="current-noun-display">
+            <h2 id="groupTitle">WHO</h2>
+            <div class="chain-status" id="chainStatusText">Soldaki Ingilizce karttan basla. Dogru yolu bul ve zinciri tamamla.</div>
+            <div class="chain-summary" id="chainSummaryText">0 / 3 zincir tamamlandi</div>
+        </div>
+
+        <div class="tense-tabs-nav" id="groupTabs">
+            <button class="tense-tab-btn active" data-group="who">1. WHO</button>
+            <button class="tense-tab-btn" data-group="which">2. WHICH</button>
+            <button class="tense-tab-btn" data-group="that">3. THAT</button>
+            <button class="tense-tab-btn" data-group="where">4. WHERE</button>
+            <button class="tense-tab-btn" data-group="when">5. WHEN</button>
+            <button class="tense-tab-btn" data-group="whose">6. WHOSE</button>
+        </div>
+
+        <div class="pagination-controls">
+            <button id="prevPageBtn" class="btn-page" type="button">&lt; Onceki 5</button>
+            <span id="pageInfoText" class="page-info">Sayfa 1 / 6</span>
+            <button id="nextPageBtn" class="btn-page" type="button">Sonraki 5 &gt;</button>
+        </div>
+
+        <div class="modules-grid">
+            <svg class="chain-overlay" id="chainOverlay" aria-hidden="true"></svg>
+
+            <div class="module-card">
+                <div class="module-title left">Relative Clausesuz Cümle</div>
+                <div class="module-subtitle">Alan 1: Relative clause olmadan kaynak cümle</div>
+                <div class="pair-col" id="headEnglishCol">
+                    <div class="pair-col-title en">Relative Clausesuz</div>
+                </div>
+                <div class="module-progress" id="headProgressText">0 / 3 zincir tamamlandi</div>
+            </div>
+
+            <div class="module-card">
+                <div class="module-title middle">Relative Clauselu Cümle</div>
+                <div class="module-subtitle">Alan 2: Relative clauselu birleşik cümle</div>
+                <div class="pair-col" id="tailEnglishCol">
+                    <div class="pair-col-title en">Relative Clauselu</div>
+                </div>
+                <div class="module-progress" id="tailProgressText">0 / 3 zincir tamamlandi</div>
+            </div>
+
+            <div class="module-card">
+                <div class="module-title right">Tam Cümle Çevirisi</div>
+                <div class="module-subtitle">Alan 3: Doğru Türkçe anlamı bul</div>
+                <div class="pair-col" id="finalTurkishCol">
+                    <div class="pair-col-title tr">Tam Türkçe</div>
+                </div>
+                <div class="module-progress" id="finalProgressText">0 / 3 zincir tamamlandi</div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (activeItems.Any())
+{
+<script>
+    const allItems = @Html.Raw(serializedData);
+    const groupRanges = {
+        who: [[1, 30], [181, 210]],
+        which: [[31, 60], [211, 240]],
+        that: [[61, 90], [241, 270]],
+        where: [[91, 120], [271, 300]],
+        when: [[121, 150], [301, 330]],
+        whose: [[151, 180], [331, 360]]
+    };
+
+    const state = {
+        currentGroup: 'who',
+        currentPage: 1,
+        totalPages: 1,
+        roundItems: [],
+        matchedIds: new Set(),
+        chainStep: 0,
+        isDragging: false,
+        pointer: null,
+        selected: {
+            head: null,
+            tail: null,
+            final: null
+        }
+    };
+
+    const dom = {
+        groupTitle: document.getElementById('groupTitle'),
+        chainStatusText: document.getElementById('chainStatusText'),
+        chainSummaryText: document.getElementById('chainSummaryText'),
+        prevPageBtn: document.getElementById('prevPageBtn'),
+        nextPageBtn: document.getElementById('nextPageBtn'),
+        pageInfoText: document.getElementById('pageInfoText'),
+        chainOverlay: document.getElementById('chainOverlay'),
+        modulesGrid: document.querySelector('.modules-grid'),
+        headEnglishCol: document.getElementById('headEnglishCol'),
+        tailEnglishCol: document.getElementById('tailEnglishCol'),
+        finalTurkishCol: document.getElementById('finalTurkishCol'),
+        headProgressText: document.getElementById('headProgressText'),
+        tailProgressText: document.getElementById('tailProgressText'),
+        finalProgressText: document.getElementById('finalProgressText'),
+        groupTabs: document.getElementById('groupTabs')
+    };
+
+    function shuffle(list) {
+        const copy = [...list];
+        for (let i = copy.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+    }
+
+    function itemsForGroup(groupKey) {
+        const ranges = groupRanges[groupKey];
+        if (!ranges) return [];
+        return allItems
+            .filter(x => ranges.some(range => x.displayOrder >= range[0] && x.displayOrder <= range[1]))
+            .sort((a, b) => a.displayOrder - b.displayOrder);
+    }
+
+    function resetChainSelection() {
+        state.chainStep = 0;
+        state.isDragging = false;
+        state.pointer = null;
+        state.selected = { head: null, tail: null, final: null };
+        document.body.classList.remove('chain-dragging');
+        document.querySelectorAll('.pair-item.in-chain, .pair-item.startable').forEach(el => {
+            el.classList.remove('in-chain', 'startable');
+            el.removeAttribute('data-chain-mark');
+        });
+        renderConnections();
+    }
+
+    function markItem(type, id, cssClass, mark) {
+        const el = document.querySelector(`.pair-item[data-type="${type}"][data-id="${id}"]`);
+        if (!el) return;
+        el.classList.add(cssClass);
+        el.setAttribute('data-chain-mark', String(mark));
+    }
+
+    function buildItem(type, item, text, cssType) {
+        const div = document.createElement('div');
+        div.className = `pair-item ${cssType}`;
+        div.dataset.type = type;
+        div.dataset.id = String(item.id);
+        div.textContent = text;
+
+        if (state.matchedIds.has(item.id)) {
+            div.classList.add('matched');
+            div.setAttribute('data-chain-mark', '✓');
+        }
+
+        div.addEventListener('pointerdown', (e) => handlePointerDown(e, type, item.id));
+        return div;
+    }
+
+    function updateProgressText() {
+        const total = state.roundItems.length;
+        const completed = state.roundItems.filter(x => state.matchedIds.has(x.id)).length;
+        const text = `${completed} / ${total} zincir tamamlandi`;
+        dom.chainSummaryText.textContent = text;
+        dom.headProgressText.textContent = text;
+        dom.tailProgressText.textContent = text;
+        dom.finalProgressText.textContent = text;
+    }
+
+    function updatePageControls() {
+        dom.pageInfoText.textContent = `Sayfa ${state.currentPage} / ${state.totalPages}`;
+        dom.prevPageBtn.disabled = state.currentPage <= 1;
+        dom.nextPageBtn.disabled = state.currentPage >= state.totalPages;
+    }
+
+    function getCardCenter(type, id) {
+        const card = document.querySelector(`.pair-item[data-type="${type}"][data-id="${id}"]`);
+        if (!card) return null;
+
+        const cardRect = card.getBoundingClientRect();
+        const gridRect = dom.modulesGrid.getBoundingClientRect();
+        return {
+            x: (cardRect.left + cardRect.width / 2) - gridRect.left,
+            y: (cardRect.top + cardRect.height / 2) - gridRect.top
+        };
+    }
+
+    function drawLine(p1, p2, color, width, dashed) {
+        const ns = 'http://www.w3.org/2000/svg';
+        const line = document.createElementNS(ns, 'line');
+        line.setAttribute('x1', String(p1.x));
+        line.setAttribute('y1', String(p1.y));
+        line.setAttribute('x2', String(p2.x));
+        line.setAttribute('y2', String(p2.y));
+        line.setAttribute('stroke', color);
+        line.setAttribute('stroke-width', String(width));
+        line.setAttribute('stroke-linecap', 'round');
+        if (dashed) {
+            line.setAttribute('stroke-dasharray', '8 6');
+        }
+        dom.chainOverlay.appendChild(line);
+    }
+
+    function renderConnections() {
+        if (!dom.chainOverlay || !dom.modulesGrid) return;
+
+        const gridRect = dom.modulesGrid.getBoundingClientRect();
+        dom.chainOverlay.setAttribute('viewBox', `0 0 ${Math.max(1, gridRect.width)} ${Math.max(1, gridRect.height)}`);
+        dom.chainOverlay.innerHTML = '';
+
+        if (state.selected.head) {
+            const head = getCardCenter('head', state.selected.head);
+            if (head && state.selected.tail) {
+                const tail = getCardCenter('tail', state.selected.tail);
+                if (tail) {
+                    drawLine(head, tail, '#ff9800', 3, true);
+                }
+            } else if (head && state.pointer) {
+                drawLine(head, state.pointer, '#ff9800', 3, true);
+            }
+        }
+
+        if (state.selected.tail) {
+            const tail = getCardCenter('tail', state.selected.tail);
+            if (tail && state.selected.final) {
+                const final = getCardCenter('final', state.selected.final);
+                if (final) {
+                    drawLine(tail, final, '#ff9800', 3, true);
+                }
+            } else if (tail && state.pointer) {
+                drawLine(tail, state.pointer, '#ff9800', 3, true);
+            }
+        }
+    }
+
+    function setStatus(text) {
+        dom.chainStatusText.textContent = text;
+    }
+
+    function renderRound() {
+        dom.headEnglishCol.innerHTML = '<div class="pair-col-title en">İngilizce</div>';
+        dom.tailEnglishCol.innerHTML = '<div class="pair-col-title en">İngilizce</div>';
+        dom.finalTurkishCol.innerHTML = '<div class="pair-col-title tr">Tam Türkçe</div>';
+
+        const headItems = shuffle(state.roundItems);
+        const tailItems = shuffle(state.roundItems);
+        const finalItems = shuffle(state.roundItems);
+
+        headItems.forEach(item => dom.headEnglishCol.appendChild(buildItem('head', item, item.sourcePairEn, 'en')));
+        tailItems.forEach(item => dom.tailEnglishCol.appendChild(buildItem('tail', item, item.relativeClauseEn, 'en')));
+        finalItems.forEach(item => dom.finalTurkishCol.appendChild(buildItem('final', item, item.turkishTranslation, 'tr')));
+
+        updateProgressText();
+        setStatus('Soldaki Ingilizce karttan basla. Dogru yolu bul ve zinciri tamamla.');
+        renderConnections();
+    }
+
+    function startNewRound(groupKey, page) {
+        const pool = itemsForGroup(groupKey);
+        state.currentGroup = groupKey;
+        state.totalPages = Math.max(1, Math.ceil(pool.length / 5));
+        state.currentPage = Math.min(Math.max(1, page || 1), state.totalPages);
+
+        const startIndex = (state.currentPage - 1) * 5;
+        const pageItems = pool.slice(startIndex, startIndex + 5);
+
+        state.matchedIds = new Set();
+        state.roundItems = shuffle(pageItems);
+
+        dom.groupTitle.textContent = groupKey.toUpperCase();
+        updatePageControls();
+        resetChainSelection();
+        renderRound();
+    }
+
+    function handleCorrectMatch(itemId) {
+        markItem('head', itemId, 'matched', '✓');
+        markItem('tail', itemId, 'matched', '✓');
+        markItem('final', itemId, 'matched', '✓');
+
+        state.matchedIds.add(itemId);
+        resetChainSelection();
+        updateProgressText();
+
+        if (state.matchedIds.size === state.roundItems.length) {
+            setStatus('Harika! Bu gruptaki tum zincirleri tamamladin. Tabdan yeni grup sec veya ayni gruba tekrar tikla.');
+        } else {
+            setStatus('Dogru zincir! Siradaki zinciri soldan baslatarak devam et.');
+        }
+
+        renderConnections();
+    }
+
+    function handleWrongMatch() {
+        setStatus('Yanlis zincir. Kartlari birakmadan soldan baslayip dogru 3luyu cizmelisin.');
+        resetChainSelection();
+    }
+
+    function updatePointerFromEvent(e) {
+        if (!dom.modulesGrid) return;
+        const rect = dom.modulesGrid.getBoundingClientRect();
+        state.pointer = {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        };
+    }
+
+    function pickCardFromPoint(clientX, clientY) {
+        const elAtPoint = document.elementFromPoint(clientX, clientY);
+        if (!elAtPoint) return null;
+        const card = elAtPoint.closest('.pair-item');
+        if (!card) return null;
+
+        return {
+            type: card.dataset.type,
+            id: Number(card.dataset.id)
+        };
+    }
+
+    function handlePointerDown(e, type, id) {
+        if (state.matchedIds.has(id)) return;
+        if (type !== 'head') {
+            setStatus('Zinciri baslatmak icin soldaki karttan (Alan 1) tiklayip surukle.');
+            return;
+        }
+
+        resetChainSelection();
+        state.isDragging = true;
+        state.chainStep = 1;
+        state.selected.head = id;
+        updatePointerFromEvent(e);
+        document.body.classList.add('chain-dragging');
+        markItem('head', id, 'startable', 1);
+        setStatus('Surukleyip Alan 2 kartina ulastir. Fareyi birakma.');
+        renderConnections();
+    }
+
+    function handlePointerMove(e) {
+        if (!state.isDragging) return;
+
+        updatePointerFromEvent(e);
+        const hovered = pickCardFromPoint(e.clientX, e.clientY);
+
+        if (hovered && !state.matchedIds.has(hovered.id)) {
+            if (state.chainStep === 1 && hovered.type === 'tail' && hovered.id === state.selected.head) {
+                state.selected.tail = hovered.id;
+                state.chainStep = 2;
+                markItem('tail', hovered.id, 'in-chain', 2);
+                setStatus('Harika. Simdi surukleyerek Alan 3 kartina git.');
+            }
+
+            if (state.chainStep === 2 && hovered.type === 'final' && hovered.id === state.selected.head) {
+                state.selected.final = hovered.id;
+            }
+        }
+
+        renderConnections();
+    }
+
+    function handlePointerUp(e) {
+        if (!state.isDragging) return;
+
+        updatePointerFromEvent(e);
+        const hovered = pickCardFromPoint(e.clientX, e.clientY);
+        if (hovered && hovered.type === 'final' && hovered.id === state.selected.head && state.selected.tail === state.selected.head) {
+            state.selected.final = hovered.id;
+        }
+
+        if (state.selected.head && state.selected.tail === state.selected.head && state.selected.final === state.selected.head) {
+            handleCorrectMatch(state.selected.head);
+        } else {
+            handleWrongMatch();
+        }
+    }
+
+    dom.groupTabs.addEventListener('click', function (e) {
+        const btn = e.target.closest('.tense-tab-btn');
+        if (!btn) return;
+
+        const group = btn.dataset.group;
+        if (!group) return;
+
+        document.querySelectorAll('.tense-tab-btn').forEach(x => x.classList.remove('active'));
+        btn.classList.add('active');
+        startNewRound(group, 1);
+    });
+
+    dom.prevPageBtn.addEventListener('click', function () {
+        if (state.currentPage <= 1) return;
+        startNewRound(state.currentGroup, state.currentPage - 1);
+    });
+
+    dom.nextPageBtn.addEventListener('click', function () {
+        if (state.currentPage >= state.totalPages) return;
+        startNewRound(state.currentGroup, state.currentPage + 1);
+    });
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerUp);
+
+    window.addEventListener('resize', renderConnections);
+    window.addEventListener('scroll', renderConnections, { passive: true });
+
+    startNewRound('who', 1);
+</script>
+}

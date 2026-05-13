@@ -1,0 +1,26 @@
+﻿{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "http": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "http://localhost:5289",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "https": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:7276;http://localhost:5289",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "OZGURSEYHAN_DB_CONNECTION": "Server=CAN\\SQLEXPRESS01;Database=OzgurSeyhanWebSitesi;User Id=sa;Password=1;TrustServerCertificate=true;",
+        "YOUTUBE_API_KEY": "AIzaSyDHAdE2O_E7SpsWhpTI-4Yl3DrDZauFVfk",
+        "ALLOWED_ORIGINS": "https://localhost:7276,http://localhost:5276"
+      }
+    }
+  }
+}

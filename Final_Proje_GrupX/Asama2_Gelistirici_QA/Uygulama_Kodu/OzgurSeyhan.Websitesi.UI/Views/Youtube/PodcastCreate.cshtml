@@ -1,0 +1,164 @@
+@{
+    ViewData["Title"] = "Podcast Ekle";
+}
+
+<div class="content">
+    <div class="container-fluid">
+        <h4 class="page-title"><i class="fab fa-spotify me-2" style="color: #1DB954;"></i>Yeni Spotify Şarkısı Ekle</h4>
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Hata!</strong> @TempData["ErrorMessage"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header" style="background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);">
+                        <h4 class="card-title" style="color: white;">
+                            <i class="fab fa-spotify"></i> Spotify Şarkısı Ekle
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="@Url.Action("PodcastCreate", "Youtube")">
+                            @Html.AntiForgeryToken()
+
+                            <div class="form-group">
+                                <label for="podcastUrl">Spotify URL</label>
+                                <input type="url" 
+                                       name="podcastUrl" 
+                                       id="podcastUrl"
+                                       class="form-control form-control-lg" 
+                                       placeholder="https://open.spotify.com/track/... veya show/... veya episode/..." 
+                                       required>
+                                <small class="form-text text-muted">
+                                    Spotify linkini yapıştırın. Başlık ve kapak otomatik çekilecektir.
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sira">Sıra Numarası</label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="sira" 
+                                       name="sira" 
+                                       placeholder="Boş bırakırsan otomatik sıralanacak"
+                                       min="0">
+                                <small class="form-text text-muted">
+                                    Boş bırakırsan en sona eklenir. Şarkılar küçükten büyüğe sıralanır (0 en başta).
+                                </small>
+                            </div>
+
+                            <div class="form-group mt-4">
+                                <button type="submit" class="btn btn-success btn-lg" style="background: #1DB954; border-color: #1DB954;">
+                                    <i class="fab fa-spotify me-2"></i> Şarkı Ekle
+                                </button>
+                                <a href="@Url.Action("PodcastIndex", "Youtube")" class="btn btn-secondary btn-lg">
+                                    <i class="la la-times"></i> İptal
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+                        </h5>
+                        <hr style="border-color: rgba(255,255,255,0.3);">
+                        
+                        <h6 class="text-white">Adım 1: Spotify'dan Link Kopyala</h6>
+                        <ol class="mb-3">
+                            <li>Spotify'da şarkı/playlist/podcast sayfasını aç</li>
+                            <li>3 nokta (⋮) menüsüne tıkla</li>
+                            <li>"Paylaş" → "Bağlantı Kopyala" seç</li>
+                        </ol>
+
+                        <h6 class="text-white">Adım 2: Buraya Yapıştır</h6>
+                        <p class="mb-2">Normal linki yukarıdaki alana yapıştırın, otomatik olarak embed formatına çevrilecektir!</p>
+
+                        <p class="mb-2"><strong>Örnek Normal Link:</strong></p>
+                        <code style="background: rgba(0,0,0,0.3); color: #1DB954; padding: 5px; display: block; word-break: break-all; margin-bottom: 10px;">
+                            https://open.spotify.com/track/6rqhFgbbKwnb9MLmUQDhG6
+                        </code>
+
+                        <p class="mb-2"><strong>Otomatik Çevrilir →</strong></p>
+                        <code style="background: rgba(0,0,0,0.3); color: #1DB954; padding: 5px; display: block; word-break: break-all;">
+                            https://open.spotify.com/<span style="background: yellow; color: black; padding: 0 3px;">embed/</span>track/6rqhFgbbKwnb9MLmUQDhG6
+                        </code>
+
+                        <div class="alert alert-light mt-3" style="background: rgba(255,255,255,0.9);">
+                            <small class="text-dark">
+                                <i class="fas fa-magic text-success"></i>
+                                <strong>Otomatik:</strong> /intl-tr/ gibi bölgeler otomatik temizlenir ve embed formatına çevrilir!
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-warning">
+                    <div class="card-body">
+                        <h6><i class="la la-lightbulb-o"></i> İpuçları</h6>
+                        <ul class="mb-0">
+                            <li>Podcast hem show hem de episode olabilir</li>
+                            <li>Show ID genellikle <code>show/</code> ile başlar</li>
+                            <li>Episode ID genellikle <code>episode/</code> ile başlar</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Spotify URL otomatik dönüştürme
+    document.addEventListener('DOMContentLoaded', function() {
+        const podcastUrlInput = document.getElementById('podcastUrl');
+
+        podcastUrlInput.addEventListener('blur', function() {
+            let url = this.value.trim();
+            
+            if (url) {
+                // Spotify URL'sini embed formatına çevir
+                let embedUrl = convertToEmbedUrl(url);
+                
+                if (embedUrl) {
+                    this.value = embedUrl;
+                }
+            }
+        });
+
+        function convertToEmbedUrl(url) {
+            try {
+                // /intl-tr/ veya /intl-xx/ gibi kısımları temizle
+                url = url.replace(/\/intl-[a-z]{2}\//gi, '/');
+                
+                // open.spotify.com kontrolü
+                if (url.includes('open.spotify.com')) {
+                    // Zaten embed varsa dokunma
+                    if (url.includes('/embed/')) {
+                        return url;
+                    }
+                    
+                    // track, playlist, show, episode, album formatlarını destekle
+                    const formats = ['track', 'playlist', 'show', 'episode', 'album'];
+                    
+                    for (let format of formats) {
+                        if (url.includes(`/${format}/`)) {
+                            // embed ekle
+                            return url.replace(`/${format}/`, `/embed/${format}/`);
+                        }
+                    }
+                }
+                
+                return url;
+            } catch (e) {
+                return url;
+            }
+        }
+    });
+</script>

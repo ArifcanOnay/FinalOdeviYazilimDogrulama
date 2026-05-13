@@ -1,0 +1,207 @@
+@model OzgurSeyhanWebSitesi.Core.Dtos.PlaylistDtos.PlaylistWithVideosDto
+
+@{
+    ViewData["Title"] = "Playlist Videoları";
+}
+
+<div class="content">
+    <div class="container-fluid">
+        <h4 class="page-title">Playlist Videoları</h4>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="card-title">@Model.Baslik</h4>
+                                <p class="card-category">Toplam @Model.Videos.Count video</p>
+                            </div>
+                            <a href="@Url.Action("PlaylistIndex", "Youtube")" class="btn btn-secondary">
+                                <i class="la la-arrow-left"></i> Geri Dön
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th style="width: 120px;">Thumbnail</th>
+                                        <th>Video Başlığı</th>
+                                        <th>Video ID</th>
+                                        <th class="text-center">İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.Videos != null && Model.Videos.Any())
+                                    {
+                                        int index = 1;
+                                        @foreach (var video in Model.Videos)
+                                        {
+                                            <tr>
+                                                <td>@index</td>
+                                                <td>
+                                                    <img src="https://img.youtube.com/vi/@video.VideoId/default.jpg" 
+                                                         alt="@video.Baslik" 
+                                                         class="img-thumbnail" 
+                                                         style="width: 100px;">
+                                                </td>
+                                                <td>
+                                                    <strong>@video.Baslik</strong>
+                                                    @if (!string.IsNullOrEmpty(video.Aciklama))
+                                                    {
+                                                        <br /><small class="text-muted">@video.Aciklama</small>
+                                                    }
+                                                    else
+                                                    {
+                                                        <br /><small class="text-muted"><i>Açıklama bulunmuyor</i></small>
+                                                    }
+                                                </td>
+                                                <td><code>@video.VideoId</code></td>
+                                                <td class="text-center">
+                                                    <a href="@video.Url" 
+                                                       target="_blank" 
+                                                       class="btn btn-info btn-sm" 
+                                                       title="YouTube'da İzle">
+                                                        <i class="la la-play"></i> İzle
+                                                    </a>
+                                                    <button type="button" 
+                                                            class="btn btn-success btn-sm"
+                                                            title="Açıklama Ekle/Düzenle"
+                                                            onclick="showAciklamaModal('@video.VideoId')">
+                                                        <i class="la la-file-text"></i> Açıklama
+                                                    </button>
+                                                    <input type="hidden" id="videoData_@video.VideoId" 
+                                                           data-baslik="@Html.Encode(video.Baslik)"
+                                                           data-aciklama="@Html.Encode(video.Aciklama ?? "")" />
+                                                </td>
+                                            </tr>
+                                            index++;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="5" class="text-center">Bu playlist'te video bulunamadı.</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Açıklama Modal -->
+<div class="modal fade" id="aciklamaModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Video Açıklaması Ekle/Düzenle</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="modalVideoId" />
+                <div class="form-group">
+                    <label><strong>Video:</strong></label>
+                    <p id="modalVideoBaslik" class="form-control-plaintext"></p>
+                </div>
+                <div class="form-group">
+                    <label for="modalAciklamaText">Açıklama:</label>
+                    <textarea id="modalAciklamaText" class="form-control" rows="6" 
+                              placeholder="Buraya video açıklamasını yazın..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-primary" onclick="saveVideoAciklama()">
+                    <i class="la la-save"></i> Kaydet
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Video Açıklama Fonksiyonları
+    var API_BASE_URL = '@ViewBag.ApiUrl' || 'https://localhost:7101';
+    console.log('Script yüklendi - API URL:', API_BASE_URL);
+    
+    function showAciklamaModal(videoId) {
+        console.log('=== showAciklamaModal CALLED ===');
+        console.log('Video ID:', videoId);
+        
+        if (!videoId) {
+            alert('Video ID bulunamadı!');
+            return;
+        }
+        
+        var dataElement = document.getElementById('videoData_' + videoId);
+        if (!dataElement) {
+            alert('Video verisi bulunamadı! Element ID: videoData_' + videoId);
+            return;
+        }
+        
+        var baslik = dataElement.getAttribute('data-baslik') || '';
+        var aciklama = dataElement.getAttribute('data-aciklama') || '';
+        
+        console.log('Video Baslik:', baslik);
+        console.log('Mevcut Aciklama:', aciklama);
+        
+        document.getElementById('modalVideoId').value = videoId;
+        document.getElementById('modalVideoBaslik').textContent = baslik;
+        document.getElementById('modalAciklamaText').value = aciklama;
+        
+        $('#aciklamaModal').modal('show');
+    }
+    
+    function saveVideoAciklama() {
+        console.log('=== saveVideoAciklama CALLED ===');
+        
+        var videoId = document.getElementById('modalVideoId').value;
+        var aciklama = document.getElementById('modalAciklamaText').value;
+        
+        console.log('Video ID:', videoId);
+        console.log('Aciklama:', aciklama);
+        
+        if (!videoId) {
+            alert('Video ID hatası!');
+            return;
+        }
+        
+        var url = API_BASE_URL + '/api/YoutubeVideo/aciklama/by-videoid?videoId=' + encodeURIComponent(videoId);
+        console.log('Request URL:', url);
+        
+        fetch(url, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ aciklama: aciklama })
+        })
+        .then(function(response) {
+            console.log('Response status:', response.status);
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('HTTP ' + response.status);
+        })
+        .then(function(data) {
+            console.log('SUCCESS:', data);
+            $('#aciklamaModal').modal('hide');
+            alert('Açıklama başarıyla kaydedildi!');
+            setTimeout(function() { location.reload(); }, 500);
+        })
+        .catch(function(error) {
+            console.error('ERROR:', error);
+            alert('Hata: ' + error.message);
+        });
+    }
+    
+    console.log('Fonksiyonlar tanımlandı - showAciklamaModal:', typeof showAciklamaModal);
+</script>

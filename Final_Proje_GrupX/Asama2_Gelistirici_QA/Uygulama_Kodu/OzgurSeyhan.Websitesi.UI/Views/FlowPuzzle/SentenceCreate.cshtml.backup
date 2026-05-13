@@ -1,0 +1,169 @@
+@model OzgurSeyhan.Websitesi.UI.Controllers.CreateFlowPuzzleSentenceDto
+@{
+    ViewData["Title"] = "Yeni Cümle Kombinasyonu Ekle";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Yeni Cümle Kombinasyonu Ekle</h4>
+        <ul class="breadcrumbs">
+            <li class="nav-home">
+                <a href="@Url.Action("Index", "AdminLayout")">
+                    <i class="flaticon-home"></i>
+                </a>
+            </li>
+            <li class="separator">
+                <i class="flaticon-right-arrow"></i>
+            </li>
+            <li class="nav-item">
+                <a href="@Url.Action("SentenceIndex")">Cümle Kombinasyonları</a>
+            </li>
+            <li class="separator">
+                <i class="flaticon-right-arrow"></i>
+            </li>
+            <li class="nav-item">
+                <a href="#">Ekle</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Cümle Kombinasyonu Bilgileri</div>
+                    <small class="text-muted">Preposition + Determiner + Noun kombinasyonlarını ve Türkçe karşılıklarını girin</small>
+                </div>
+                <form asp-action="SentenceCreate" method="post">
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Preposition">Preposition (Edat)</label>
+                                    <select asp-for="Preposition" class="form-control">
+                                        <option value="">-- Seçiniz --</option>
+                                        <option value="to">to (e/a hali)</option>
+                                        <option value="in">in (de/da hali)</option>
+                                        <option value="on">on (üzerinde)</option>
+                                        <option value="at">at (de/da hali)</option>
+                                        <option value="from">from (den/dan hali)</option>
+                                        <option value="for">for (için hali)</option>
+                                        <option value="with">with (ile hali)</option>
+                                        <option value="without">without (olmadan)</option>
+                                        <option value="after">after (sonra)</option>
+                                        <option value="before">before (önce)</option>
+                                        <option value="about">about (hakkında)</option>
+                                        <option value="because of">because of (yüzünden)</option>
+                                    </select>
+                                    <span asp-validation-for="Preposition" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="NounId">Noun (İsim)</label>
+                                    <select asp-for="NounId" class="form-control">
+                                        <option value="">-- Seçiniz --</option>
+                                        @foreach (var noun in ViewBag.Nouns as List<OzgurSeyhan.Websitesi.UI.Controllers.FlowPuzzleNounDto>)
+                                        {
+                                            <option value="@noun.Id">@noun.SingularForm / @noun.PluralForm (@noun.TurkishMeaning)</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="NounId" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="DeterminerSingular">Determiner (Singular)</label>
+                                    <select asp-for="DeterminerSingular" class="form-control">
+                                        <option value="">-- Seçiniz --</option>
+                                        <option value="a">a (bir)</option>
+                                        <option value="the">the (belirli)</option>
+                                        <option value="this">this (bu)</option>
+                                        <option value="that">that (şu)</option>
+                                    </select>
+                                    <span asp-validation-for="DeterminerSingular" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="DeterminerPlural">Determiner (Plural)</label>
+                                    <select asp-for="DeterminerPlural" class="form-control">
+                                        <option value="">-- Seçiniz --</option>
+                                        <option value="the">the (belirli)</option>
+                                        <option value="these">these (bunlar)</option>
+                                        <option value="those">those (şunlar)</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                    </select>
+                                    <span asp-validation-for="DeterminerPlural" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="TurkishSingular">Türkçe Karşılık (Singular)</label>
+                                    <input asp-for="TurkishSingular" class="form-control" placeholder="örn: bir çocuğa" />
+                                    <small class="form-text text-muted">Tam cümle karşılığını yazın (to a child → bir çocuğa)</small>
+                                    <span asp-validation-for="TurkishSingular" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="TurkishPlural">Türkçe Karşılık (Plural)</label>
+                                    <input asp-for="TurkishPlural" class="form-control" placeholder="örn: çocuklara" />
+                                    <small class="form-text text-muted">Tam cümle karşılığını yazın (to the children → çocuklara)</small>
+                                    <span asp-validation-for="TurkishPlural" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="DisplayOrder">Görüntülenme Sırası</label>
+                                    <input asp-for="DisplayOrder" type="number" class="form-control" />
+                                    <small class="form-text text-muted">Oyunda görüntülenme sırasını belirler (0'dan başlar)</small>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-check" style="margin-top: 35px;">
+                                    <label class="form-check-label">
+                                        <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                        <span class="form-check-sign">Aktif</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-action">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fa fa-save"></i> Kaydet
+                        </button>
+                        <a href="@Url.Action("SentenceIndex")" class="btn btn-danger">
+                            <i class="fa fa-times"></i> İptal
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

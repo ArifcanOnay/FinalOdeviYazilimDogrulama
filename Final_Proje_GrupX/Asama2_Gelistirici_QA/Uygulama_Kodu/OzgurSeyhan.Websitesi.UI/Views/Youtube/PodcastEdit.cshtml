@@ -1,0 +1,110 @@
+@model OzgurSeyhanWebSitesi.Core.Dtos.PodcastDtos.PodcastDto
+
+@{
+    ViewData["Title"] = "Podcast Düzenle";
+}
+
+<div class="content">
+    <div class="container-fluid">
+        <h4 class="page-title">Podcast Düzenle</h4>
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Hata!</strong> @TempData["ErrorMessage"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">
+                            <i class="la la-edit"></i> Podcast Bilgilerini Güncelle
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="@Url.Action("PodcastEdit", "Youtube", new { id = Model.Id })">
+                            @Html.AntiForgeryToken()
+                            
+                            <div class="form-group">
+                                <label for="baslik">Podcast Başlığı</label>
+                                <input type="text" 
+                                       name="baslik" 
+                                       id="baslik"
+                                       class="form-control" 
+                                       value="@Model.Baslik"
+                                       required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="podcastUrl">Spotify Embed URL</label>
+                                <input type="url" 
+                                       name="podcastUrl" 
+                                       id="podcastUrl"
+                                       class="form-control" 
+                                       value="@Model.PodcastUrl"
+                                       required>
+                                <small class="form-text text-muted">
+                                    Spotify embed URL'si (https://open.spotify.com/embed/show/XXXXX formatında olmalı)
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sira">Sıra Numarası</label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="sira" 
+                                       name="sira" 
+                                       value="@Model.Sira"
+                                       min="0">
+                                <small class="form-text text-muted">
+                                    Şarkılar küçükten büyüğe sıralanır (0 en başta).
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="la la-save"></i> Güncelle
+                                </button>
+                                <a href="@Url.Action("PodcastIndex", "Youtube")" class="btn btn-secondary">
+                                    <i class="la la-times"></i> İptal
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5><i class="la la-eye"></i> Mevcut Podcast Önizleme</h5>
+                        <hr>
+                        <div class="mb-3">
+                            <strong>Başlık:</strong>
+                            <p>@Model.Baslik</p>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Spotify Player:</strong>
+                            <div class="mt-2">
+                                <iframe style="border-radius:12px" 
+                                        src="@Model.PodcastUrl" 
+                                        width="100%" 
+                                        height="352" 
+                                        frameBorder="0" 
+                                        allowfullscreen="" 
+                                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                                        loading="lazy">
+                                </iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

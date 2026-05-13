@@ -1,0 +1,101 @@
+@model OzgurSeyhanWebSitesi.Core.Dtos.OzelDersDtos.CreateOzelDersDto
+
+@{
+    ViewData["Title"] = "Yeni Özel Ders Ekle";
+}
+
+<div class="content-wrapper">
+    <div class="page-header">
+        <h3 class="page-title">Yeni Özel Ders Ekle</h3>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/Admin">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="@Url.Action("Index", "OzelDers")">Özel Dersler</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Yeni Ekle</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Özel Ders Bilgileri</h4>
+                    <p class="card-description">Lütfen tüm alanları eksiksiz doldurun</p>
+
+                    @if (TempData["ErrorMessage"] is string errorMessage && !string.IsNullOrWhiteSpace(errorMessage))
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @errorMessage
+                        </div>
+                    }
+                    @if (TempData["SuccessMessage"] is string successMessage && !string.IsNullOrWhiteSpace(successMessage))
+                    {
+                        <div class="alert alert-success" role="alert">
+                            @successMessage
+                        </div>
+                    }
+
+                    <form asp-action="Create" method="post" enctype="multipart/form-data" class="forms-sample">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="KurSeviyesi">Kur Seviyesi</label>
+                                    <input asp-for="KurSeviyesi" class="form-control" placeholder="Örn: A1, B2, İleri Seviye" />
+                                    <span asp-validation-for="KurSeviyesi" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Kurs Resmi (Opsiyonel)</label>
+                                    <input type="file" name="ResimDosya" class="form-control" accept="image/*" />
+                                    <small class="form-text text-muted">Kurs kartında gösterilecek resim (JPG, PNG)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="YoutubeVideoUrl">YouTube Video URL (Opsiyonel)</label>
+                            <input asp-for="YoutubeVideoUrl" class="form-control" placeholder="https://www.youtube.com/watch?v=xxxxxx" />
+                            <span asp-validation-for="YoutubeVideoUrl" class="text-danger"></span>
+                            <small class="form-text text-muted">Kurs detayında gösterilecek tanıtım videosu</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Aciklama">Açıklama</label>
+                            <textarea asp-for="Aciklama" class="form-control" rows="4" 
+                                      placeholder="Özel ders hakkında detaylı açıklama..."></textarea>
+                            <span asp-validation-for="Aciklama" class="text-danger"></span>
+                        </div>
+
+
+                        <div class="form-group">
+                            <label for="Sira">Sıra Numarası</label>
+                            <input type="number" 
+                                   name="Sira" 
+                                   id="Sira" 
+                                   class="form-control" 
+                                   placeholder="Boş bırakırsan otomatik sıralanacak" 
+                                   min="0">
+                            <small class="form-text text-muted">Boş bırakırsan en sona eklenir. Kurslar küçükten büyüğe sıralanır (0 en başta).</small>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary mr-2">
+                                <i class="mdi mdi-content-save"></i> Kaydet
+                            </button>
+                            <a href="@Url.Action("Index", "OzelDers")" class="btn btn-light">
+                                <i class="mdi mdi-cancel"></i> İptal
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

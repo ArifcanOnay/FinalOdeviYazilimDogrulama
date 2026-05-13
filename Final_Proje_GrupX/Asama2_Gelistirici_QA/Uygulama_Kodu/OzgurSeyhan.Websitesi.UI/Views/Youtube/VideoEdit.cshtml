@@ -1,0 +1,98 @@
+@model OzgurSeyhanWebSitesi.Core.Dtos.YoutubeVideoDtos.YoutubeVideoDto
+
+@{
+    ViewData["Title"] = "Video Düzenle";
+}
+
+<div class="content">
+    <div class="container-fluid">
+        <h4 class="page-title">Video Düzenle</h4>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Video Bilgilerini Güncelle</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="@Url.Action("VideoEdit", "Youtube")">
+                            <input type="hidden" name="Id" value="@Model.Id" />
+                            <input type="hidden" name="VideoId" value="@Model.VideoId" />
+                            <input type="hidden" name="OgretmenId" value="1" />
+
+                            <div class="form-group">
+                                <label for="Baslik">Video Başlığı</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="Baslik" 
+                                       name="Baslik" 
+                                       value="@Model.Baslik" 
+                                       required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="Url">Video URL</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="Url" 
+                                       name="Url" 
+                                       value="@Model.Url" 
+                                       required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="Sira">Sıra Numarası</label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="Sira" 
+                                       name="Sira" 
+                                       value="@Model.Sira"
+                                       min="0">
+                                <small class="form-text text-muted">
+                                    Videolar küçükten büyüğe sıralanır (0 en başta).
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="Aciklama">Açıklama <span class="text-muted">(Opsiyonel)</span></label>
+                                <textarea class="form-control" 
+                                          id="Aciklama" 
+                                          name="Aciklama" 
+                                          rows="4" 
+                                          maxlength="2000"
+                                          placeholder="Video hakkında kısa bir açıklama yazın...">@Model.Aciklama</textarea>
+                                <small class="form-text text-muted">
+                                    Bu açıklama sitede videonun altında ve video oynatıcısında gösterilecektir. En fazla 2000 karakter.
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="la la-save"></i> Güncelle
+                                </button>
+                                <a href="@Url.Action("VideoIndex", "Youtube")" class="btn btn-secondary">
+                                    <i class="la la-times"></i> İptal
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5>Video Önizleme</h5>
+                        <img src="https://img.youtube.com/vi/@Model.VideoId/mqdefault.jpg" 
+                             alt="@Model.Baslik" 
+                             class="img-fluid mb-3">
+                        <p><strong>Video ID:</strong> <code>@Model.VideoId</code></p>
+                        <a href="@Model.Url" target="_blank" class="btn btn-info btn-sm">
+                            <i class="la la-play"></i> YouTube'da İzle
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

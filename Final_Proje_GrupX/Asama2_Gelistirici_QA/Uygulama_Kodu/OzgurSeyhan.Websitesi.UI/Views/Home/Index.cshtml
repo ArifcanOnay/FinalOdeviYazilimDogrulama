@@ -1,0 +1,4790 @@
+﻿@model List<OzgurSeyhanWebSitesi.Core.Dtos.PlaylistDtos.PlaylistWithVideosDto>
+
+@{
+    ViewData["Title"] = "Özgür Seyhan - İngilizce Eğitim Uzmanı";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="~/Site ana resim.png">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; overflow-x: hidden; }
+        
+        .hero-section {
+            min-height: auto;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            padding: 60px 0 80px 0;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(138, 43, 226, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 191, 255, 0.2) 0%, transparent 50%);
+            animation: gradientShift 15s ease infinite;
+        }
+        
+        @@keyframes gradientShift {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        .hero-section > .container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .youtube-section {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            padding: 80px 0;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .youtube-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 30% 20%, rgba(230, 57, 70, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(41, 128, 185, 0.15) 0%, transparent 50%);
+        }
+        
+        .youtube-section > .container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero-title { font-size: 3.5rem; font-weight: 800; margin-bottom: 1rem; }
+        .hero-subtitle { font-size: 1.3rem; font-weight: 300; margin-bottom: 1.5rem; }
+        .hero-description { font-size: 1rem; margin-bottom: 2rem; opacity: 0.95; }
+        
+        .hero-image {
+            width: 380px;
+            height: 380px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 8px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 0 20px rgba(255, 255, 255, 0.1);
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @@keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            box-shadow: 0 10px 25px rgba(245, 87, 108, 0.3);
+        }
+        
+        .btn-primary-custom:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(245, 87, 108, 0.4);
+            color: white;
+        }
+        
+        .section-title { 
+            font-size: 2rem; 
+            font-weight: 700; 
+            margin-bottom: 2rem; 
+            color: white; 
+            text-align: center;
+            margin-top: 3rem;
+        }
+        
+        .youtube-section-title {
+            font-size: 2.5rem; 
+            font-weight: 700; 
+            margin-bottom: 3rem; 
+            color: white; 
+            text-align: center;
+        }
+        
+        .info-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .info-card:hover::before {
+            left: 100%;
+        }
+        
+        .info-card:hover { 
+            transform: translateY(-10px) scale(1.02); 
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .info-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #00bfff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+        
+        .info-card h5 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .info-card p {
+            font-size: 0.9rem;
+            margin: 0;
+            opacity: 0.95;
+        }
+        
+        .timeline-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 15px;
+            border-left: 5px solid;
+            border-image: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) 1;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .timeline-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            transition: all 0.5s;
+            opacity: 0;
+        }
+        
+        .timeline-card:hover::after {
+            opacity: 1;
+        }
+        
+        .timeline-card:hover { 
+            transform: translateX(15px) scale(1.02); 
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+        
+        .timeline-year { 
+            font-size: 1.3rem; 
+            font-weight: 700; 
+            margin-bottom: 5px;
+        }
+        
+        .timeline-title { 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            margin-bottom: 8px;
+        }
+        
+        .timeline-desc { 
+            font-size: 0.9rem; 
+            opacity: 0.95;
+            margin: 0;
+        }
+        
+        .youtube-section-title {
+            font-size: 2.8rem; 
+            font-weight: 800; 
+            margin-bottom: 3rem; 
+            color: white; 
+            text-align: center;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .youtube-section-title i {
+            background: linear-gradient(135deg, #ff0000 0%, #ff6b6b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @@keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .playlist-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            position: relative;
+            margin-top: 0;
+        }
+        
+        .category-header {
+            background: rgba(255, 255, 255, 0.95);
+            color: #1a1a2e;
+            padding: 15px 25px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .category-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.2), transparent);
+            transition: left 0.6s;
+        }
+        
+        .category-header:hover::before {
+            left: 100%;
+        }
+        
+        .category-header i {
+            margin-right: 10px;
+            color: #667eea;
+            font-size: 1.2rem;
+        }
+        
+        .playlist-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(230, 57, 70, 0.1) 0%, rgba(41, 128, 185, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        
+        .playlist-card:hover::before {
+            opacity: 1;
+        }
+        
+        .playlist-card:hover { 
+            transform: translateY(-15px) scale(1.03); 
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 25px 60px rgba(230, 57, 70, 0.4);
+            border-color: rgba(230, 57, 70, 0.5);
+        }
+        
+        .playlist-thumbnail {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-bottom: 3px solid rgba(230, 57, 70, 0.5);
+            transition: transform 0.4s;
+        }
+        
+        .playlist-card:hover .playlist-thumbnail {
+            transform: scale(1.1);
+        }
+        
+        .playlist-body {
+            padding: 25px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .playlist-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: white;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .playlist-description {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .playlist-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        
+        .playlist-video-count {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+        
+        .playlist-video-count i {
+            color: #ff6b6b;
+        }
+        
+        .btn-watch-playlist {
+            background: linear-gradient(135deg, #e63946 0%, #ff6b6b 100%);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 5px 15px rgba(230, 57, 70, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-watch-playlist:hover {
+            background: linear-gradient(135deg, #ff6b6b 0%, #e63946 100%);
+            color: white;
+            transform: translateY(-3px) scale(1.08);
+            box-shadow: 0 15px 35px rgba(230, 57, 70, 0.6);
+        }
+        
+        /* İngilizce Konuşma Tüyoları Section */
+        .tuyolar-section {
+            padding: 100px 0;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e3f2fd 50%, #e8eaf6 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tuyolar-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(103, 58, 183, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(63, 81, 181, 0.08) 0%, transparent 50%);
+        }
+        
+        .tuyolar-section > .container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .tuyolar-section-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #5e35b1 0%, #3f51b5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            text-shadow: 0 4px 15px rgba(94, 53, 177, 0.2);
+            position: relative;
+        }
+        
+        .tuyolar-section-title i {
+            color: #5e35b1;
+            -webkit-text-fill-color: #5e35b1;
+            animation: pulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px rgba(94, 53, 177, 0.5));
+        }
+        
+        .tuyolar-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #4527a0;
+            margin-bottom: 3rem;
+            font-weight: 400;
+        }
+        
+        .tuyolar-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid rgba(94, 53, 177, 0.15);
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(94, 53, 177, 0.12);
+        }
+        
+        .tuyolar-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(103, 58, 183, 0.06) 0%, rgba(63, 81, 181, 0.06) 100%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        
+        .tuyolar-card:hover::before {
+            opacity: 1;
+        }
+        
+        .tuyolar-card:hover {
+            transform: translateY(-15px) scale(1.03);
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 25px 60px rgba(94, 53, 177, 0.25);
+            border-color: rgba(94, 53, 177, 0.4);
+        }
+        
+        .tuyolar-thumbnail-container {
+            position: relative;
+            overflow: hidden;
+            height: 250px;
+        }
+        
+        .tuyolar-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s;
+        }
+        
+        .tuyolar-card:hover .tuyolar-thumbnail {
+            transform: scale(1.1);
+        }
+        
+        .tuyolar-play-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: rgba(94, 53, 177, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(94, 53, 177, 0.5);
+        }
+        
+        .tuyolar-play-overlay i {
+            color: white;
+            font-size: 2rem;
+            margin-left: 5px;
+        }
+        
+        .tuyolar-card:hover .tuyolar-play-overlay {
+            transform: translate(-50%, -50%) scale(1.2);
+            background: rgba(103, 58, 183, 0.95);
+        }
+        
+        .tuyolar-body {
+            padding: 25px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .tuyolar-badge {
+            background: linear-gradient(135deg, #5e35b1 0%, #7e57c2 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(94, 53, 177, 0.3);
+        }
+        
+        .tuyolar-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #4527a0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+        
+        .tuyolar-watch-btn {
+            background: linear-gradient(135deg, #5e35b1 0%, #7e57c2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 5px 15px rgba(94, 53, 177, 0.3);
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .tuyolar-watch-btn:hover {
+            background: linear-gradient(135deg, #7e57c2 0%, #5e35b1 100%);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(94, 53, 177, 0.5);
+        }
+        
+        /* Gerçek Hayattan İngilizce Section - Native American English */
+        .native-section {
+            padding: 100px 0;
+            background: linear-gradient(135deg, #1e3a8a 0%, #dc2626 30%, #ffffff 60%, #dc2626 80%, #1e3a8a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .native-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(220, 38, 38, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(30, 58, 138, 0.15) 0%, transparent 50%),
+                linear-gradient(0deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+        }
+        
+        .native-section > .container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .native-section-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #1e3a8a 0%, #dc2626 50%, #1e3a8a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            text-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
+            position: relative;
+        }
+        
+        .native-section-title i {
+            color: #dc2626;
+            -webkit-text-fill-color: #dc2626;
+            animation: pulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px rgba(220, 38, 38, 0.6));
+        }
+        
+        .native-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 3rem;
+            font-weight: 400;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .native-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid rgba(220, 38, 38, 0.2);
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(30, 58, 138, 0.2);
+        }
+        
+        .native-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(220, 38, 38, 0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        
+        .native-card:hover::before {
+            opacity: 1;
+        }
+        
+        .native-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 25px 60px rgba(220, 38, 38, 0.4);
+            border-color: rgba(220, 38, 38, 0.6);
+        }
+        
+        .native-thumbnail-container {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1e3a8a 0%, #dc2626 100%);
+        }
+        
+        .native-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s;
+        }
+        
+        .native-card:hover .native-thumbnail {
+            transform: scale(1.1);
+        }
+        
+        .native-play-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: rgba(220, 38, 38, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        .native-play-overlay i {
+            font-size: 2rem;
+            color: white;
+            margin-left: 5px;
+        }
+        
+        .native-card:hover .native-play-overlay {
+            background: rgba(30, 58, 138, 0.95);
+            transform: translate(-50%, -50%) scale(1.15);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+        }
+        
+        .native-usa-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #dc2626 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .native-usa-badge i {
+            font-size: 1.2rem;
+        }
+        
+        .native-body {
+            padding: 30px 25px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .native-real-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 3px 10px rgba(220, 38, 38, 0.3);
+        }
+        
+        .native-real-badge i {
+            margin-right: 5px;
+        }
+        
+        .native-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #1e3a8a;
+            text-shadow: none;
+        }
+        
+        .native-description {
+            font-size: 0.95rem;
+            color: #535353;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        
+        .native-watch-btn {
+            width: 100%;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #dc2626 0%, #1e3a8a 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 5px 20px rgba(220, 38, 38, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .native-watch-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(30, 58, 138, 0.6);
+            background: linear-gradient(135deg, #1e3a8a 0%, #dc2626 100%);
+        }
+        
+        .native-watch-btn i {
+            font-size: 1.2rem;
+        }
+
+        /* Podcast Section */
+        .podcast-section {
+            padding: 100px 0;
+            background: linear-gradient(135deg, #1DB954 0%, #191414 50%, #1a1a2e 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .podcast-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(29, 185, 84, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(25, 20, 20, 0.15) 0%, transparent 50%);
+        }
+        
+        .podcast-section > .container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .podcast-section-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            text-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+            position: relative;
+        }
+        
+        .podcast-section-title i {
+            color: #1DB954;
+            -webkit-text-fill-color: #1DB954;
+            animation: pulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px rgba(29, 185, 84, 0.6));
+        }
+        
+        .podcast-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 3rem;
+            font-weight: 300;
+        }
+        
+        .podcast-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid rgba(29, 185, 84, 0.2);
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 40px rgba(29, 185, 84, 0.2);
+        }
+        
+        .podcast-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(29, 185, 84, 0.08) 0%, rgba(30, 215, 96, 0.08) 100%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        
+        .podcast-card:hover::before {
+            opacity: 1;
+        }
+        
+        .podcast-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 25px 60px rgba(29, 185, 84, 0.4);
+            border-color: rgba(29, 185, 84, 0.6);
+        }
+        
+        .podcast-image-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1DB954 0%, #191414 100%);
+        }
+        
+        .podcast-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s;
+        }
+        
+        .podcast-card:hover .podcast-image {
+            transform: scale(1.1);
+        }
+        
+        .podcast-spotify-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: #1DB954;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .podcast-spotify-badge i {
+            font-size: 1.2rem;
+        }
+        
+        .podcast-body {
+            padding: 30px 25px;
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .podcast-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #191414;
+            text-shadow: none;
+        }
+        
+        .podcast-description {
+            font-size: 0.95rem;
+            color: #535353;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            flex: 1;
+        }
+        
+        .podcast-play-btn {
+            width: 100%;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 5px 20px rgba(29, 185, 84, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .podcast-play-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(29, 185, 84, 0.6);
+            background: linear-gradient(135deg, #1ed760 0%, #1DB954 100%);
+        }
+        
+        .podcast-play-btn i {
+            font-size: 1.2rem;
+        }
+        
+        /* Podcast Modal */
+        .podcast-modal-content {
+            background: #191414;
+            border: none;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        /* YouTube Kanalları Section */
+        .youtube-kanallari-section {
+            padding: 100px 0;
+            background: linear-gradient(135deg, #0a0a0a 0%, #282828 50%, #FF0000 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .youtube-kanallari-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 0, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 0, 0, 0.15) 0%, transparent 50%);
+        }
+        
+        .youtube-kanallari-section > .container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .youtube-kanallari-section-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: white;
+            text-align: center;
+            text-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);
+        }
+        
+        .youtube-kanallari-section-title i {
+            color: #FF0000;
+            animation: pulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.8));
+        }
+        
+        .youtube-kanallari-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 3rem;
+            font-weight: 400;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .youtube-kanal-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid rgba(255, 0, 0, 0.2);
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            height: 100%;
+        }
+        
+        .youtube-kanal-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 25px 60px rgba(255, 0, 0, 0.4);
+            border-color: rgba(255, 0, 0, 0.6);
+        }
+        
+        .youtube-kanal-thumbnail-container {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #282828 0%, #FF0000 100%);
+        }
+        
+        .youtube-kanal-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s;
+        }
+        
+        .youtube-kanal-card:hover .youtube-kanal-thumbnail {
+            transform: scale(1.1);
+        }
+        
+        .youtube-kanal-play-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 0, 0, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+        }
+        
+        .youtube-kanal-play-overlay i {
+            font-size: 2.5rem;
+            color: white;
+        }
+        
+        .youtube-kanal-card:hover .youtube-kanal-play-overlay {
+            background: rgba(200, 0, 0, 0.95);
+            transform: translate(-50%, -50%) scale(1.2);
+            box-shadow: 0 12px 40px rgba(255, 0, 0, 0.6);
+        }
+        
+        .youtube-kanal-body {
+            padding: 30px 25px;
+            position: relative;
+        }
+        
+        .youtube-kanal-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #FF0000 0%, #CC0000 100%);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+        }
+        
+        .youtube-kanal-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .youtube-kanal-watch-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #FF0000 0%, #CC0000 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(255, 0, 0, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .youtube-kanal-watch-btn:hover {
+            background: linear-gradient(135deg, #CC0000 0%, #AA0000 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 0, 0, 0.5);
+        }
+        
+        .youtube-kanal-watch-btn i {
+            font-size: 1.1rem;
+        }
+
+        /* Dersler Section */
+        .dersler-section {
+            padding: 100px 0;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 25%, #d97706 50%, #b45309 75%, #92400e 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .dersler-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(251, 191, 36, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(217, 119, 6, 0.2) 0%, transparent 50%),
+                linear-gradient(0deg, rgba(0,0,0,0.1) 0%, transparent 100%);
+        }
+
+        /* Podcastler için şaşalı mor-pembe gradient */
+        .podcast-section {
+            padding: 100px 0;
+            background: linear-gradient(135deg, #e94057 0%, #f27121 25%, #d946ef 50%, #8b5cf6 75%, #6366f1 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .podcast-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(233, 64, 87, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(217, 70, 239, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.2) 0%, transparent 70%),
+                linear-gradient(0deg, rgba(0,0,0,0.15) 0%, transparent 100%);
+        }
+        
+        .podcast-section > .container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .podcast-section-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: white;
+            text-align: center;
+            text-shadow: 0 4px 20px rgba(217, 70, 239, 0.8);
+        }
+        
+        .podcast-section-title i {
+            color: #fbbf24;
+            animation: pulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.9));
+        }
+        
+        .podcast-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 3rem;
+            font-weight: 400;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+        }
+        
+        .podcast-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid rgba(217, 70, 239, 0.3);
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(139, 92, 246, 0.3);
+            height: 100%;
+        }
+        
+        .podcast-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(233, 64, 87, 0.05) 0%, rgba(217, 70, 239, 0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        
+        .podcast-card:hover::before {
+            opacity: 1;
+        }
+        
+        .podcast-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 25px 60px rgba(217, 70, 239, 0.6);
+            border-color: rgba(139, 92, 246, 0.8);
+        }
+
+        .podcast-thumbnail-container {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #e94057 0%, #d946ef 50%, #8b5cf6 100%);
+        }
+        
+        .podcast-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s;
+        }
+        
+        .podcast-card:hover .podcast-thumbnail {
+            transform: scale(1.1);
+        }
+        
+        .podcast-play-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90px;
+            height: 90px;
+            background: rgba(217, 70, 239, 0.95);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+        }
+        
+        .podcast-play-overlay i {
+            font-size: 3rem;
+            color: white;
+        }
+        
+        .podcast-card:hover .podcast-play-overlay {
+            background: rgba(139, 92, 246, 0.98);
+            transform: translate(-50%, -50%) scale(1.2);
+            box-shadow: 0 12px 45px rgba(217, 70, 239, 0.8);
+        }
+        
+        .podcast-body {
+            padding: 30px 25px;
+            position: relative;
+        }
+        
+        .podcast-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #e94057 0%, #d946ef 100%);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 20px rgba(217, 70, 239, 0.4);
+        }
+        
+        .podcast-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .podcast-watch-btn {
+            background: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            box-shadow: 0 6px 25px rgba(139, 92, 246, 0.4);
+        }
+        
+        .podcast-watch-btn:hover {
+            background: linear-gradient(135deg, #d946ef 0%, #e94057 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 35px rgba(217, 70, 239, 0.6);
+            color: white;
+        }
+        
+        .dersler-section > .container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .dersler-section-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: white;
+            text-align: center;
+            text-shadow: 0 4px 15px rgba(146, 64, 14, 0.6);
+        }
+        
+        .dersler-section-title i {
+            color: #fbbf24;
+            animation: pulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.8));
+        }
+        
+        .dersler-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 3rem;
+            font-weight: 400;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+        }
+        
+        .ders-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid rgba(251, 191, 36, 0.3);
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(146, 64, 14, 0.3);
+            height: 100%;
+        }
+        
+        .ders-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.05) 0%, rgba(217, 119, 6, 0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        
+        .ders-card:hover::before {
+            opacity: 1;
+        }
+        
+        .ders-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 25px 60px rgba(245, 158, 11, 0.5);
+            border-color: rgba(251, 191, 36, 0.8);
+        }
+        
+        .ders-thumbnail-container {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        
+        .ders-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s;
+        }
+        
+        .ders-card:hover .ders-thumbnail {
+            transform: scale(1.1);
+        }
+        
+        .ders-playlist-badge,
+        .ders-video-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+        
+        .ders-playlist-badge {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.95) 0%, rgba(245, 158, 11, 0.95) 100%);
+            color: #1a1a1a;
+        }
+        
+        .ders-video-badge {
+            background: linear-gradient(135deg, rgba(217, 119, 6, 0.95) 0%, rgba(180, 83, 9, 0.95) 100%);
+        }
+        
+        .ders-play-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90px;
+            height: 90px;
+            background: rgba(245, 158, 11, 0.95);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+        }
+        
+        .ders-play-overlay i {
+            font-size: 3rem;
+            color: white;
+        }
+        
+        .ders-card:hover .ders-play-overlay {
+            background: rgba(217, 119, 6, 0.98);
+            transform: translate(-50%, -50%) scale(1.2);
+            box-shadow: 0 12px 40px rgba(245, 158, 11, 0.7);
+        }
+        
+        .ders-body {
+            padding: 30px 25px;
+            position: relative;
+        }
+        
+        .ders-type-badge {
+            display: inline-block;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .ders-playlist-type {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #1a1a1a;
+        }
+        
+        .ders-video-type {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+        }
+        
+        .ders-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .ders-description {
+            font-size: 0.95rem;
+            color: #555;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .ders-watch-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .ders-watch-btn:hover {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.6);
+        }
+        
+        .ders-watch-btn i {
+            font-size: 1.1rem;
+        }
+
+        /* Tüyolar Section */
+        .tuyolar-section {
+            padding: 100px 0;
+            background: linear-gradient(135deg, #34d399 0%, #10b981 25%, #059669 50%, #047857 75%, #065f46 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tuyolar-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(52, 211, 153, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(5, 150, 105, 0.2) 0%, transparent 50%),
+                linear-gradient(0deg, rgba(0,0,0,0.1) 0%, transparent 100%);
+        }
+        
+        .tuyolar-section > .container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .tuyolar-section-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: white;
+            text-align: center;
+            text-shadow: 0 4px 15px rgba(6, 95, 70, 0.6);
+        }
+        
+        .tuyolar-section-title i {
+            color: #fbbf24;
+            animation: pulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.8));
+        }
+        
+        .tuyolar-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 3rem;
+            font-weight: 400;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+        }
+        
+        .tuyo-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid rgba(16, 185, 129, 0.3);
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(6, 95, 70, 0.3);
+            height: 100%;
+        }
+        
+        .tuyo-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        
+        .tuyo-card:hover::before {
+            opacity: 1;
+        }
+        
+        .tuyo-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 25px 60px rgba(16, 185, 129, 0.5);
+            border-color: rgba(52, 211, 153, 0.8);
+        }
+        
+        .tuyo-thumbnail-container {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .tuyo-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s;
+        }
+        
+        .tuyo-card:hover .tuyo-thumbnail {
+            transform: scale(1.1);
+        }
+        
+        .tuyo-playlist-badge,
+        .tuyo-video-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+        
+        .tuyo-playlist-badge {
+            background: linear-gradient(135deg, rgba(52, 211, 153, 0.95) 0%, rgba(16, 185, 129, 0.95) 100%);
+            color: #1a1a1a;
+        }
+        
+        .tuyo-video-badge {
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.95) 0%, rgba(4, 120, 87, 0.95) 100%);
+        }
+        
+        .tuyo-play-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90px;
+            height: 90px;
+            background: rgba(16, 185, 129, 0.95);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+        }
+        
+        .tuyo-play-overlay i {
+            font-size: 3rem;
+            color: white;
+        }
+        
+        .tuyo-card:hover .tuyo-play-overlay {
+            background: rgba(5, 150, 105, 0.98);
+            transform: translate(-50%, -50%) scale(1.2);
+            box-shadow: 0 12px 40px rgba(16, 185, 129, 0.7);
+        }
+        
+        .tuyo-body {
+            padding: 30px 25px;
+            position: relative;
+        }
+        
+        .tuyo-type-badge {
+            display: inline-block;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .tuyo-playlist-type {
+            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+            color: #1a1a1a;
+        }
+        
+        .tuyo-video-type {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        }
+        
+        .tuyo-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .tuyo-description {
+            font-size: 0.95rem;
+            color: #555;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .tuyo-watch-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .tuyo-watch-btn:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.6);
+        }
+        
+        .tuyo-watch-btn i {
+            font-size: 1.1rem;
+        }
+        
+        /* Podcast Modal */
+        .podcast-modal-content {
+            background: #191414;
+            border: none;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        
+        .podcast-modal-header {
+            background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+            color: white;
+            border: none;
+            padding: 20px 30px;
+            box-shadow: 0 4px 20px rgba(29, 185, 84, 0.4);
+        }
+        
+        .podcast-modal-body {
+            padding: 0;
+        }
+        
+        .podcast-embed-container {
+            width: 100%;
+            min-height: 380px;
+            background: #191414;
+        }
+        
+        /* Özel Dersler Section */
+        .ozelders-section {
+            padding: 100px 0;
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 50%, #ffd180 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ozelders-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(255,167,38,0.18)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
+            opacity: 0.5;
+        }
+        
+        .ozelders-section-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ff6f00 0%, #ff9f1c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            text-shadow: 0 4px 15px rgba(255, 111, 0, 0.25);
+            position: relative;
+        }
+        
+        .ozelders-section-title i {
+            color: #ff6f00;
+            -webkit-text-fill-color: #ff6f00;
+            animation: pulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px rgba(255, 111, 0, 0.45));
+        }
+        
+        .ozelders-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #8d4b20;
+            margin-bottom: 3rem;
+            font-weight: 400;
+        }
+        
+        .ozelders-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid rgba(255, 167, 38, 0.25);
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 40px rgba(255, 138, 101, 0.18);
+        }
+        
+        .ozelders-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 204, 128, 0.15) 0%, rgba(255, 138, 101, 0.12) 100%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        
+        .ozelders-card:hover::before {
+            opacity: 1;
+        }
+        
+        .ozelders-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 25px 60px rgba(255, 138, 101, 0.35);
+            border-color: rgba(255, 167, 38, 0.55);
+        }
+
+        .ozelders-card.summer-school {
+            border-color: rgba(255, 152, 0, 0.45);
+            box-shadow: 0 16px 45px rgba(255, 152, 0, 0.25);
+            min-height: 560px;
+        }
+
+        .ozelders-card.summer-school::before {
+            opacity: 1;
+            background: linear-gradient(135deg, rgba(255, 204, 128, 0.25) 0%, rgba(255, 138, 101, 0.2) 100%);
+        }
+
+        .ozelders-card.summer-school::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 85% 10%, rgba(255, 236, 179, 0.65) 0%, rgba(255, 236, 179, 0) 45%),
+                        radial-gradient(circle at 10% 85%, rgba(255, 112, 67, 0.25) 0%, rgba(255, 112, 67, 0) 55%);
+            opacity: 0.9;
+            pointer-events: none;
+        }
+
+        .ozelders-card.summer-school:hover {
+            box-shadow: 0 28px 70px rgba(255, 152, 0, 0.35);
+            border-color: rgba(255, 152, 0, 0.8);
+        }
+
+        .summer-card-column {
+            max-width: 560px;
+        }
+
+        .ozelders-image-container {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            overflow: hidden;
+        }
+
+        .ozelders-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s;
+        }
+
+        .ozelders-card:hover .ozelders-image {
+            transform: scale(1.1);
+        }
+
+        .ozelders-level-overlay {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.98);
+            color: #d35400;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 167, 38, 0.45);
+        }
+
+        .ozelders-level-overlay.summer {
+            color: #e65100;
+            border-color: rgba(255, 152, 0, 0.6);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .summer-stamp {
+            position: absolute;
+            left: 15px;
+            top: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #6a2c0f;
+            background: linear-gradient(135deg, #ffd36a 0%, #ff9f1c 100%);
+            box-shadow: 0 6px 18px rgba(255, 159, 28, 0.35);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            z-index: 2;
+        }
+
+        .summer-image-caption {
+            position: absolute;
+            left: 18px;
+            right: 18px;
+            bottom: 18px;
+            z-index: 2;
+            color: white;
+            font-size: 1.15rem;
+            font-weight: 800;
+            text-shadow: 0 3px 14px rgba(0, 0, 0, 0.45);
+        }
+
+        .ozelders-card.summer-school .ozelders-image-container::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255, 245, 224, 0.08) 0%, rgba(230, 81, 0, 0.72) 100%);
+            pointer-events: none;
+        }
+        
+        .ozelders-header {
+            background: linear-gradient(135deg, #ff8f00 0%, #ffb74d 100%);
+            padding: 30px 25px;
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(255, 143, 0, 0.35);
+        }
+        
+        .ozelders-level-badge {
+            background: rgba(255, 255, 255, 0.98);
+            color: #bf4b00;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            border: 2px solid rgba(255, 167, 38, 0.45);
+        }
+        
+        .ozelders-icon {
+            font-size: 3rem;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .ozelders-body {
+            padding: 30px 25px;
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .ozelders-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #8d4b20;
+            text-shadow: none;
+        }
+
+        .ozelders-title.summer {
+            color: #d35400;
+            font-size: 1.65rem;
+            margin-bottom: 10px;
+        }
+
+        .summer-card-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: fit-content;
+            margin-bottom: 12px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(255, 243, 224, 0.95);
+            color: #bf4b00;
+            border: 1px solid rgba(255, 152, 0, 0.35);
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+
+        .ozelders-short-description {
+            font-size: 0.95rem;
+            color: #7a3b00;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        .ozelders-short-description.summer {
+            color: #8d4b20;
+            font-size: 1rem;
+        }
+
+        .summer-benefits {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+            margin: 0 0 20px;
+        }
+
+        .summer-benefit {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-height: 38px;
+            padding: 8px 10px;
+            border-radius: 14px;
+            background: rgba(255, 248, 225, 0.95);
+            color: #7a3b00;
+            border: 1px solid rgba(255, 183, 77, 0.55);
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .summer-benefit i {
+            color: #fb8c00;
+        }
+
+        .ozelders-quick-info {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .info-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 248, 225, 0.85);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #7a3b00;
+            border: 1px solid rgba(255, 183, 77, 0.45);
+        }
+
+        .info-badge i {
+            color: #ff8f00;
+        }
+
+        .ozelders-detail-btn {
+            width: 100%;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #ff7a18 0%, #ffb347 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 122, 24, 0.35);
+        }
+
+        .ozelders-card.summer-school .ozelders-detail-btn {
+            background: linear-gradient(135deg, #ff7a18 0%, #ffb347 100%);
+            box-shadow: 0 6px 18px rgba(255, 122, 24, 0.35);
+        }
+
+        .ozelders-detail-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 122, 24, 0.45);
+            background: linear-gradient(135deg, #ff6f00 0%, #ff9f1c 100%);
+        }
+
+        .ozelders-card.summer-school .ozelders-detail-btn:hover {
+            background: linear-gradient(135deg, #ff6f00 0%, #ff9f1c 100%);
+            box-shadow: 0 8px 22px rgba(255, 122, 24, 0.45);
+        }
+        
+        .ozelders-description {
+            font-size: 0.95rem;
+            color: #7a3b00;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            flex: 1;
+        }
+        
+        .ozelders-details {
+            background: rgba(255, 248, 225, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 2px solid rgba(255, 183, 77, 0.35);
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            color: #7a3b00;
+            font-size: 0.95rem;
+            border-bottom: 2px solid rgba(255, 183, 77, 0.35);
+        }
+        
+        .detail-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .detail-item i {
+            font-size: 1.1rem;
+            color: #ff8f00;
+            min-width: 24px;
+            text-align: center;
+        }
+        
+        .detail-item strong {
+            color: #bf4b00;
+            font-weight: 600;
+        }
+        
+        .ozelders-price {
+            background: linear-gradient(135deg, #ff8f00 0%, #ffb74d 100%);
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 5px 25px rgba(255, 143, 0, 0.35);
+            border: 3px solid rgba(255, 255, 255, 0.9);
+        }
+        
+        .price-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        
+        .price-amount {
+            font-size: 2rem;
+            color: white;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* İletişim Section */
+        .contact-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 100px 0;
+            position: relative;
+        }
+        
+        .contact-section-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: white;
+            text-align: center;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .contact-section-title i {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .contact-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 3rem;
+            font-weight: 300;
+        }
+        
+        .contact-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 50px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 25px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(102, 126, 234, 0.1);
+        }
+        
+        .contact-item:hover {
+            transform: translateY(-5px);
+            background: rgba(102, 126, 234, 0.1);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+        
+        .contact-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .contact-info {
+            flex: 1;
+        }
+        
+        .contact-label {
+            font-size: 0.9rem;
+            color: #667eea;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        
+        .contact-value {
+            font-size: 1.1rem;
+            color: #333;
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .contact-value:hover {
+            color: #667eea;
+        }
+        
+        .contact-footer {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid rgba(102, 126, 234, 0.2);
+            text-align: center;
+        }
+        
+        .contact-footer p {
+            font-size: 1.1rem;
+            color: #555;
+            margin: 0;
+            font-weight: 500;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .stat-card:hover { 
+            transform: scale(1.05); 
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .stat-number { 
+            font-size: 2.5rem; 
+            font-weight: 800; 
+            margin-bottom: 5px;
+        }
+        
+        .stat-label { 
+            font-size: 0.95rem; 
+            opacity: 0.95;
+        }
+        
+        .modal-content {
+            background: #1a1a2e;
+            color: white;
+            border: none;
+        }
+        
+        .modal-dialog {
+            max-width: 95vw !important;
+            height: 95vh;
+            margin: 2.5vh auto;
+        }
+        
+        .modal-content {
+            height: 100%;
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 25px;
+        }
+        
+        .modal-body {
+            padding: 0;
+            overflow-y: auto;
+        }
+        
+        .video-container-row {
+            height: auto;
+            margin: 0;
+        }
+        
+        .video-main-section {
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .video-sidebar {
+            height: auto;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 0;
+            background: #0f0f1e;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .video-item {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            background: rgba(255, 255, 255, 0.05);
+            margin: 8px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .video-item:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateX(8px) scale(1.02);
+            border-color: rgba(230, 57, 70, 0.4);
+            box-shadow: 0 5px 15px rgba(230, 57, 70, 0.25);
+        }
+        
+        .video-item.active {
+            background: linear-gradient(135deg, rgba(230, 57, 70, 0.3) 0%, rgba(255, 107, 107, 0.3) 100%);
+            border-left: 4px solid #e63946;
+            border-color: rgba(230, 57, 70, 0.8);
+            box-shadow: 0 5px 20px rgba(230, 57, 70, 0.4);
+            transform: translateX(8px);
+        }
+        
+        .video-thumbnail-small {
+            width: 140px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+        
+        .video-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .video-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 5px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.3;
+        }
+        
+        .video-duration {
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+        
+        /* Video Progress Bar - Modern Telefon Şarj Görünümü */
+        .video-progress-container {
+            margin-top: 12px;
+            width: 100%;
+        }
+        
+        .video-progress-bar {
+            width: 100%;
+            height: 14px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .video-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00c853 0%, #69f0ae 50%, #00e676 100%);
+            border-radius: 20px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            box-shadow: 
+                0 0 20px rgba(0, 200, 83, 0.6),
+                0 0 30px rgba(105, 240, 174, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .video-progress-fill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, transparent 100%);
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .video-progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+            animation: shimmer 2.5s infinite;
+            border-radius: 20px;
+        }
+        
+        @@keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+        
+        @@keyframes pulse {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 20px rgba(0, 200, 83, 0.6),
+                    0 0 30px rgba(105, 240, 174, 0.4),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 25px rgba(0, 200, 83, 0.8),
+                    0 0 40px rgba(105, 240, 174, 0.6),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            }
+        }
+        
+        .video-progress-text {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+        }
+        
+        .video-progress-percent {
+            font-weight: 700;
+            color: #69f0ae;
+            text-shadow: 0 0 10px rgba(105, 240, 174, 0.5);
+            font-size: 0.8rem;
+        }
+        
+        .video-completed-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: linear-gradient(135deg, #00c853 0%, #69f0ae 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            box-shadow: 
+                0 3px 12px rgba(0, 200, 83, 0.5),
+                0 0 20px rgba(105, 240, 174, 0.3);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            animation: completeBadgePulse 2s ease-in-out infinite;
+        }
+        
+        .video-completed-badge i {
+            font-size: 0.9rem;
+            animation: checkRotate 0.6s ease-in-out;
+        }
+        
+        @@keyframes completeBadgePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @@keyframes checkRotate {
+            0% { transform: rotate(-180deg) scale(0); }
+            100% { transform: rotate(0deg) scale(1); }
+        }
+        
+        .playlist-progress-summary {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 18px;
+            margin: 10px;
+            border-radius: 15px;
+            border: 2px solid rgba(0, 200, 83, 0.4);
+            box-shadow: 
+                0 4px 15px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        
+        .playlist-progress-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .playlist-overall-progress {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        
+        .playlist-overall-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff9800 0%, #ffc107 100%);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 15px rgba(255, 152, 0, 0.6);
+        }
+        
+        .playlist-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .playlist-stats-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .playlist-stats-item i {
+            color: #ffc107;
+        }
+        
+        .video-player-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            flex-shrink: 0;
+        }
+        
+        .video-player-container iframe,
+        .video-player-container > div {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .video-info-section {
+            padding: 20px 25px;
+            background: #1a1a2e;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+        }
+        }
+        
+        .current-video-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .current-video-description {
+            font-size: 0.9rem;
+            opacity: 0.85;
+            margin: 0;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.85);
+            white-space: pre-line;
+        }
+        
+        .playlist-sidebar-header {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-weight: 600;
+        }
+        
+        .playlist-videos-list {
+            max-height: 550px;
+            overflow-y: auto;
+        }
+        
+        .playlist-videos-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .playlist-videos-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .playlist-videos-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+        
+        .playlist-videos-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Özel Ders Modal Stilleri */
+        .ozelders-modal-content {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 100%);
+            border: none;
+            border-radius: 25px;
+            overflow: hidden;
+        }
+
+        .ozelders-modal-header {
+            background: linear-gradient(135deg, #43a047 0%, #66bb6a 100%);
+            color: white;
+            border: none;
+            padding: 25px 30px;
+            box-shadow: 0 4px 20px rgba(67, 160, 71, 0.3);
+        }
+
+        .ozelders-modal-header .modal-title {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .ozelders-modal-body {
+            padding: 40px 30px;
+        }
+
+        .ders-info-section {
+            padding-right: 20px;
+        }
+
+        .info-section-title {
+            color: #2e7d32;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .ders-aciklama {
+            color: #37474f;
+            line-height: 1.8;
+            font-size: 1rem;
+            margin-bottom: 25px;
+        }
+
+        .ders-details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .ders-detail-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 2px solid rgba(46, 125, 50, 0.15);
+            transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .ders-detail-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(46, 125, 50, 0.2);
+            border-color: rgba(46, 125, 50, 0.3);
+        }
+
+        .detail-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #43a047 0%, #66bb6a 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .detail-content {
+            flex: 1;
+        }
+
+        .detail-label {
+            font-size: 0.85rem;
+            color: #757575;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #2e7d32;
+        }
+
+        .ders-contact-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid rgba(46, 125, 50, 0.15);
+        }
+
+        .ders-contact-btn {
+            width: 100%;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #43a047 0%, #66bb6a 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(67, 160, 71, 0.3);
+        }
+
+        .ders-contact-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(67, 160, 71, 0.4);
+            background: linear-gradient(135deg, #388e3c 0%, #43a047 100%);
+        }
+
+        .ders-contact-info {
+            width: 100%;
+            padding: 20px 30px;
+            background: linear-gradient(135deg, #43a047 0%, #66bb6a 100%);
+            color: white;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(67, 160, 71, 0.3);
+        }
+
+        .ders-contact-info i {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+        }
+
+        .ders-video-section {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            border: 2px solid rgba(46, 125, 50, 0.15);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .video-section-title {
+            color: #2e7d32;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .ders-video-section .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 15px;
+            background: #f5f5f5;
+        }
+
+        .ders-video-section .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+        }
+        
+        @@media (max-width: 768px) {
+            .hero-title { font-size: 2.5rem; }
+            .hero-image { width: 280px; height: 280px; }
+            .section-title { font-size: 1.5rem; }
+            .playlist-thumbnail { height: 180px; }
+            .ozelders-section-title { font-size: 2rem; }
+            .ozelders-subtitle { font-size: 1rem; }
+            .ozelders-header { padding: 20px 15px; }
+            .ozelders-icon { font-size: 2rem; }
+            .ozelders-body { padding: 20px 15px; }
+            .ozelders-card.summer-school { min-height: 0; }
+            .summer-benefits { grid-template-columns: 1fr; }
+            .summer-image-caption { font-size: 1rem; }
+            .contact-section-title { font-size: 2rem; }
+            .contact-subtitle { font-size: 1rem; }
+            .contact-card { padding: 30px 20px; }
+            .contact-item { flex-direction: column; text-align: center; }
+            .contact-icon { margin-bottom: 10px; }
+            .ders-details-grid { grid-template-columns: 1fr; }
+            .ders-info-section { padding-right: 0; margin-bottom: 30px; }
+        }
+        /* User Navigation Bar */
+        .user-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 12, 41, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .user-navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .user-navbar .brand {
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+        
+        .user-nav-items {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: white;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        .btn-nav {
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-login {
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn-login:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+            color: white;
+        }
+        
+        .btn-register {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+        
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        
+        .btn-logout {
+            background: rgba(255, 59, 48, 0.2);
+            color: #ff3b30;
+            border: 1px solid rgba(255, 59, 48, 0.3);
+        }
+        
+        .btn-logout:hover {
+            background: rgba(255, 59, 48, 0.3);
+            color: #ff3b30;
+        }
+        
+        body {
+            padding-top: 70px;
+        }
+    </style>
+</head>
+<body>
+    <!-- User Navigation Bar -->
+    <nav class="user-navbar">
+        <div class="container">
+            <a href="/" class="brand">
+                <i class="fas fa-graduation-cap me-2"></i>Özgür Seyhan
+            </a>
+            
+            <div class="user-nav-items">
+                <div id="userNavContent">
+                    <!-- JavaScript ile doldurulacak -->
+                    <a href="/Home/Login" class="btn-nav btn-login">
+                        <i class="fas fa-sign-in-alt"></i>Giriş Yap
+                    </a>
+                    <a href="/Home/Register" class="btn-nav btn-register">
+                        <i class="fas fa-user-plus"></i>Kayıt Ol
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <div class="container">
+            @{
+                var hakkimda = ViewBag.Hakkimda as OzgurSeyhanWebSitesi.Core.Dtos.HakkimdaDtos.HakkimdaDto;
+                if (hakkimda != null)
+                {
+                    <!-- Hero Başlık ve Resim -->
+                    <div class="row align-items-center mb-5">
+                        <div class="col-lg-6 mb-4 mb-lg-0">
+                            <h1 class="hero-title">@hakkimda.AdSoyad</h1>
+                            <p class="hero-subtitle">@hakkimda.Unvan</p>
+                            <p class="hero-description">@hakkimda.Aciklama</p>
+                        </div>
+                        <div class="col-lg-6 text-center">
+                            <img src="@(!string.IsNullOrEmpty(hakkimda.ProfilResmiUrl) ? hakkimda.ProfilResmiUrl : "~/Ready-Bootstrap-Dashboard-master/assets/img/Özgür Hoca resim.jpg")" 
+                                 alt="@hakkimda.AdSoyad" class="hero-image">
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <!-- Varsayılan içerik (yönetici bilgileri girmemişse) -->
+                    <div class="row align-items-center mb-5">
+                        <div class="col-lg-6 mb-4 mb-lg-0">
+                            <h1 class="hero-title">Özgür Seyhan</h1>
+                            <p class="hero-subtitle">İngilizce Eğitim Uzmanı & Yaşam Koçu</p>
+                            <p class="hero-description">
+                                Türkiye'deki herkese İngilizcenin ne kadar kolay bir dil olduğunu ve herkesin kendi derdini ifade edebilecek düzeyde anlatabilmesinin ne kadar basit olduğunu öğretmek amacıyla bu yola başkoydum. Tüm içeriklerimi ücretsiz sunarak, İngilizce öğrenmenin herkes için erişilebilir olması gerektiğine inanıyorum.
+                            </p>
+                        </div>
+                        <div class="col-lg-6 text-center">
+                            <img src="~/Ready-Bootstrap-Dashboard-master/assets/img/Özgür Hoca resim.jpg" 
+                                 alt="Özgür Seyhan" class="hero-image">
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </section>
+
+    <!-- İngilizceni Geliştirecek Dersler -->
+    <section class="dersler-section">
+        <div class="container">
+            <h2 class="dersler-section-title">
+                <i class="fas fa-graduation-cap me-2"></i>İngilizceni Geliştirecek Dersler
+            </h2>
+            <p class="dersler-subtitle">
+                İngilizce seviyenizi geliştirmek için hazırlanmış kapsamlı eğitim videoları
+            </p>
+            
+            <div class="row g-4" id="derslerContainer">
+                @* Playlist'leri göster (Ders Serileri) - Sadece Kategori 4 *@
+                @if(ViewBag.DerslerPlaylists != null && ViewBag.DerslerPlaylists.Count > 0)
+                {
+                    foreach(var playlist in ViewBag.DerslerPlaylists)
+                    {
+                        <div class="col-lg-4 col-md-6">
+                            <div class="ders-card ders-playlist-card" onclick="openPlaylist('@playlist.Id', '@Html.Raw(playlist.Baslik.Replace("'", "\\\\'"))')">
+                                <div class="ders-thumbnail-container">
+                                    @if (!string.IsNullOrEmpty(playlist.KapakResmi))
+                                    {
+                                        <img src="@playlist.KapakResmi" alt="@playlist.Baslik" class="ders-thumbnail">
+                                    }
+                                    else if(playlist.Videos != null && playlist.Videos.Any())
+                                    {
+                                        <img src="https://img.youtube.com/vi/@playlist.Videos.First().VideoId/maxresdefault.jpg" 
+                                             alt="@playlist.Baslik" 
+                                             class="ders-thumbnail"
+                                             onerror="this.src='https://img.youtube.com/vi/@playlist.Videos.First().VideoId/hqdefault.jpg'">
+                                    }
+                                    else
+                                    {
+                                        <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-graduation-cap" style="font-size: 80px; color: white; opacity: 0.9;"></i>
+                                        </div>
+                                    }
+                                    <div class="ders-playlist-badge">
+                                        <i class="fas fa-list-ul me-1"></i>
+                                        <span>@(playlist.Videos?.Count ?? 0) Video</span>
+                                    </div>
+                                    <div class="ders-play-overlay">
+                                        <i class="fas fa-play-circle"></i>
+                                    </div>
+                                </div>
+                                <div class="ders-body">
+                                    <span class="ders-type-badge ders-playlist-type">
+                                        <i class="fas fa-layer-group me-1"></i> Ders Serisi
+                                    </span>
+                                    <h5 class="ders-title">@playlist.Baslik</h5>
+                                    @if(!string.IsNullOrEmpty(playlist.Aciklama))
+                                    {
+                                        <p class="ders-description">@playlist.Aciklama</p>
+                                    }
+                                    <button class="btn ders-watch-btn" onclick="event.stopPropagation(); openPlaylist('@playlist.Id', '@Html.Raw(playlist.Baslik.Replace("'", "\\\\'"))')">
+                                        <i class="fas fa-play me-2"></i> Seriye Başla
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+
+                @* Tekli Ders Videolarını göster *@
+                @if(ViewBag.IngilizceniGelistirecekDersler != null && ViewBag.IngilizceniGelistirecekDersler.Count > 0)
+                {
+                    foreach(var video in ViewBag.IngilizceniGelistirecekDersler)
+                    {
+                        <div class="col-lg-4 col-md-6">
+                            <div class="ders-card ders-video-card" onclick="openSingleVideo('@video.VideoId', '@Html.Raw(video.Baslik.Replace("'", "\\\\'"))')">
+                                <div class="ders-thumbnail-container">
+                                    <img src="https://img.youtube.com/vi/@video.VideoId/maxresdefault.jpg" 
+                                         alt="@video.Baslik" 
+                                         class="ders-thumbnail"
+                                         onerror="this.src='https://img.youtube.com/vi/@video.VideoId/hqdefault.jpg'">
+                                    <div class="ders-video-badge">
+                                        <i class="fas fa-chalkboard-teacher me-1"></i>
+                                        <span>Ders</span>
+                                    </div>
+                                    <div class="ders-play-overlay">
+                                        <i class="fas fa-play-circle"></i>
+                                    </div>
+                                </div>
+                                <div class="ders-body">
+                                    <span class="ders-type-badge ders-video-type">
+                                        <i class="fas fa-graduation-cap me-1"></i> Eğitim Videosu
+                                    </span>
+                                    <h5 class="ders-title">@video.Baslik</h5>
+                                    @if (!string.IsNullOrEmpty(video.Aciklama))
+                                    {
+                                        <p class="ders-description">@video.Aciklama</p>
+                                    }
+                                    <button class="btn ders-watch-btn" onclick="event.stopPropagation(); openSingleVideo('@video.VideoId', '@Html.Raw(video.Baslik.Replace("'", "\\\\'"))')">
+                                        <i class="fas fa-play me-2"></i> Dersi İzle
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+
+                @* Boş durumda mesaj *@
+                @if((ViewBag.DerslerPlaylists == null || ViewBag.DerslerPlaylists.Count == 0) && (ViewBag.IngilizceniGelistirecekDersler == null || ViewBag.IngilizceniGelistirecekDersler.Count == 0))
+                {
+                    <div class="col-12 text-center">
+                        <div class="ders-card" style="padding: 60px 20px; cursor: default;">
+                            <i class="fas fa-graduation-cap fa-4x mb-3" style="opacity: 0.6; color: #f59e0b;"></i>
+                            <h4 style="margin-bottom: 10px; color: #f59e0b;">Yakında Dersler Burada Olacak!</h4>
+                            <p style="font-size: 1rem; margin: 0; opacity: 0.9; color: #f59e0b;">
+                                Admin panelinden ders serileri (playlist) ve tekli ders videoları ekleyerek paylaşabilirsiniz.
+                            </p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- İngilizceni Geliştirecek Tüyolar -->
+    <section class="tuyolar-section">
+        <div class="container">
+            <h2 class="tuyolar-section-title">
+                <i class="fas fa-lightbulb me-2"></i>İngilizceni Geliştirecek Tüyolar
+            </h2>
+            <p class="tuyolar-subtitle">
+                İngilizce öğrenirken işinize yarayacak pratik ipuçları ve püf noktalar
+            </p>
+            
+            <div class="row g-4" id="tuyolarContainer">
+                @* Playlist'leri göster (Tüyo Serileri) - Sadece Kategori 5 *@
+                @if(ViewBag.TuyolarPlaylists != null && ViewBag.TuyolarPlaylists.Count > 0)
+                {
+                    foreach(var playlist in ViewBag.TuyolarPlaylists)
+                    {
+                        <div class="col-lg-4 col-md-6">
+                            <div class="tuyo-card tuyo-playlist-card" onclick="openPlaylist('@playlist.Id', '@Html.Raw(playlist.Baslik.Replace("'", "\\\\'"))')">
+                                <div class="tuyo-thumbnail-container">
+                                    @if (!string.IsNullOrEmpty(playlist.KapakResmi))
+                                    {
+                                        <img src="@playlist.KapakResmi" alt="@playlist.Baslik" class="tuyo-thumbnail">
+                                    }
+                                    else if(playlist.Videos != null && playlist.Videos.Any())
+                                    {
+                                        <img src="https://img.youtube.com/vi/@playlist.Videos.First().VideoId/maxresdefault.jpg" 
+                                             alt="@playlist.Baslik" 
+                                             class="tuyo-thumbnail"
+                                             onerror="this.src='https://img.youtube.com/vi/@playlist.Videos.First().VideoId/hqdefault.jpg'">
+                                    }
+                                    else
+                                    {
+                                        <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-lightbulb" style="font-size: 80px; color: white; opacity: 0.9;"></i>
+                                        </div>
+                                    }
+                                    <div class="tuyo-playlist-badge">
+                                        <i class="fas fa-list-ul me-1"></i>
+                                        <span>@(playlist.Videos?.Count ?? 0) Video</span>
+                                    </div>
+                                    <div class="tuyo-play-overlay">
+                                        <i class="fas fa-play-circle"></i>
+                                    </div>
+                                </div>
+                                <div class="tuyo-body">
+                                    <span class="tuyo-type-badge tuyo-playlist-type">
+                                        <i class="fas fa-layer-group me-1"></i> Tüyo Serisi
+                                    </span>
+                                    <h5 class="tuyo-title">@playlist.Baslik</h5>
+                                    @if(!string.IsNullOrEmpty(playlist.Aciklama))
+                                    {
+                                        <p class="tuyo-description">@playlist.Aciklama</p>
+                                    }
+                                    <button class="btn tuyo-watch-btn" onclick="event.stopPropagation(); openPlaylist('@playlist.Id', '@Html.Raw(playlist.Baslik.Replace("'", "\\\\'"))')">
+                                        <i class="fas fa-play me-2"></i> Seriye Başla
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+
+                @* Tekli Tüyo Videolarını göster *@
+                @if(ViewBag.IngilizceniGelistirecekTuyolar != null && ViewBag.IngilizceniGelistirecekTuyolar.Count > 0)
+                {
+                    foreach(var video in ViewBag.IngilizceniGelistirecekTuyolar)
+                    {
+                        <div class="col-lg-4 col-md-6">
+                            <div class="tuyo-card tuyo-video-card" onclick="openSingleVideo('@video.VideoId', '@Html.Raw(video.Baslik.Replace("'", "\\\\'"))')">
+                                <div class="tuyo-thumbnail-container">
+                                    <img src="https://img.youtube.com/vi/@video.VideoId/maxresdefault.jpg" 
+                                         alt="@video.Baslik" 
+                                         class="tuyo-thumbnail"
+                                         onerror="this.src='https://img.youtube.com/vi/@video.VideoId/hqdefault.jpg'">
+                                    <div class="tuyo-video-badge">
+                                        <i class="fas fa-star me-1"></i>
+                                        <span>İpucu</span>
+                                    </div>
+                                    <div class="tuyo-play-overlay">
+                                        <i class="fas fa-play-circle"></i>
+                                    </div>
+                                </div>
+                                <div class="tuyo-body">
+                                    <span class="tuyo-type-badge tuyo-video-type">
+                                        <i class="fas fa-lightbulb me-1"></i> Pratik İpucu
+                                    </span>
+                                    <h5 class="tuyo-title">@video.Baslik</h5>
+                                    @if (!string.IsNullOrEmpty(video.Aciklama))
+                                    {
+                                        <p class="playlist-description">@video.Aciklama</p>
+                                    }
+                                    <button class="btn tuyo-watch-btn" onclick="event.stopPropagation(); openSingleVideo('@video.VideoId', '@Html.Raw(video.Baslik.Replace("'", "\\\\'"))')">
+                                        <i class="fas fa-play me-2"></i> İpucunu İzle
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+
+                @* Boş durumda mesaj *@
+                @if((ViewBag.TuyolarPlaylists == null || ViewBag.TuyolarPlaylists.Count == 0) && (ViewBag.IngilizceniGelistirecekTuyolar == null || ViewBag.IngilizceniGelistirecekTuyolar.Count == 0))
+                {
+                    <div class="col-12 text-center">
+                        <div class="tuyo-card" style="padding: 60px 20px; cursor: default;">
+                            <i class="fas fa-lightbulb fa-4x mb-3" style="opacity: 0.6; color: #10b981;"></i>
+                            <h4 style="margin-bottom: 10px; color: #10b981;">Yakında Tüyolar Burada Olacak!</h4>
+                            <p style="font-size: 1rem; margin: 0; opacity: 0.9; color: #10b981;">
+                                Admin panelinden tüyo serileri (playlist) ve tekli tüyo videoları ekleyerek paylaşabilirsiniz.
+                            </p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- Gerçek Hayattan İngilizce - Native American English -->
+    <section class="native-section">
+        <div class="container">
+            <h2 class="native-section-title">
+                <i class="fas fa-flag-usa me-2"></i>Gerçek Hayattan İngilizce
+            </h2>
+            <p class="native-subtitle">
+                Bir Amerikalı günlük hayatta nasıl konuşur? Native speaker ile gerçek hayat konuşmalarını dinleyin ve öğrenin
+            </p>
+            
+            <div class="row g-4" id="nativeContainer">
+                @if(ViewBag.GercekHayattanIngilizce != null && ViewBag.GercekHayattanIngilizce.Count > 0)
+                {
+                    foreach(var video in ViewBag.GercekHayattanIngilizce)
+                    {
+                        <div class="col-lg-4 col-md-6">
+                            @if (!string.IsNullOrEmpty(video.KategoriBaslik))
+                            {
+                                <div class="category-header" style="background: linear-gradient(135deg, #1e3a8a 0%, #dc2626 100%); border-left-color: #dc2626;">
+                                    <i class="fas fa-tag"></i>
+                                    @video.KategoriBaslik
+                                </div>
+                            }
+                            <div class="native-card" onclick="openSingleVideo('@video.VideoId', '@Html.Raw(video.Baslik.Replace("'", "\\'"))')">
+                                <div class="native-thumbnail-container">
+                                    <img src="https://img.youtube.com/vi/@video.VideoId/maxresdefault.jpg" 
+                                         alt="@video.Baslik" 
+                                         class="native-thumbnail">
+                                    <div class="native-play-overlay">
+                                        <i class="fas fa-play"></i>
+                                    </div>
+                                    <div class="native-usa-badge">
+                                        <i class="fas fa-flag-usa"></i>
+                                        <span>🇺🇸 USA</span>
+                                    </div>
+                                </div>
+                                <div class="native-body">
+                                    <span class="native-real-badge">
+                                        <i class="fas fa-microphone me-1"></i> Gerçek Konuşma
+                                    </span>
+                                    <h5 class="native-title">@video.Baslik</h5>
+                                    <p class="native-description">
+                                        @if (!string.IsNullOrEmpty(video.Aciklama)) { @video.Aciklama } else { <text>Native speaker ile günlük hayattan gerçek İngilizce konuşmaları deneyimleyin.</text> }
+                                    </p>
+                                    <button class="btn native-watch-btn" onclick="event.stopPropagation(); openSingleVideo('@video.VideoId', '@Html.Raw(video.Baslik.Replace("'", "\\'"))')">
+                                        <i class="fas fa-play-circle me-2"></i> İzle
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12 text-center">
+                        <div class="native-card" style="padding: 60px 20px; cursor: default;">
+                            <i class="fas fa-flag-usa fa-4x mb-3" style="opacity: 0.6; color: #dc2626;"></i>
+                            <h4 style="margin-bottom: 10px; color: #1e3a8a;">Yakında Gerçek Hayat Konuşmaları Burada Olacak!</h4>
+                            <p style="font-size: 1rem; margin: 0; opacity: 0.9; color: #1e3a8a;">
+                                Native American English speaker ile gerçek hayat konuşmalarını buradan izleyebileceksiniz.
+                            </p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- İngilizceni Geliştirecek Podcastler -->
+    <section class="podcast-section">
+        <div class="container">
+            <h2 class="podcast-section-title">
+                <i class="fas fa-podcast me-2"></i>İngilizceni Geliştirecek Podcastler
+            </h2>
+            <p class="podcast-subtitle">
+                İngilizce seviyenizi geliştirmek için hazırlanmış podcast videoları
+            </p>
+            
+            <div class="row g-4" id="podcastlerContainer">
+                @if(ViewBag.IngilizceniGelistirecekPodcastler != null && ViewBag.IngilizceniGelistirecekPodcastler.Count > 0)
+                {
+                    foreach(var video in ViewBag.IngilizceniGelistirecekPodcastler)
+                    {
+                        <div class="col-lg-4 col-md-6">
+                            @if (!string.IsNullOrEmpty(video.KategoriBaslik))
+                            {
+                                <div class="category-header" style="background: linear-gradient(135deg, #e94057 0%, #d946ef 100%); border-left-color: #8b5cf6;">
+                                    <i class="fas fa-tag"></i>
+                                    @video.KategoriBaslik
+                                </div>
+                            }
+                            <div class="podcast-card" onclick="openSingleVideo('@video.VideoId', '@Html.Raw(video.Baslik.Replace("'", "\\'"))')">
+                                <div class="podcast-thumbnail-container">
+                                    <img src="https://img.youtube.com/vi/@video.VideoId/maxresdefault.jpg" 
+                                         alt="@video.Baslik" 
+                                         class="podcast-thumbnail">
+                                    <div class="podcast-play-overlay">
+                                        <i class="fas fa-play"></i>
+                                    </div>
+                                </div>
+                                <div class="podcast-body">
+                                    <span class="podcast-badge">
+                                        <i class="fas fa-podcast me-1"></i> Podcast
+                                    </span>
+                                    <h5 class="podcast-title">@video.Baslik</h5>
+                                    @if (!string.IsNullOrEmpty(video.Aciklama))
+                                    {
+                                        <p class="playlist-description">@video.Aciklama</p>
+                                    }
+                                    <button class="btn podcast-watch-btn" onclick="event.stopPropagation(); openSingleVideo('@video.VideoId', '@Html.Raw(video.Baslik.Replace("'", "\\'"))')">
+                                        <i class="fas fa-play-circle me-2"></i> İzle
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12 text-center">
+                        <div class="podcast-card" style="padding: 60px 20px; cursor: default;">
+                            <i class="fas fa-podcast fa-4x mb-3" style="opacity: 0.6; color: #d946ef;"></i>
+                            <h4 style="margin-bottom: 10px; color: #8b5cf6;">Yakında Podcast Videolarım Burada Olacak!</h4>
+                            <p style="font-size: 1rem; margin: 0; opacity: 0.9; color: #8b5cf6;">Admin panelinden video ekleyerek podcast videolarınızı paylaşabilirsiniz.</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- İngilizce Konuşmanı Artıracak Tüyolar Bölümü -->
+    <!-- İngilizceni Geliştirecek Şarkılar (Spotify) Bölümü -->
+    <section class="tuyolar-section">
+        <div class="container">
+            <h2 class="tuyolar-section-title">
+                <i class="fab fa-spotify me-2" style="color: #1DB954;"></i>İngilizceni Geliştirecek Şarkılar
+            </h2>
+            <p class="tuyolar-subtitle">
+                İngilizce öğrenirken müzik dinleyerek eğlenin ve kelimeleri kalıcı hale getirin
+            </p>
+            
+            <div class="row g-4" id="spotifyContainer">
+                @if(ViewBag.Podcasts != null && ViewBag.Podcasts.Count > 0)
+                {
+                    foreach(var podcast in ViewBag.Podcasts)
+                    {
+                        <div class="col-lg-4 col-md-6">
+                            <iframe style="border-radius:12px" 
+                                    src="@podcast.PodcastUrl" 
+                                    width="100%" 
+                                    height="352" 
+                                    frameBorder="0" 
+                                    allowfullscreen="" 
+                                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                                    loading="lazy">
+                            </iframe>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12 text-center">
+                        <div class="tuyolar-card" style="padding: 60px 20px; cursor: default;">
+                            <i class="fab fa-spotify fa-4x mb-3" style="opacity: 0.6; color: #1DB954;"></i>
+                            <h4 style="margin-bottom: 10px; color: #1DB954;">Yakında İngilizce Şarkılar Burada Olacak!</h4>
+                            <p style="font-size: 1rem; margin: 0; opacity: 0.9; color: #1DB954;">
+                                Admin panelinden Spotify şarkıları ekleyerek paylaşabilirsiniz.
+                            </p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- İngilizceni Geliştirecek YouTube Kanalları -->
+    <section class="youtube-kanallari-section">
+        <div class="container">
+            <h2 class="youtube-kanallari-section-title">
+                <i class="fab fa-youtube me-2"></i>İngilizceni Geliştirecek YouTube Kanalları
+            </h2>
+            <p class="youtube-kanallari-subtitle">
+                İngilizce öğrenmeye yönelik kaliteli YouTube kanallarından özenle seçilmiş videolar
+            </p>
+            
+            <div class="row g-4" id="youtubeKanallariContainer">
+                @if(ViewBag.IngilizceniGelistirecekYoutubeKanallari != null && ViewBag.IngilizceniGelistirecekYoutubeKanallari.Count > 0)
+                {
+                    foreach(var video in ViewBag.IngilizceniGelistirecekYoutubeKanallari)
+                    {
+                        <div class="col-lg-4 col-md-6">
+                            <div class="youtube-kanal-card" onclick="openSingleVideo('@video.VideoId', '@Html.Raw(video.Baslik.Replace("'", "\\\\'"))')">
+                                <div class="youtube-kanal-thumbnail-container">
+                                    <img src="https://img.youtube.com/vi/@video.VideoId/maxresdefault.jpg" 
+                                         alt="@video.Baslik" 
+                                         class="youtube-kanal-thumbnail"
+                                         onerror="this.src='https://img.youtube.com/vi/@video.VideoId/hqdefault.jpg'">
+                                    <div class="youtube-kanal-play-overlay">
+                                        <i class="fab fa-youtube"></i>
+                                    </div>
+                                </div>
+                                <div class="youtube-kanal-body">
+                                    <span class="youtube-kanal-badge">
+                                        <i class="fab fa-youtube me-1"></i> YouTube
+                                    </span>
+                                    <h5 class="youtube-kanal-title">@video.Baslik</h5>
+                                    @if (!string.IsNullOrEmpty(video.Aciklama))
+                                    {
+                                        <p class="playlist-description">@video.Aciklama</p>
+                                    }
+                                    <button class="btn youtube-kanal-watch-btn" onclick="event.stopPropagation(); openSingleVideo('@video.VideoId', '@Html.Raw(video.Baslik.Replace("'", "\\\\'"))')">>
+                                        <i class="fas fa-play me-2"></i> İzle
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12 text-center">
+                        <div class="youtube-kanal-card" style="padding: 60px 20px; cursor: default;">
+                            <i class="fab fa-youtube fa-4x mb-3" style="opacity: 0.6; color: #FF0000;"></i>
+                            <h4 style="margin-bottom: 10px; color: #FF0000;">Yakında YouTube Kanalları Videoları Burada Olacak!</h4>
+                            <p style="font-size: 1rem; margin: 0; opacity: 0.9; color: #FF0000;">
+                                Admin panelinden kaliteli YouTube kanallarından videolar ekleyerek paylaşabilirsiniz.
+                            </p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- Oyun Kosesi Bolumu -->
+    <section class="flow-puzzle-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 80px 0; color: white; position: relative; overflow: hidden;">
+        <div class="container" style="position: relative; z-index: 1;">
+            <h2 class="section-title" style="font-size: 3rem; font-weight: 800; text-align: center; margin-bottom: 1rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+                <i class="fas fa-bolt me-2"></i>Oyun Kosesi
+            </h2>
+            <p class="section-subtitle" style="text-align: center; font-size: 1.3rem; margin-bottom: 3rem; opacity: 0.95;">
+                Zincir mantigiyla ogrenirken eglenecegin tum oyunlar tek bir kose de.
+            </p>
+            
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="flow-puzzle-card" style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border-radius: 25px; padding: 50px; text-align: center; box-shadow: 0 15px 50px rgba(0,0,0,0.3); border: 2px solid rgba(255, 255, 255, 0.2);">
+                        <div class="puzzle-icon mb-4">
+                            <i class="fas fa-link fa-5x" style="color: #ffd700; opacity: 0.9;"></i>
+                        </div>
+                        <h3 style="font-size: 2rem; font-weight: 700; margin-bottom: 1.5rem;">Oyun Kosesi: surukle, eslestir, tamamla!</h3>
+                        <p style="font-size: 1.1rem; margin-bottom: 2rem; line-height: 1.8;">
+                            🎯 <strong>Zincir Eslestirme:</strong> Kartlari dogru sirayla birlestir, hizi ve dikkati ayni anda gelistir.<br>
+                            ⚡ <strong>Fiil Oyunu:</strong> Tense, modal ve soru yapilarinda cumnenin akisini guclendir.<br>
+                            🧩 <strong>Relative Clause Oyunu:</strong> Who, which, that, where, when, whose kaliplarini pratik et.<br>
+                            🧱 <strong>Uzun Tamlama Oyunu:</strong> Bas isim + tamlayan + detay parcasiyla uzun ifade kurmayi pekistir.<br>
+                            📚 <strong>Kademeli Akis:</strong> Sayfali yapi ile duzenli tekrar yap, ilerlemeni net gor.<br>
+                            <br>
+                            Her turda dogru zinciri kur, hizini artir ve Ingilizce cumle kurma becerini kalici hale getir.
+                        </p>
+                        <a href="@Url.Action("FlowPuzzleGame", "Home")" class="btn" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; font-size: 1.3rem; font-weight: bold; padding: 18px 50px; border-radius: 50px; text-decoration: none; box-shadow: 0 10px 30px rgba(245, 87, 108, 0.4); transition: all 0.3s ease; display: inline-block;">
+                            <i class="fas fa-gamepad me-2"></i>Fiil Oyunu
+                        </a>
+                        <a href="@Url.Action("RelativeClauseGame", "Home")" class="btn ms-2" style="background: linear-gradient(135deg, #20bf6b 0%, #0fb9b1 100%); color: white; font-size: 1.1rem; font-weight: bold; padding: 14px 30px; border-radius: 50px; text-decoration: none; box-shadow: 0 10px 24px rgba(15, 185, 177, 0.35); transition: all 0.3s ease; display: inline-block;">
+                            <i class="fas fa-code-branch me-2"></i>Relative Clause Oyunu
+                        </a>
+                        <a href="@Url.Action("LongPhraseGame", "Home")" class="btn ms-2" style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); color: #1f2d3d; font-size: 1.1rem; font-weight: bold; padding: 14px 30px; border-radius: 50px; text-decoration: none; box-shadow: 0 10px 24px rgba(253, 160, 133, 0.35); transition: all 0.3s ease; display: inline-block;">
+                            <i class="fas fa-layer-group me-2"></i>Uzun Tamlama Oyunu
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Animated Background -->
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.1;">
+            <div style="position: absolute; top: 15%; left: 8%; width: 80px; height: 80px; background: white; border-radius: 50%; animation: float 7s ease-in-out infinite;"></div>
+            <div style="position: absolute; top: 50%; right: 12%; width: 100px; height: 100px; background: white; border-radius: 50%; animation: float 9s ease-in-out infinite 1.5s;"></div>
+            <div style="position: absolute; bottom: 25%; left: 15%; width: 60px; height: 60px; background: white; border-radius: 50%; animation: float 11s ease-in-out infinite 3s;"></div>
+        </div>
+    </section>
+
+    <!-- Özel Derslerim Bölümü -->
+    <section class="ozelders-section">
+        <div class="container">
+            <h2 class="ozelders-section-title">
+                <i class="fas fa-chalkboard-teacher me-2"></i>Özel Derslerim
+            </h2>
+            <p class="ozelders-subtitle">
+                İhtiyaçlarınıza özel tasarlanmış İngilizce eğitim programları
+            </p>
+            
+            <div class="row g-4 justify-content-center" id="ozelDersContainer">
+                @if(ViewBag.OzelDersler != null && ViewBag.OzelDersler.Count > 0)
+                {
+                    foreach(var ders in ViewBag.OzelDersler)
+                    {
+                        var resimUrl = !string.IsNullOrEmpty(ders.ResimUrl) ? ders.ResimUrl : "https://via.placeholder.com/400x250?text=Kurs+Görseli";
+                        var kurSeviyesi = ders.KurSeviyesi ?? string.Empty;
+                        var aciklama = ders.Aciklama ?? string.Empty;
+                        var isSummerSchool = kurSeviyesi.Contains("yaz okulu", StringComparison.OrdinalIgnoreCase)
+                            || aciklama.Contains("yaz okulu", StringComparison.OrdinalIgnoreCase)
+                            || kurSeviyesi.Contains("summer", StringComparison.OrdinalIgnoreCase)
+                            || aciklama.Contains("summer", StringComparison.OrdinalIgnoreCase);
+                        var colClass = isSummerSchool ? "col-lg-5 col-md-7 summer-card-column" : "col-lg-4 col-md-6";
+                        var cardClass = isSummerSchool ? "ozelders-card summer-school" : "ozelders-card";
+                        var overlayClass = isSummerSchool ? "ozelders-level-overlay summer" : "ozelders-level-overlay";
+                        var titleClass = isSummerSchool ? "ozelders-title summer" : "ozelders-title";
+                        var descriptionClass = isSummerSchool ? "ozelders-short-description summer" : "ozelders-short-description";
+                        var shortDescription = aciklama.Length > 120 ? aciklama.Substring(0, 120) + "..." : aciklama;
+                        <div class="@colClass">
+                            <div class="@cardClass">
+                                <div class="ozelders-image-container">
+                                    <img src="@resimUrl" alt="@kurSeviyesi Kurs Görseli" class="ozelders-image">
+                                    @if (isSummerSchool)
+                                    {
+                                        <div class="summer-stamp">
+                                            <i class="fas fa-sun"></i>
+                                            Yaz Okulu
+                                        </div>
+                                        <div class="summer-image-caption">36 dersin sonunda İngilizce konuşabileceksin</div>
+                                    }
+                                    <div class="@overlayClass">@kurSeviyesi</div>
+                                </div>
+                                <div class="ozelders-body">
+                                    @if (isSummerSchool)
+                                    {
+                                        <div class="summer-card-kicker">
+                                            <i class="fas fa-umbrella-beach"></i>
+                                            Yaz okulu konsepti
+                                        </div>
+                                    }
+                                    <h5 class="@titleClass">@kurSeviyesi</h5>
+                                    <p class="@descriptionClass">@shortDescription</p>
+                                    @if (isSummerSchool)
+                                    {
+                                        <div class="summer-benefits">
+                                            <span class="summer-benefit"><i class="fas fa-calendar-alt"></i> 36 ders</span>
+                                            <span class="summer-benefit"><i class="fas fa-comments"></i> Pratik odaklı</span>
+                                            <span class="summer-benefit"><i class="fas fa-chart-line"></i> Hızlı gelişim</span>
+                                        </div>
+                                    }
+                                    
+                                    <button class="btn ozelders-detail-btn" onclick="openOzelDersDetail(@ders.Id, '@Html.Raw(kurSeviyesi.Replace("'", "\\'"))')">
+                                        <i class="fas fa-info-circle me-2"></i> Detayları Gör
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12 text-center">
+                        <div class="ozelders-card" style="padding: 60px 20px; cursor: default;">
+                            <i class="fas fa-chalkboard-teacher fa-4x mb-3" style="opacity: 0.6; color: #28a745;"></i>
+                            <h4 style="margin-bottom: 10px;">Yakında Özel Dersler Burada Olacak!</h4>
+                            <p style="font-size: 1rem; margin: 0; opacity: 0.9;">Özel eğitim programları için iletişime geçin.</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- İletişim Bölümü -->
+    <section class="contact-section">
+        <div class="container">
+            <h2 class="contact-section-title">
+                <i class="fas fa-envelope me-2"></i>İletişime Geçin
+            </h2>
+            <p class="contact-subtitle">
+                Herhangi bir sorunuz varsa benimle iletişime geçmekten çekinmeyin
+            </p>
+            
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="contact-card">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="contact-item">
+                                    <div class="contact-icon">
+                                        <i class="fas fa-envelope"></i>
+                                    </div>
+                                    <div class="contact-info">
+                                        <h5 class="contact-label">E-posta</h5>
+                                        <a href="mailto:ozgurseyhan46@gmail.com" class="contact-value">
+                                            ozgurseyhan46@gmail.com
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="contact-item">
+                                    <div class="contact-icon">
+                                        <i class="fab fa-instagram"></i>
+                                    </div>
+                                    <div class="contact-info">
+                                        <h5 class="contact-label">Instagram</h5>
+                                        <a href="https://www.instagram.com/can.onayy/" target="_blank" class="contact-value">
+                                            @@can.onayy
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="contact-item">
+                                    <div class="contact-icon">
+                                        <i class="fab fa-instagram"></i>
+                                    </div>
+                                    <div class="contact-info">
+                                        <h5 class="contact-label">Instagram</h5>
+                                        <a href="https://www.instagram.com/ozgurle5dakikadaingilizce/?hl=en" target="_blank" rel="noopener noreferrer" class="contact-value">
+                                            @@ozgurle5dakikadaingilizce
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="contact-item">
+                                    <div class="contact-icon">
+                                        <i class="fab fa-youtube"></i>
+                                    </div>
+                                    <div class="contact-info">
+                                        <h5 class="contact-label">YouTube</h5>
+                                        <a id="contactYoutubeLink" href="https://www.youtube.com/@@5dakikadaingilizce" target="_blank" rel="noopener noreferrer" class="contact-value">
+                                            Özgür Seyhan
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-footer">
+                            <p>
+                                <i class="fas fa-heart text-danger"></i> 
+                                İngilizce öğrenme yolculuğunuzda size yardımcı olmaktan mutluluk duyarım!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Modal -->
+    <div class="modal fade" id="playlistModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="playlistModalTitle">Playlist</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row video-container-row">
+                        <div class="col-lg-8 video-main-section">
+                            <div class="video-player-container" id="videoPlayerContainer">
+                                <div id="videoPlayer"></div>
+                            </div>
+                            <div class="video-info-section">
+                                <h5 class="current-video-title" id="currentVideoTitle"></h5>
+                                <p class="current-video-description" id="currentVideoDescription"></p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 video-sidebar">
+                            <div class="playlist-sidebar-header">
+                                <i class="fas fa-list me-2"></i>Playlist Videoları
+                            </div>
+                            <div class="playlist-videos-list" id="videoListContainer">
+                                <!-- Video listesi buraya gelecek -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Podcast Modal -->
+    <div class="modal fade" id="podcastModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content podcast-modal-content">
+                <div class="modal-header podcast-modal-header">
+                    <h5 class="modal-title" id="podcastModalTitle">Podcast</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body podcast-modal-body">
+                    <div class="podcast-embed-container" id="podcastEmbedContainer">
+                        <!-- Spotify iframe buraya gelecek -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Özel Ders Detay Modal -->
+    <div class="modal fade" id="ozelDersModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content ozelders-modal-content">
+                <div class="modal-header ozelders-modal-header">
+                    <h5 class="modal-title" id="ozelDersModalTitle">Kurs Detayları</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body ozelders-modal-body">
+                    <div class="row">
+                        <!-- Sol Taraf: Bilgiler -->
+                        <div class="col-lg-6">
+                            <div class="ders-info-section">
+                                <h4 class="info-section-title">
+                                    <i class="fas fa-info-circle me-2"></i>Kurs Hakkında
+                                </h4>
+                                <p class="ders-aciklama" id="dersAciklama"></p>
+                                
+                                <div class="ders-contact-section mt-4">
+                                    <div class="ders-contact-info">
+                                        <i class="fas fa-envelope me-2"></i>
+                                        <span style="font-weight: 600;">ozgurseyhan46@gmail.com</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sağ Taraf: Video -->
+                        <div class="col-lg-6">
+                            <div class="ders-video-section">
+                                <h4 class="video-section-title">
+                                    <i class="fas fa-play-circle me-2"></i>Kurs Tanıtım Videosu
+                                </h4>
+                                <div class="video-container" id="dersVideoContainer">
+                                    <!-- Video buraya gelecek -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        let currentPlaylistVideos = [];
+        let ytPlayer = null;
+        let currentVideoIndex = 0;
+        let currentPlaylistId = null;
+        let progressCheckInterval = null;
+        let maxWatchedTime = 0;
+        let videoDuration = 0;
+        let lastCheckedTime = 0;
+
+        const contactYoutubeLink = document.getElementById('contactYoutubeLink');
+        if (contactYoutubeLink) {
+            const forcedYoutubeUrl = 'https://www.youtube.com/@@5dakikadaingilizce';
+            contactYoutubeLink.setAttribute('href', forcedYoutubeUrl);
+            contactYoutubeLink.addEventListener('click', function (event) {
+                event.preventDefault();
+                window.open(forcedYoutubeUrl, '_blank', 'noopener,noreferrer');
+            });
+        }
+        
+        // Video progress tracking - LocalStorage ve Backend hibrit
+        const VideoProgressManager = {
+            currentUser: null,
+            
+            // Session'dan kullanıcı bilgisini al
+            async checkUserSession() {
+                try {
+                    const response = await fetch('/Home/CheckSession', {
+                        credentials: 'include'
+                    });
+                    const result = await response.json();
+                    
+                    if (result.success && result.data) {
+                        this.currentUser = {
+                            id: result.data.id,
+                            name: result.data.name,
+                            email: result.data.email
+                        };
+                        return true;
+                    }
+                    return false;
+                } catch (error) {
+                    console.log('Session check failed:', error);
+                    return false;
+                }
+            },
+            
+            getProgress: function(playlistId, videoId) {
+                // Kullanıcı giriş yapmamışsa 0 döndür
+                if (!this.currentUser) {
+                    return 0;
+                }
+                
+                // Kullanıcıya özel key oluştur
+                const userId = this.currentUser.id;
+                const key = `video_progress_${userId}_${playlistId}_${videoId}`;
+                const progress = parseFloat(localStorage.getItem(key)) || 0;
+                
+                // Debug için log
+                if (progress > 0) {
+                    console.log(`Progress okundu [User ${userId}]: Playlist ${playlistId}, Video ${videoId} = ${progress}%`);
+                }
+                
+                return progress;
+            },
+            
+            setProgress: async function(playlistId, videoId, percent, watchedSeconds = 0, totalDuration = 0) {
+                // Kullanıcı giriş yapmamışsa işlem yapma
+                if (!this.currentUser) {
+                    console.warn('setProgress: Kullanıcı giriş yapmamış, progress kaydedilemiyor');
+                    return;
+                }
+                
+                // Kullanıcıya özel key oluştur
+                const userId = this.currentUser.id;
+                const key = `video_progress_${userId}_${playlistId}_${videoId}`;
+                const normalizedPercent = Math.min(100, Math.max(0, percent));
+                
+                // Her zaman localStorage'a kaydet (cache olarak)
+                localStorage.setItem(key, normalizedPercent.toFixed(2));
+                
+                // Backend'e de kaydet
+                try {
+                    console.log(`📤 Backend'e gönderiliyor: User=${userId}, Playlist=${playlistId}, Video=${videoId}, Progress=${normalizedPercent.toFixed(2)}%`);
+                    
+                    const apiUrl = '@ViewBag.ApiUrl' || window.location.origin;
+                    const response = await fetch(`${apiUrl}/api/VideoProgress/update`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            userId: userId, // UserId'yi de gönder
+                            playlistId: playlistId,
+                            videoId: videoId,
+                            izlenmeYuzdesi: normalizedPercent,
+                            izlenenSaniye: watchedSeconds || Math.floor((normalizedPercent / 100) * totalDuration),
+                            toplamSure: totalDuration || 600
+                        })
+                    });
+                    
+                    console.log(`📨 Backend response status: ${response.status} ${response.statusText}`);
+                    
+                    const result = await response.json();
+                    console.log('📨 Backend response data:', result);
+                    
+                    if (result.success) {
+                        console.log(`✅ Backend'e kaydedildi [User ${userId}]: Video ${videoId} = ${normalizedPercent.toFixed(2)}%`);
+                    } else {
+                        console.error('⚠️ Backend progress kaydı başarısız:', result.message);
+                        
+                        // Eğer session yoksa kullanıcıyı uyar (sadece bir kere)
+                        if (result.requireLogin && !window.sessionExpiredWarned) {
+                            console.error('❌ SESSION KAYBOLMUŞ! Kullanıcı tekrar giriş yapmalı!');
+                            window.sessionExpiredWarned = true;
+                            
+                            // 3 saniye bekle, sonra yönlendir (böylece log'ları görebiliriz)
+                            setTimeout(() => {
+                                if (confirm('Oturumunuz sona erdi.\n\nGiriş sayfasına yönlendirilmek ister misiniz?')) {
+                                    window.location.href = '/Home/Login';
+                                }
+                            }, 1000);
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ Backend kaydetme hatası:', error);
+                    console.error('Error details:', error.message, error.stack);
+                }
+            },
+            
+            // Backend'den kullanıcının tüm progress'ini yükle
+            async loadUserProgress(playlistId) {
+                if (!this.currentUser) {
+                    console.log('⚠️ loadUserProgress: Kullanıcı giriş yapmamış, atlanıyor');
+                    return;
+                }
+                
+                const userId = this.currentUser.id;
+                
+                try {
+                    console.log(`📥 Backend'den progress yükleniyor [User ${userId}, Playlist ${playlistId}]...`);
+                    const apiUrl = '@ViewBag.ApiUrl' || window.location.origin;
+                    const response = await fetch(`${apiUrl}/api/VideoProgress/current-user/playlist/${playlistId}?userId=${userId}`, {
+                        credentials: 'include'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    const result = await response.json();
+                    
+                    if (result.success && result.data && result.data.length > 0) {
+                        console.log(`✅ ${result.data.length} adet video progress'i yüklendi [Playlist ${playlistId}]`);
+                        console.log('Backend data sample:', result.data[0]); // Debug için ilk kayda bak
+                        
+                        // Backend'den gelen verileri LocalStorage'a yaz (kullanıcıya özel)
+                        result.data.forEach(progress => {
+                            // Property isimlerini kontrol et (hem camelCase hem PascalCase)
+                            const izlenmeYuzdesi = progress.izlenmeYuzdesi ?? progress.IzlenmeYuzdesi ?? 0;
+                            const playlistId = progress.playlistId ?? progress.PlaylistId;
+                            const videoId = progress.videoId ?? progress.VideoId;
+                            const izlenenSaniye = progress.izlenenSaniye ?? progress.IzlenenSaniye ?? 0;
+                            const toplamSure = progress.toplamSure ?? progress.ToplamSure ?? 0;
+                            
+                            const key = `video_progress_${userId}_${playlistId}_${videoId}`;
+                            const progressValue = parseFloat(izlenmeYuzdesi).toFixed(2);
+                            localStorage.setItem(key, progressValue);
+                            console.log(`  📝 Video ${videoId}: ${progressValue}% (İzlenen: ${izlenenSaniye}s / ${toplamSure}s)`);
+                        });
+                        
+                        console.log(`💾 LocalStorage'a ${result.data.length} kayıt yazıldı`);
+                    } else {
+                        console.log(`ℹ️ Playlist ${playlistId} için henüz progress kaydı yok`);
+                    }
+                } catch (error) {
+                    console.error(`❌ Backend'den progress yüklenirken hata oluştu [Playlist ${playlistId}]:`, error);
+                }
+            },
+            
+            getPlaylistProgress: function(playlistId, videos) {
+                if (!videos || videos.length === 0) return 0;
+                
+                let totalProgress = 0;
+                videos.forEach(video => {
+                    totalProgress += this.getProgress(playlistId, video.videoId);
+                });
+                
+                return (totalProgress / videos.length).toFixed(1);
+            },
+            
+            getCompletedCount: function(playlistId, videos) {
+                if (!videos || videos.length === 0) return 0;
+                
+                return videos.filter(video => 
+                    this.getProgress(playlistId, video.videoId) >= 95
+                ).length;
+            }
+        };
+        
+        const playlists = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model ?? new List<OzgurSeyhanWebSitesi.Core.Dtos.PlaylistDtos.PlaylistWithVideosDto>(), new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
+
+        @{
+            var _videoDescMap = new Dictionary<string, string?>();
+            System.Action<System.Collections.IEnumerable> _addToMap = null!;
+            _addToMap = list => {
+                if (list == null) return;
+                foreach (OzgurSeyhanWebSitesi.Core.Dtos.YoutubeVideoDtos.YoutubeVideoDto v in list)
+                    _videoDescMap[v.VideoId] = v.Aciklama;
+            };
+            _addToMap(ViewBag.IngilizceniGelistirecekPodcastler);
+            _addToMap(ViewBag.IngilizceniGelistirecekYoutubeKanallari);
+            _addToMap(ViewBag.IngilizceniGelistirecekDersler);
+            _addToMap(ViewBag.IngilizceniGelistirecekTuyolar);
+            _addToMap(ViewBag.GercekHayattanIngilizce);
+        }
+        const singleVideoDescriptions = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_videoDescMap, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
+        
+        console.log('📊 TOPLAM PLAYLIST SAYISI:', playlists.length);
+        console.log('📋 TÜM PLAYLISTLER:', playlists);
+        playlists.forEach((p, index) => {
+            console.log(`  ${index + 1}. ID: ${p.id}, Başlık: ${p.baslik}, Video Sayısı: ${p.videos?.length || 0}, Kategori: ${p.kategori}`);
+        });
+        
+        // Navbar'ı güncelle
+        function updateNavbar(user) {
+            const navContent = document.getElementById('userNavContent');
+            
+            if (user) {
+                // Kullanıcı girişli - basit tasarım: sadece ad soyad ve çıkış
+                navContent.innerHTML = `
+                    <span style="color: white; margin-right: 15px; font-weight: 500;">
+                        <i class="fas fa-user" style="margin-right: 8px;"></i>${user.name}
+                    </span>
+                    <a href="#" onclick="logout(event)" class="btn-nav btn-logout">
+                        <i class="fas fa-sign-out-alt"></i>Çıkış Yap
+                    </a>
+                `;
+            } else {
+                // Kullanıcı girişli değil
+                navContent.innerHTML = `
+                    <a href="/Home/Login" class="btn-nav btn-login">
+                        <i class="fas fa-sign-in-alt"></i>Giriş Yap
+                    </a>
+                    <a href="/Home/Register" class="btn-nav btn-register">
+                        <i class="fas fa-user-plus"></i>Kayıt Ol
+                    </a>
+                `;
+            }
+        }
+        
+        // Çıkış yap fonksiyonu
+        async function logout(event) {
+            event.preventDefault();
+            
+            // ÖNEMLI: Çıkış yapıldığında mevcut kullanıcının localStorage verilerini temizle
+            // Backend'de saklanan veriler korunuyor, sadece cache temizleniyor
+            if (VideoProgressManager.currentUser) {
+                const userId = VideoProgressManager.currentUser.id;
+                const keysToRemove = [];
+                
+                // Bu kullanıcıya ait tüm progress key'lerini bul
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith(`video_progress_${userId}_`)) {
+                        keysToRemove.push(key);
+                    }
+                }
+                
+                // Bu kullanıcının verilerini temizle
+                keysToRemove.forEach(key => localStorage.removeItem(key));
+                console.log(`Çıkış yapıldı: ${keysToRemove.length} adet progress verisi temizlendi (backend'de korunuyor)`);
+            }
+            
+            // Kullanıcı bilgisini temizle
+            VideoProgressManager.currentUser = null;
+            
+            // UI'deki logout sayfasına git
+            window.location.href = '/Home/Logout';
+        }
+        
+        // Playlist kartlarındaki progress bar'ları güncelle
+        function updateAllPlaylistProgress() {
+            document.querySelectorAll('.playlist-progress').forEach(progressContainer => {
+                const playlistId = parseInt(progressContainer.getAttribute('data-playlist-id'));
+                const videoCount = parseInt(progressContainer.getAttribute('data-video-count'));
+                
+                const playlist = playlists.find(p => p.id === playlistId);
+                if (!playlist || !playlist.videos) return;
+                
+                const overallProgress = VideoProgressManager.getPlaylistProgress(playlistId, playlist.videos);
+                const completedCount = VideoProgressManager.getCompletedCount(playlistId, playlist.videos);
+                
+                // Progress bar'ı güncelle
+                const progressBar = progressContainer.querySelector('.playlist-progress-bar');
+                const progressText = progressContainer.querySelector('.playlist-progress-text');
+                const completedText = progressContainer.querySelector('.playlist-completed-count');
+                
+                if (progressBar) progressBar.style.width = `${overallProgress}%`;
+                if (progressText) progressText.textContent = `${overallProgress}%`;
+                if (completedText) completedText.innerHTML = `<i class="fas fa-check-circle me-1"></i>${completedCount}/${videoCount} video tamamlandı`;
+            });
+        }
+        
+        // Sayfa yüklendiğinde kullanıcı session kontrolü yap
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🔄 Sayfa yükleniyor, kullanıcı session kontrol ediliyor...');
+            
+            await VideoProgressManager.checkUserSession();
+            
+            if (VideoProgressManager.currentUser) {
+                const currentUserId = VideoProgressManager.currentUser.id;
+                console.log(`✅ Kullanıcı giriş yapmış: ${VideoProgressManager.currentUser.name} (ID: ${currentUserId})`);
+                
+                // Diğer kullanıcılara ait localStorage verilerini temizle
+                const keysToRemove = [];
+                
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    // video_progress ile başlayan ama bu kullanıcıya ait olmayan key'leri bul
+                    if (key && key.startsWith('video_progress_') && !key.startsWith(`video_progress_${currentUserId}_`)) {
+                        keysToRemove.push(key);
+                    }
+                }
+                
+                // Diğer kullanıcıların verilerini temizle
+                keysToRemove.forEach(key => localStorage.removeItem(key));
+                if (keysToRemove.length > 0) {
+                    console.log(`🧹 ${keysToRemove.length} adet başka kullanıcıya ait eski veri temizlendi`);
+                }
+                
+                updateNavbar(VideoProgressManager.currentUser);
+                
+                // Tüm playlist'lerin progress'ini backend'den yükle
+                console.log(`📥 ${playlists.length} adet playlist için backend'den progress yükleniyor...`);
+                for (const playlist of playlists) {
+                    await VideoProgressManager.loadUserProgress(playlist.id);
+                }
+                console.log('✅ Tüm progress verileri backend\'den başarıyla yüklendi!');
+                
+                // Progress bar'ları güncelle
+                updateAllPlaylistProgress();
+                console.log('🎨 Progress bar\'ları güncellendi');
+            } else {
+                console.log('ℹ️ Kullanıcı giriş yapmamış - Guest modu');
+                updateNavbar(null);
+                // Giriş yapmamış kullanıcılar için progress gösterme
+                console.log('⚠️ Guest kullanıcılar video izleyemez, progress gösterilmiyor');
+            }
+        });
+        
+        async function openPlaylist(playlistId, playlistName) {
+            // Kullanıcı giriş kontrolü - giriş yapmamışsa videoları izleyemez
+            if (!VideoProgressManager.currentUser) {
+                // Güzel bir uyarı modal'ı göster
+                if (confirm('Videoları izlemek için giriş yapmanız gerekmektedir.\n\nGiriş sayfasına yönlendirilmek ister misiniz?')) {
+                    window.location.href = '/Home/Login';
+                }
+                return;
+            }
+            
+            // playlistId'yi number'a çevir (string olarak gelebilir)
+            playlistId = parseInt(playlistId);
+            currentPlaylistId = playlistId;
+            document.getElementById('playlistModalTitle').textContent = playlistName;
+            
+            console.log('🎬 Opening playlist ID:', playlistId, '(type:', typeof playlistId, ')');
+            console.log('📋 Searching in playlists:', playlists.map(p => ({ id: p.id, type: typeof p.id })));
+            const playlist = playlists.find(p => p.id === playlistId);
+            console.log('✅ Found playlist:', playlist);
+            
+            if(playlist && playlist.videos && playlist.videos.length > 0) {
+                currentPlaylistVideos = playlist.videos;
+                
+                // Backend'den progress yükle
+                await VideoProgressManager.loadUserProgress(playlistId);
+                
+                renderVideoList(playlist.videos);
+                loadVideo(playlist.videos[0], 0);
+                
+                const modal = new bootstrap.Modal(document.getElementById('playlistModal'));
+                modal.show();
+            } else {
+                console.error('❌ Playlist bulunamadı veya video yok', playlist);
+                alert('Bu playlist\'te henüz video bulunmuyor.');
+            }
+        }
+        
+        function loadVideo(video, index) {
+            currentVideoIndex = index;
+            
+            // Önceki player'ı temizle ve iframe'i yeniden oluştur
+            if (ytPlayer) {
+                ytPlayer.destroy();
+                ytPlayer = null;
+            }
+            
+            // Video player container'ı temizle ve yeni iframe ekle
+            const container = document.getElementById('videoPlayerContainer');
+            container.innerHTML = '<div id="videoPlayer"></div>';
+            
+            document.getElementById('currentVideoTitle').textContent = video.baslik;
+            document.getElementById('currentVideoDescription').textContent = video.aciklama || 'Açıklama bulunmuyor';
+            
+            // Aktif videoyu vurgula
+            document.querySelectorAll('.video-item').forEach((item, i) => {
+                if (i === index) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            
+            // Daha önce izlenmiş süreyi al
+            const savedProgress = VideoProgressManager.getProgress(currentPlaylistId, video.videoId);
+            maxWatchedTime = 0;
+            videoDuration = 0;
+            
+            // YouTube Player oluştur
+            ytPlayer = new YT.Player('videoPlayer', {
+                height: '100%',
+                width: '100%',
+                videoId: video.videoId,
+                playerVars: {
+                    'autoplay': 1,
+                    'rel': 0,
+                    'modestbranding': 1,
+                    'controls': 2,  // Özel kontroller - seeking yasak
+                    'disablekb': 1,  // Klavye kısayollarını devre dışı bırak
+                    'fs': 1,
+                    'iv_load_policy': 3
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+        
+        function onPlayerReady(event) {
+            console.log('Player hazır');
+            
+            // Video duration'ı al
+            videoDuration = ytPlayer.getDuration();
+            
+            // Daha önce izlenmiş progress varsa, o noktaya kadar ileri alma izni ver
+            const video = currentPlaylistVideos[currentVideoIndex];
+            const savedProgress = VideoProgressManager.getProgress(currentPlaylistId, video.videoId);
+            
+            console.log(`Video: ${video.baslik}, Kaydedilmiş progress: ${savedProgress}%`);
+            
+            if (videoDuration > 0 && savedProgress > 0) {
+                if (savedProgress < 95) {
+                    // %95'ten az ise kaldığı yerden devam et
+                    const startTime = (savedProgress / 100) * videoDuration;
+                    maxWatchedTime = startTime;
+                    console.log(`Kaldığı yerden devam ediliyor: ${Math.floor(startTime)} saniye (${Math.floor(savedProgress)}%)`);
+                    
+                    // Kullanıcıyı kaldığı yere götür
+                    ytPlayer.seekTo(startTime, true);
+                } else {
+                    // Video tamamlanmış, baştan başlat ama max watched time'ı koru
+                    maxWatchedTime = videoDuration;
+                    console.log('Video tamamlanmış, baştan başlatılıyor');
+                }
+            }
+            
+            // Progress tracking başlat
+            startRealVideoTracking();
+        }
+        
+        function onPlayerStateChange(event) {
+            // Video durumu değiştiğinde
+            if (event.data == YT.PlayerState.PLAYING) {
+                console.log('Video oynatılıyor');
+                
+                // Oynatma başladığında mevcut zamanı kontrol et
+                const currentTime = ytPlayer.getCurrentTime();
+                if (currentTime > maxWatchedTime + 1) {
+                    console.warn('⚠️ SEEKING TESPİT EDİLDİ! Video geri alınıyor:', currentTime, '->', maxWatchedTime);
+                    ytPlayer.seekTo(maxWatchedTime, true);
+                    
+                    // Alert yerine console.warn kullan - daha az rahatsız edici
+                    if (!window.seekWarningShown) {
+                        console.warn('⚠️ Videoyu ileri alamazsınız! Lütfen videoyu sırayla izleyiniz.');
+                        window.seekWarningShown = true;
+                        setTimeout(() => { window.seekWarningShown = false; }, 3000);
+                    }
+                }
+                
+                startRealVideoTracking();
+            } else if (event.data == YT.PlayerState.PAUSED) {
+                console.log('Video duraklatıldı');
+                if (progressCheckInterval) {
+                    clearInterval(progressCheckInterval);
+                }
+            } else if (event.data == YT.PlayerState.ENDED) {
+                console.log('Video bitti');
+                if (progressCheckInterval) {
+                    clearInterval(progressCheckInterval);
+                }
+                // Video bittiğinde %100 yap
+                const video = currentPlaylistVideos[currentVideoIndex];
+                const duration = ytPlayer.getDuration();
+                VideoProgressManager.setProgress(
+                    currentPlaylistId, 
+                    video.videoId, 
+                    100,
+                    Math.floor(duration),
+                    Math.floor(duration)
+                );
+                updateVideoProgressUI(video.videoId);
+                updatePlaylistProgressSummary();
+            }
+        }
+        
+        function startRealVideoTracking() {
+            // Önceki interval'ı temizle
+            if (progressCheckInterval) {
+                clearInterval(progressCheckInterval);
+            }
+            
+            const video = currentPlaylistVideos[currentVideoIndex];
+            lastCheckedTime = 0;
+            
+            progressCheckInterval = setInterval(() => {
+                if (!ytPlayer || !ytPlayer.getCurrentTime) return;
+                
+                try {
+                    const currentTime = ytPlayer.getCurrentTime();
+                    const duration = ytPlayer.getDuration();
+                    const playerState = ytPlayer.getPlayerState();
+                    
+                    if (!duration || duration <= 0) return;
+                    
+                    // Eğer video oynatılıyorsa
+                    if (playerState === YT.PlayerState.PLAYING) {
+                        // Son kontrolden bu yana geçen süreyi hesapla
+                        const timeDifference = currentTime - lastCheckedTime;
+                        
+                        // SADECE İLERİ ALMA KONTROLÜ (Geriye gitmeye izin ver)
+                        // Kullanıcı izlemediği bir yere İLERİ gitmişse geri al
+                        if (currentTime > maxWatchedTime + 2) {
+                            console.warn('⛔ İLERİ ALMA ENGELLENDİ! CurrentTime:', currentTime, 'MaxWatched:', maxWatchedTime);
+                            ytPlayer.seekTo(maxWatchedTime, true);
+                            
+                            // Alert yerine console.warn kullan
+                            if (!window.seekWarningShown) {
+                                console.warn('⚠️ Videoyu ileri alamazsınız! Geriye gidebilir, hızı değiştirebilirsiniz (2x hız önerilir)');
+                                window.seekWarningShown = true;
+                                setTimeout(() => { window.seekWarningShown = false; }, 3000);
+                            }
+                            return;
+                        }
+                        
+                        lastCheckedTime = currentTime;
+                    }
+                    
+                    // Maksimum izlenen zamanı güncelle
+                    if (currentTime > maxWatchedTime) {
+                        maxWatchedTime = currentTime;
+                    }
+                    
+                    // Progress hesapla
+                    const progress = (maxWatchedTime / duration) * 100;
+                    
+                    // Progress'i kaydet ve UI'ı güncelle (gerçek süreleri gönder)
+                    VideoProgressManager.setProgress(
+                        currentPlaylistId, 
+                        video.videoId, 
+                        progress,
+                        Math.floor(maxWatchedTime),
+                        Math.floor(duration)
+                    );
+                    updateVideoProgressUI(video.videoId);
+                    updatePlaylistProgressSummary();
+                    
+                    console.log(`Progress: ${Math.floor(progress)}% (${Math.floor(maxWatchedTime)}/${Math.floor(duration)} saniye)`);
+                } catch (error) {
+                    console.error('Tracking hatası:', error);
+                }
+            }, 500); // Her yarım saniyede kontrol et - daha hızlı tepki
+        }
+        
+        function updateVideoProgressUI(videoId) {
+            const progressBar = document.querySelector(`[data-video-id="${videoId}"] .video-progress-fill`);
+            const progressText = document.querySelector(`[data-video-id="${videoId}"] .video-progress-percent`);
+            
+            if (progressBar && progressText) {
+                const progress = VideoProgressManager.getProgress(currentPlaylistId, videoId);
+                progressBar.style.width = progress + '%';
+                progressText.textContent = Math.floor(progress) + '%';
+            }
+        }
+        
+        function updatePlaylistProgressSummary() {
+            const overallProgress = VideoProgressManager.getPlaylistProgress(currentPlaylistId, currentPlaylistVideos);
+            const completedCount = VideoProgressManager.getCompletedCount(currentPlaylistId, currentPlaylistVideos);
+            
+            const progressFill = document.querySelector('.playlist-overall-fill');
+            const statsCompleted = document.querySelector('.stats-completed');
+            const statsPercent = document.querySelector('.stats-percent');
+            
+            if (progressFill) {
+                progressFill.style.width = overallProgress + '%';
+            }
+            
+            if (statsCompleted) {
+                statsCompleted.textContent = `${completedCount}/${currentPlaylistVideos.length} Video Tamamlandı`;
+            }
+            
+            if (statsPercent) {
+                statsPercent.textContent = `%${overallProgress} Tamamlandı`;
+            }
+        }
+        
+        function renderVideoList(videos) {
+            const container = document.getElementById('videoListContainer');
+            container.innerHTML = '';
+            
+            // Playlist progress summary ekle
+            const progressSummary = document.createElement('div');
+            progressSummary.className = 'playlist-progress-summary';
+            const overallProgress = VideoProgressManager.getPlaylistProgress(currentPlaylistId, videos);
+            const completedCount = VideoProgressManager.getCompletedCount(currentPlaylistId, videos);
+            
+            progressSummary.innerHTML = `
+                <div class="playlist-progress-title">
+                    <i class="fas fa-chart-line me-2"></i>Kurs İlerlemeniz
+                </div>
+                <div class="playlist-overall-progress">
+                    <div class="playlist-overall-fill" style="width: ${overallProgress}%"></div>
+                </div>
+                <div class="playlist-stats">
+                    <span class="playlist-stats-item stats-completed">
+                        <i class="fas fa-check-circle"></i>
+                        ${completedCount}/${videos.length} Video Tamamlandı
+                    </span>
+                    <span class="playlist-stats-item stats-percent">
+                        <i class="fas fa-percentage"></i>
+                        %${overallProgress} Tamamlandı
+                    </span>
+                </div>
+            `;
+            
+            container.appendChild(progressSummary);
+            
+            videos.forEach((video, index) => {
+                const videoItem = document.createElement('div');
+                videoItem.className = 'video-item';
+                videoItem.setAttribute('data-video-id', video.videoId);
+                if (index === 0) videoItem.classList.add('active');
+                videoItem.onclick = () => loadVideo(video, index);
+                
+                const progress = VideoProgressManager.getProgress(currentPlaylistId, video.videoId);
+                const isCompleted = progress >= 95;
+                
+                videoItem.innerHTML = `
+                    <img src="https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg" 
+                         alt="${video.baslik}" class="video-thumbnail-small">
+                    <div class="video-info">
+                        <div class="video-title">${index + 1}. ${video.baslik}</div>
+                        <div class="video-duration">
+                            <i class="fas fa-play-circle me-1"></i>Video ${index + 1}
+                        </div>
+                        <div class="video-progress-container">
+                            <div class="video-progress-bar">
+                                <div class="video-progress-fill" style="width: ${progress}%"></div>
+                            </div>
+                            <div class="video-progress-text">
+                                <span class="video-progress-percent">${Math.floor(progress)}%</span>
+                                ${isCompleted ? '<span class="video-completed-badge"><i class="fas fa-check"></i> Tamamlandı</span>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(videoItem);
+            });
+        }
+        
+        // Modal kapandığında videoyu durdur ve progress tracking'i durdur
+        document.getElementById('playlistModal').addEventListener('hidden.bs.modal', function () {
+            document.getElementById('videoPlayer').src = '';
+            if (progressCheckInterval) {
+                clearInterval(progressCheckInterval);
+                progressCheckInterval = null;
+            }
+        });
+        
+        // Tek video açma fonksiyonu (İngilizce Konuşma Tüyoları için)
+        function openSingleVideo(videoId, videoTitle) {
+            currentPlaylistId = 'single_video'; // Tek video için özel ID
+            document.getElementById('playlistModalTitle').textContent = videoTitle;
+            
+            // Video player container'ı temizle ve iframe oluştur
+            const container = document.getElementById('videoPlayerContainer');
+            container.innerHTML = `
+                <iframe id="singleVideoPlayer" 
+                    width="100%" 
+                    height="100%" 
+                    src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+            `;
+            
+            // Başlık ve açıklamayı ayarla
+            document.getElementById('currentVideoTitle').textContent = videoTitle;
+            const desc = singleVideoDescriptions[videoId];
+            document.getElementById('currentVideoDescription').textContent = desc || '';
+            
+            // Yan liste kısmını gizle - sadece video oynatıcı göster
+            document.querySelector('.video-main-section').classList.remove('col-lg-8');
+            document.querySelector('.video-main-section').classList.add('col-lg-12');
+            document.querySelector('.video-sidebar').style.display = 'none';
+            
+            // Modal'ı aç
+            const modal = new bootstrap.Modal(document.getElementById('playlistModal'));
+            modal.show();
+            
+            // Modal kapanınca temizlik yap
+            document.getElementById('playlistModal').addEventListener('hidden.bs.modal', function resetLayout() {
+                // Video player'ı temizle
+                container.innerHTML = '<div id="videoPlayer"></div>';
+                
+                // Layout'u geri getir
+                document.querySelector('.video-main-section').classList.remove('col-lg-12');
+                document.querySelector('.video-main-section').classList.add('col-lg-8');
+                document.querySelector('.video-sidebar').style.display = 'block';
+                
+                // Event listener'ı kaldır
+                document.getElementById('playlistModal').removeEventListener('hidden.bs.modal', resetLayout);
+            }, { once: true });
+        }
+        
+        // Spotify modal aç
+        function openSpotify(embedUrl, title) {
+            document.getElementById('podcastModalTitle').textContent = title;
+            
+            // Spotify embed container'a iframe ekle
+            const container = document.getElementById('podcastEmbedContainer');
+            container.innerHTML = `
+                <iframe style="border-radius:12px" 
+                    src="${embedUrl}" 
+                    width="100%" 
+                    height="380" 
+                    frameBorder="0" 
+                    allowfullscreen="" 
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                    loading="lazy">
+                </iframe>
+            `;
+            
+            // Modalı aç
+            const modal = new bootstrap.Modal(document.getElementById('podcastModal'));
+            modal.show();
+        }
+        
+        // Özel Ders iletişim
+        function contactForOzelDers(kurSeviyesi) {
+            // WhatsApp, e-posta veya iletişim formu
+            const message = encodeURIComponent(`Merhaba, ${kurSeviyesi} kursu hakkında bilgi almak istiyorum.`);
+            const phoneNumber = '905XXXXXXXXX'; // Telefon numarasını buraya ekleyin
+            
+            // Seçenekler:
+            // 1. WhatsApp
+            // window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+            
+            // 2. E-posta
+            // window.location.href = `mailto:ozgurseyhan@example.com?subject=Özel Ders Talebi - ${kurSeviyesi}&body=${message}`;
+            
+            // 3. Basit alert (şimdilik)
+            alert(`${kurSeviyesi} kursu için iletişime geçmek üzeresiniz.\n\nTelefon: +90 XXX XXX XX XX\nE-posta: ozgurseyhan@example.com`);
+        }
+
+        // Özel Ders detay modal
+        const ozelDersler = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.OzelDersler ?? new List<OzgurSeyhanWebSitesi.Core.Dtos.OzelDersDtos.OzelDersDto>(), new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
+        
+        function openOzelDersDetail(dersId, kurSeviyesi) {
+            console.log('Opening ders ID:', dersId);
+            const ders = ozelDersler.find(d => d.id === dersId);
+            console.log('Found ders:', ders);
+            
+            if(!ders) {
+                alert('Ders bilgisi bulunamadı.');
+                return;
+            }
+
+            // Modal başlığı
+            document.getElementById('ozelDersModalTitle').textContent = ders.kurSeviyesi;
+            
+            // Detaylar
+            document.getElementById('dersAciklama').textContent = ders.aciklama;
+            
+            // YouTube videosu
+            const videoContainer = document.getElementById('dersVideoContainer');
+            if(ders.youtubeVideoUrl) {
+                const videoId = extractYouTubeVideoId(ders.youtubeVideoUrl);
+                if(videoId) {
+                    videoContainer.innerHTML = `
+                        <iframe width="100%" height="315" 
+                            src="https://www.youtube.com/embed/${videoId}" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen>
+                        </iframe>
+                    `;
+                } else {
+                    videoContainer.innerHTML = '<p class="text-muted">Video yüklenemedi</p>';
+                }
+            } else {
+                videoContainer.innerHTML = '<p class="text-muted">Bu kurs için henüz tanıtım videosu eklenmemiş</p>';
+            }
+            
+            // Modal'ı aç
+            const modal = new bootstrap.Modal(document.getElementById('ozelDersModal'));
+            modal.show();
+        }
+
+        function extractYouTubeVideoId(url) {
+            if(!url) return null;
+            
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        // Podcast açma fonksiyonu
+        function openPodcast(podcastUrl, podcastTitle) {
+            document.getElementById('podcastModalTitle').textContent = podcastTitle;
+            
+            // Spotify iframe oluştur
+            const container = document.getElementById('podcastEmbedContainer');
+            container.innerHTML = `
+                <iframe style="border-radius:12px" 
+                        src="${podcastUrl}" 
+                        width="100%" 
+                        height="380" 
+                        frameBorder="0" 
+                        allowfullscreen="" 
+                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                        loading="lazy">
+                </iframe>
+            `;
+            
+            // Modal'ı aç
+            const modal = new bootstrap.Modal(document.getElementById('podcastModal'));
+            modal.show();
+        }
+
+        // Podcast modal kapanınca iframe'i temizle
+        document.getElementById('podcastModal').addEventListener('hidden.bs.modal', function () {
+            document.getElementById('podcastEmbedContainer').innerHTML = '';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,708 @@
+@model List<OzgurSeyhan.Websitesi.UI.Controllers.FlowPuzzleSentenceDto>
+@{
+    ViewData["Title"] = "Flow Puzzle - İngilizce Cümle Eşleştir";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentNoun = ViewBag.CurrentNoun as OzgurSeyhan.Websitesi.UI.Controllers.FlowPuzzleNounDto;
+    var currentPage = (int)ViewBag.CurrentPage;
+    var totalPages = (int)ViewBag.TotalPages;
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .flow-container {
+        max-width: 1500px;
+        margin: 20px auto;
+        padding: 20px;
+    }
+
+    .game-header {
+        text-align: center;
+        color: white;
+        margin-bottom: 25px;
+    }
+
+    .game-header h1 {
+        font-size: 2.8rem;
+        font-weight: 800;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        margin-bottom: 8px;
+    }
+
+    .game-header p {
+        font-size: 1.1rem;
+        opacity: 0.95;
+    }
+
+    .current-noun-display {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+        text-align: center;
+    }
+
+    .current-noun-display h2 {
+        color: #667eea;
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin-bottom: 12px;
+    }
+
+    .noun-forms {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-top: 15px;
+    }
+
+    .noun-form {
+        padding: 12px 25px;
+        border-radius: 12px;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .noun-singular { background: #e3f2fd; color: #1976d2; }
+    .noun-plural { background: #fff3e0; color: #f57c00; }
+
+    .sections-wrapper {
+        display: flex;
+        gap: 25px;
+        margin-bottom: 25px;
+    }
+
+    .puzzle-section {
+        flex: 1;
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+    }
+
+    .section-title {
+        text-align: center;
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 3px solid;
+    }
+
+    .singular-title { color: #1976d2; border-color: #1976d2; }
+    .plural-title { color: #f57c00; border-color: #f57c00; }
+
+    .match-area {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        min-height: 580px;
+    }
+
+    .match-area canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .items-column {
+        width: 45%;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        position: relative;
+        z-index: 10;
+    }
+
+    .match-item {
+        padding: 10px 12px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        font-size: 0.85rem;
+        border: 2px solid #ddd;
+        background: white;
+        user-select: none;
+        position: relative;
+    }
+
+    .match-item:hover:not(.matched) {
+        transform: scale(1.03);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .english-item {
+        background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        border-color: #90caf9;
+        color: #1565c0;
+    }
+
+    .english-item .prep-badge {
+        display: inline-block;
+        background: #667eea;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 5px;
+        font-size: 0.75rem;
+        margin-right: 5px;
+    }
+
+    .english-item .det-badge {
+        display: inline-block;
+        background: #2ecc71;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 5px;
+        font-size: 0.75rem;
+        margin-right: 5px;
+    }
+
+    .english-item .noun-badge {
+        display: inline-block;
+        background: #f39c12;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 5px;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .turkish-item {
+        background: linear-gradient(135deg, #fce4ec, #f8bbd0);
+        border-color: #f48fb1;
+        color: #c62828;
+    }
+
+    .match-item.selected {
+        border-width: 3px;
+        box-shadow: 0 0 15px rgba(102, 126, 234, 0.5);
+        transform: scale(1.05);
+    }
+
+    .match-item.matched {
+        opacity: 0.7;
+        cursor: default;
+        border-color: #4CAF50;
+        background: #e8f5e9 !important;
+        color: #2e7d32 !important;
+    }
+
+    .match-item.matched::after {
+        content: ' \2713';
+        color: #4CAF50;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    .match-item.wrong {
+        animation: shake 0.5s ease-in-out;
+        border-color: #e74c3c !important;
+        background: #ffebee !important;
+    }
+
+    @@keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20% { transform: translateX(-8px); }
+        40% { transform: translateX(8px); }
+        60% { transform: translateX(-5px); }
+        80% { transform: translateX(5px); }
+    }
+
+    .controls-bar {
+        background: white;
+        border-radius: 20px;
+        padding: 20px 30px;
+        box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .progress-section {
+        flex: 1;
+        margin: 0 20px;
+    }
+
+    .progress-bar-track {
+        width: 100%;
+        height: 25px;
+        background: #e0e0e0;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #2ecc71, #27ae60);
+        transition: width 0.5s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .stats-text {
+        text-align: center;
+        margin-top: 8px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #555;
+    }
+
+    .btn-game {
+        padding: 12px 28px;
+        font-size: 1rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        white-space: nowrap;
+    }
+
+    .btn-game:hover {
+        transform: translateY(-2px);
+    }
+
+    .btn-reset {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        color: white;
+    }
+
+    .pagination-controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .btn-page {
+        padding: 12px 25px;
+        font-size: 1rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        text-decoration: none;
+    }
+
+    .btn-page:hover:not(.disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 7px 20px rgba(102, 126, 234, 0.5);
+        color: white;
+    }
+
+    .btn-page.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .page-info {
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 600;
+        padding: 10px 25px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50px;
+    }
+
+    .no-data-message {
+        text-align: center;
+        padding: 60px;
+        color: #999;
+        font-size: 1.3rem;
+    }
+
+    .no-data-message i {
+        font-size: 4rem;
+        display: block;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="flow-container">
+    <div class="game-header">
+        <h1><i class="fas fa-puzzle-piece me-2"></i>Flow Puzzle</h1>
+        <p>Soldaki İngilizce ifadeyi sağdaki doğru Türkçe çevirisiyle eşleştir!</p>
+    </div>
+
+    @if (currentNoun != null && Model != null && Model.Any())
+    {
+        <div class="current-noun-display">
+            <h2>@currentNoun.TurkishMeaning</h2>
+            <div class="noun-forms">
+                <div class="noun-form noun-singular">
+                    Singular: <strong>@currentNoun.SingularForm</strong>
+                </div>
+                <div class="noun-form noun-plural">
+                    Plural: <strong>@currentNoun.PluralForm</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls-bar">
+            <button class="btn-game btn-reset" onclick="resetGame()">
+                <i class="fas fa-redo"></i> Sifirla
+            </button>
+            <div class="progress-section">
+                <div class="progress-bar-track">
+                    <div class="progress-bar-fill" id="progressFill" style="width: 0%;">
+                        <span id="progressText">0 / 24</span>
+                    </div>
+                </div>
+                <div class="stats-text">
+                    <span style="color:#2ecc71;">Dogru: <span id="correctCount">0</span></span> &nbsp;|&nbsp;
+                    <span style="color:#e74c3c;">Yanlis: <span id="wrongCount">0</span></span> &nbsp;|&nbsp;
+                    <span style="color:#3498db;">Kalan: <span id="remainCount">24</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sections-wrapper">
+            <!-- SINGULAR SECTION -->
+            <div class="puzzle-section">
+                <div class="section-title singular-title">SINGULAR (Tekil)</div>
+                <div class="match-area" id="singularArea">
+                    <canvas id="singularCanvas"></canvas>
+                    <div class="items-column" id="singularEnglish">
+                        @foreach (var s in Model.Take(12))
+                        {
+                            <div class="match-item english-item"
+                                 data-id="@s.Id"
+                                 data-side="english"
+                                 data-section="singular"
+                                 onclick="selectItem(this)">
+                                <span class="prep-badge">@s.Preposition</span>
+                                <span class="det-badge">@s.DeterminerSingular</span>
+                                <span class="noun-badge">@s.NounSingular</span>
+                            </div>
+                        }
+                    </div>
+                    <div class="items-column" id="singularTurkish">
+                        <!-- Türkçeler JavaScript ile karışık sırada yerleştirilecek -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- PLURAL SECTION -->
+            <div class="puzzle-section">
+                <div class="section-title plural-title">PLURAL (Cogul)</div>
+                <div class="match-area" id="pluralArea">
+                    <canvas id="pluralCanvas"></canvas>
+                    <div class="items-column" id="pluralEnglish">
+                        @foreach (var s in Model.Take(12))
+                        {
+                            <div class="match-item english-item"
+                                 data-id="@s.Id"
+                                 data-side="english"
+                                 data-section="plural"
+                                 onclick="selectItem(this)">
+                                <span class="prep-badge">@s.Preposition</span>
+                                <span class="det-badge">@s.DeterminerPlural</span>
+                                <span class="noun-badge">@s.NounPlural</span>
+                            </div>
+                        }
+                    </div>
+                    <div class="items-column" id="pluralTurkish">
+                        <!-- Türkçeler JavaScript ile karışık sırada yerleştirilecek -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pagination-controls">
+            <a href="@Url.Action("FlowPuzzleGame", "Home", new { page = currentPage - 1 })"
+               class="btn-page @(currentPage <= 1 ? "disabled" : "")">
+                <i class="fas fa-chevron-left"></i> Onceki
+            </a>
+            <span class="page-info">
+                @currentPage / @totalPages
+            </span>
+            <a href="@Url.Action("FlowPuzzleGame", "Home", new { page = currentPage + 1 })"
+               class="btn-page @(currentPage >= totalPages ? "disabled" : "")">
+                Sonraki <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="puzzle-section">
+            <div class="no-data-message">
+                <i class="fas fa-database"></i>
+                Henuz veri yuklenmemis! Admin panelinden seed data yukleyin.<br/>
+                <a href="@Url.Action("SentenceIndex", "FlowPuzzle")" class="btn-page" style="margin-top:20px; display:inline-block;">
+                    Admin Panel'e Git
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+@if (Model != null && Model.Any())
+{
+<script>
+    // Sentence data from server
+    const sentenceData = [
+        @foreach (var s in Model.Take(12))
+        {
+            @Html.Raw($"{{ id: {s.Id}, turkishSingular: \"{s.TurkishSingular}\", turkishPlural: \"{s.TurkishPlural}\" }},")
+        }
+    ];
+
+    // Game state
+    let state = {
+        selectedItem: null,
+        matchesSingular: [],
+        matchesPlural: [],
+        correct: 0,
+        wrong: 0,
+        total: sentenceData.length * 2
+    };
+
+    // Shuffle array
+    function shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    // Build Turkish columns (shuffled)
+    function buildTurkishColumns() {
+        // Singular
+        const singularTurkish = shuffle(sentenceData.map(s => ({ id: s.id, text: s.turkishSingular })));
+        const singCol = document.getElementById('singularTurkish');
+        singCol.innerHTML = '';
+        singularTurkish.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'match-item turkish-item';
+            div.setAttribute('data-id', item.id);
+            div.setAttribute('data-side', 'turkish');
+            div.setAttribute('data-section', 'singular');
+            div.textContent = item.text;
+            div.onclick = function() { selectItem(this); };
+            singCol.appendChild(div);
+        });
+
+        // Plural
+        const pluralTurkish = shuffle(sentenceData.map(s => ({ id: s.id, text: s.turkishPlural })));
+        const plurCol = document.getElementById('pluralTurkish');
+        plurCol.innerHTML = '';
+        pluralTurkish.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'match-item turkish-item';
+            div.setAttribute('data-id', item.id);
+            div.setAttribute('data-side', 'turkish');
+            div.setAttribute('data-section', 'plural');
+            div.textContent = item.text;
+            div.onclick = function() { selectItem(this); };
+            plurCol.appendChild(div);
+        });
+    }
+
+    // Setup canvases
+    function setupCanvases() {
+        ['singular', 'plural'].forEach(section => {
+            const area = document.getElementById(section + 'Area');
+            const canvas = document.getElementById(section + 'Canvas');
+            canvas.width = area.offsetWidth;
+            canvas.height = area.offsetHeight;
+        });
+    }
+
+    // Select item
+    function selectItem(el) {
+        if (el.classList.contains('matched')) return;
+
+        const side = el.getAttribute('data-side');
+        const section = el.getAttribute('data-section');
+
+        // If nothing selected yet, or same side clicked
+        if (!state.selectedItem) {
+            state.selectedItem = el;
+            el.classList.add('selected');
+            return;
+        }
+
+        const prevSide = state.selectedItem.getAttribute('data-side');
+        const prevSection = state.selectedItem.getAttribute('data-section');
+
+        // Same item clicked - deselect
+        if (state.selectedItem === el) {
+            el.classList.remove('selected');
+            state.selectedItem = null;
+            return;
+        }
+
+        // Same side clicked - switch selection
+        if (side === prevSide || section !== prevSection) {
+            state.selectedItem.classList.remove('selected');
+            state.selectedItem = el;
+            el.classList.add('selected');
+            return;
+        }
+
+        // Different sides, same section - try to match!
+        const englishEl = side === 'english' ? el : state.selectedItem;
+        const turkishEl = side === 'turkish' ? el : state.selectedItem;
+
+        const engId = parseInt(englishEl.getAttribute('data-id'));
+        const turId = parseInt(turkishEl.getAttribute('data-id'));
+
+        // Check match
+        if (engId === turId) {
+            // CORRECT
+            englishEl.classList.add('matched');
+            englishEl.classList.remove('selected');
+            turkishEl.classList.add('matched');
+            turkishEl.classList.remove('selected');
+
+            const matchList = section === 'singular' ? state.matchesSingular : state.matchesPlural;
+            matchList.push({ english: englishEl, turkish: turkishEl, section: section });
+
+            state.correct++;
+            drawConnections();
+            updateProgress();
+
+            // Check if all done
+            if (state.correct === state.total) {
+                setTimeout(() => {
+                    alert('Tebrikler! Tum eslestirmeleri dogru yaptin!');
+                }, 500);
+            }
+        } else {
+            // WRONG
+            state.wrong++;
+            englishEl.classList.add('wrong');
+            turkishEl.classList.add('wrong');
+            englishEl.classList.remove('selected');
+            turkishEl.classList.remove('selected');
+
+            setTimeout(() => {
+                englishEl.classList.remove('wrong');
+                turkishEl.classList.remove('wrong');
+            }, 800);
+
+            updateProgress();
+        }
+
+        state.selectedItem = null;
+    }
+
+    // Draw connection lines
+    function drawConnections() {
+        ['singular', 'plural'].forEach(section => {
+            const canvas = document.getElementById(section + 'Canvas');
+            const ctx = canvas.getContext('2d');
+            const area = document.getElementById(section + 'Area');
+            const areaRect = area.getBoundingClientRect();
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const matchList = section === 'singular' ? state.matchesSingular : state.matchesPlural;
+
+            matchList.forEach(match => {
+                const engRect = match.english.getBoundingClientRect();
+                const turRect = match.turkish.getBoundingClientRect();
+
+                const x1 = engRect.right - areaRect.left;
+                const y1 = engRect.top + engRect.height / 2 - areaRect.top;
+                const x2 = turRect.left - areaRect.left;
+                const y2 = turRect.top + turRect.height / 2 - areaRect.top;
+
+                // Draw curved line
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                const cp1x = x1 + (x2 - x1) * 0.4;
+                const cp2x = x1 + (x2 - x1) * 0.6;
+                ctx.bezierCurveTo(cp1x, y1, cp2x, y2, x2, y2);
+                ctx.strokeStyle = '#4CAF50';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // Draw dots at endpoints
+                [{ x: x1, y: y1 }, { x: x2, y: y2 }].forEach(p => {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+                    ctx.fillStyle = '#4CAF50';
+                    ctx.fill();
+                });
+            });
+        });
+    }
+
+    // Update progress
+    function updateProgress() {
+        const answered = state.correct;
+        const pct = (answered / state.total) * 100;
+
+        document.getElementById('progressFill').style.width = pct + '%';
+        document.getElementById('progressText').textContent = answered + ' / ' + state.total;
+        document.getElementById('correctCount').textContent = state.correct;
+        document.getElementById('wrongCount').textContent = state.wrong;
+        document.getElementById('remainCount').textContent = state.total - state.correct;
+    }
+
+    // Reset game
+    function resetGame() {
+        if (!confirm('Oyunu sifirlamak istediginize emin misiniz?')) return;
+
+        state.selectedItem = null;
+        state.matchesSingular = [];
+        state.matchesPlural = [];
+        state.correct = 0;
+        state.wrong = 0;
+
+        document.querySelectorAll('.match-item').forEach(el => {
+            el.classList.remove('selected', 'matched', 'wrong');
+        });
+
+        // Re-shuffle Turkish columns
+        buildTurkishColumns();
+
+        // Clear canvases
+        ['singular', 'plural'].forEach(section => {
+            const canvas = document.getElementById(section + 'Canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+
+        updateProgress();
+    }
+
+    // Init
+    window.addEventListener('load', function() {
+        buildTurkishColumns();
+        setupCanvases();
+        updateProgress();
+    });
+
+    // Handle resize
+    window.addEventListener('resize', function() {
+        setupCanvases();
+        drawConnections();
+    });
+</script>
+}

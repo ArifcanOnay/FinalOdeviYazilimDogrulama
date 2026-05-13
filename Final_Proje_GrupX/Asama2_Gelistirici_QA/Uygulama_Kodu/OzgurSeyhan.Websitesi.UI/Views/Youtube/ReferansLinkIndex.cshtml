@@ -1,0 +1,110 @@
+@model List<OzgurSeyhanWebSitesi.Core.Dtos.ReferansLinkDto>
+
+@{
+    ViewData["Title"] = "Web Siteleri Yönetimi";
+}
+
+<div class="content">
+    <div class="container-fluid">
+        <h4 class="page-title">İngilizceni Geliştirecek Web Siteleri Yönetimi</h4>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>Başarılı!</strong> @TempData["SuccessMessage"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Hata!</strong> @TempData["ErrorMessage"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="card-title">Web Siteleri Listesi</h4>
+                            <a href="@Url.Action("ReferansLinkCreate", "Youtube")" class="btn btn-primary">
+                                <i class="la la-plus"></i> Yeni Site Ekle
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Sıra</th>
+                                        <th>İkon</th>
+                                        <th>Site Adı</th>
+                                        <th>Açıklama</th>
+                                        <th>Link</th>
+                                        <th class="text-center">İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model != null && Model.Any())
+                                    {
+                                        @foreach (var link in Model)
+                                        {
+                                            <tr>
+                                                <td><strong>@link.Sira</strong></td>
+                                                <td style="font-size: 24px;">@(string.IsNullOrEmpty(link.Ikon) ? "🌐" : link.Ikon)</td>
+                                                <td><strong>@link.SiteAdi</strong></td>
+                                                <td>@link.Aciklama</td>
+                                                <td>
+                                                    <a href="@link.Link" target="_blank" class="text-primary">
+                                                        @(link.Link.Length > 50 ? link.Link.Substring(0, 50) + "..." : link.Link)
+                                                    </a>
+                                                </td>
+                                                <td class="text-center">
+                                                    <a href="@link.Link" 
+                                                       target="_blank" 
+                                                       class="btn btn-info btn-sm" 
+                                                       title="Siteyi Ziyaret Et">
+                                                        <i class="la la-external-link"></i>
+                                                    </a>
+                                                    <a href="@Url.Action("ReferansLinkEdit", "Youtube", new { id = link.Id })" 
+                                                       class="btn btn-warning btn-sm" 
+                                                       title="Düzenle">
+                                                        <i class="la la-edit"></i>
+                                                    </a>
+                                                    <a href="@Url.Action("ReferansLinkDelete", "Youtube", new { id = link.Id })" 
+                                                       class="btn btn-danger btn-sm" 
+                                                       title="Sil"
+                                                       onclick="return confirm('Bu linki silmek istediğinizden emin misiniz?');">
+                                                        <i class="la la-trash"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="6" class="text-center">
+                                                <div class="alert alert-info mb-0">
+                                                    Henüz hiç link eklenmemiş. <a href="@Url.Action("ReferansLinkCreate", "Youtube")">Hemen ekleyin!</a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

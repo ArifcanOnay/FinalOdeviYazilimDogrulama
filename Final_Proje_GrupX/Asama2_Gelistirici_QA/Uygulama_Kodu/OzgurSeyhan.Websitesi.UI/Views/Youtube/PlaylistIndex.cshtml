@@ -1,0 +1,114 @@
+@model List<OzgurSeyhanWebSitesi.Core.Dtos.PlaylistDtos.PlaylistDto>
+
+@{
+    ViewData["Title"] = "Playlist Yönetimi";
+}
+
+<div class="content">
+    <div class="container-fluid">
+        <h4 class="page-title">Playlist Yönetimi</h4>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>Başarılı!</strong> @TempData["SuccessMessage"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+
+        @if (TempData["InfoMessage"] != null)
+        {
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <strong>Bilgi!</strong> @TempData["InfoMessage"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Hata!</strong> @TempData["ErrorMessage"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="card-title"><i class="fas fa-podcast me-2"></i>Playlist Listesi (İngilizceni Geliştirecek Podcastler)</h4>
+                            <a href="@Url.Action("PlaylistCreate", "Youtube")" class="btn btn-primary">
+                                <i class="la la-plus"></i> Yeni Playlist Ekle
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Başlık</th>
+                                        <th>Playlist ID</th>
+                                        <th>Öğretmen ID</th>
+                                        <th class="text-center">İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model != null && Model.Any())
+                                    {
+                                        @foreach (var playlist in Model)
+                                        {
+                                            <tr>
+                                                <td>@playlist.Id</td>
+                                                <td>@playlist.Baslik</td>
+                                                <td><code>@playlist.PlaylistId</code></td>
+                                                <td>@playlist.OgretmenId</td>
+                                                <td class="text-center">
+                                                    <a href="@Url.Action("PlaylistVideos", "Youtube", new { id = playlist.Id })" 
+                                                       class="btn btn-info btn-sm" 
+                                                       title="Videoları Gör">
+                                                        <i class="la la-eye"></i> Videoları Gör
+                                                    </a>
+                                                    <form method="post" 
+                                                          action="@Url.Action("AddNewVideosToPlaylist", "Youtube", new { id = playlist.Id })" 
+                                                          style="display:inline;"
+                                                          onsubmit="return confirm('YouTube\'dan yeni videolar eklenecek. Devam etmek istiyor musunuz?');">
+                                                        <button type="submit" class="btn btn-success btn-sm" title="Yeni Videoları Ekle">
+                                                            <i class="la la-plus-circle"></i> Video Ekle
+                                                        </button>
+                                                    </form>
+                                                    <form method="post" 
+                                                          action="@Url.Action("PlaylistDelete", "Youtube", new { id = playlist.Id })" 
+                                                          style="display:inline;"
+                                                          onsubmit="return confirm('Bu playlist\'i silmek istediğinizden emin misiniz?');">
+                                                        <button type="submit" class="btn btn-danger btn-sm" title="Sil">
+                                                            <i class="la la-trash"></i> Sil
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="5" class="text-center">Henüz playlist eklenmemiş.</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

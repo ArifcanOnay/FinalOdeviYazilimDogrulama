@@ -1,0 +1,153 @@
+@model List<OzgurSeyhan.Websitesi.UI.Controllers.FlowPuzzleSentenceDto>
+@{
+    ViewData["Title"] = "Edat Cümle Yönetimi";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Edat Cümle Yönetimi</h4>
+        <ul class="breadcrumbs">
+            <li class="nav-home">
+                <a href="@Url.Action("Index", "AdminLayout")">
+                    <i class="flaticon-home"></i>
+                </a>
+            </li>
+            <li class="separator">
+                <i class="flaticon-right-arrow"></i>
+            </li>
+            <li class="nav-item">
+                <a href="#">Edat İsimleri</a>
+            </li>
+            <li class="separator">
+                <i class="flaticon-right-arrow"></i>
+            </li>
+            <li class="nav-item">
+                <a href="#">Cümle Kombinasyonları</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <h4 class="card-title">Preposition + Determiner + Noun Kombinasyonları</h4>
+                        <a href="@Url.Action("LoadSeedData")" class="btn btn-success btn-round ml-auto mr-2" onclick="return confirm('100 isim ve 1200 cümle kombinasyonu yüklenecek. Emin misiniz?');">
+                            <i class="fa fa-database"></i>
+                            100 İsim + 1200 Kombinasyon Yükle
+                        </a>
+                        <a href="@Url.Action("SentenceCreate")" class="btn btn-primary btn-round">
+                            <i class="fa fa-plus"></i>
+                            Yeni Cümle Kombinasyonu Ekle
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <strong>Başarılı!</strong> @TempData["Success"]
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    }
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Hata!</strong> @TempData["Error"]
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    }
+
+                    <div class="table-responsive">
+                        <table id="sentenceTable" class="display table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Preposition</th>
+                                    <th>Determiner (Singular)</th>
+                                    <th>Determiner (Plural)</th>
+                                    <th>Noun (Singular)</th>
+                                    <th>Noun (Plural)</th>
+                                    <th>Türkçe (Singular)</th>
+                                    <th>Türkçe (Plural)</th>
+                                    <th>Aktif</th>
+                                    <th>Sıra</th>
+                                    <th style="width: 10%">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null && Model.Any())
+                                {
+                                    foreach (var sentence in Model)
+                                    {
+                                        <tr>
+                                            <td>@sentence.Id</td>
+                                            <td><span class="badge badge-success">@sentence.Preposition</span></td>
+                                            <td>@sentence.DeterminerSingular</td>
+                                            <td>@sentence.DeterminerPlural</td>
+                                            <td><strong>@sentence.NounSingular</strong></td>
+                                            <td><strong>@sentence.NounPlural</strong></td>
+                                            <td>@sentence.TurkishSingular</td>
+                                            <td>@sentence.TurkishPlural</td>
+                                            <td>
+                                                @if (sentence.IsActive)
+                                                {
+                                                    <span class="badge badge-success">Aktif</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-danger">Pasif</span>
+                                                }
+                                            </td>
+                                            <td>@sentence.DisplayOrder</td>
+                                            <td>
+                                                <div class="form-button-action">
+                                                    <a href="@Url.Action("SentenceEdit", new { id = sentence.Id })" class="btn btn-link btn-primary btn-lg" data-toggle="tooltip" title="Düzenle">
+                                                        <i class="fa fa-edit"></i>
+                                                    </a>
+                                                    <form method="post" action="@Url.Action("SentenceDelete", new { id = sentence.Id })" style="display: inline-block;">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-link btn-danger" data-toggle="tooltip" title="Sil" onclick="return confirm('Bu cümle kombinasyonunu silmek istediğinize emin misiniz?');">
+                                                            <i class="fa fa-times"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="10" class="text-center">Henüz cümle kombinasyonu eklenmemiş.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#sentenceTable').DataTable({
+                "pageLength": 10,
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Turkish.json"
+                }
+            });
+
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+}

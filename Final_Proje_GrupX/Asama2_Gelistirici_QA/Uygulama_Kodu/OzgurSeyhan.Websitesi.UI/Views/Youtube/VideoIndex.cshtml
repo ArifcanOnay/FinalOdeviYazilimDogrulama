@@ -1,0 +1,251 @@
+@model List<OzgurSeyhanWebSitesi.Core.Dtos.YoutubeVideoDtos.YoutubeVideoDto>
+
+@{
+    ViewData["Title"] = "Video Yönetimi";
+}
+
+<div class="content">
+    <div class="container-fluid">
+        <h4 class="page-title">Video Yönetimi</h4>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>Başarılı!</strong> @TempData["SuccessMessage"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Hata!</strong> @TempData["ErrorMessage"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="card-title">Video Listesi</h4>
+                            <a href="@Url.Action("VideoCreate", "Youtube")" class="btn btn-primary">
+                                <i class="la la-plus"></i> Yeni Video Ekle
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th style="width: 120px;">Thumbnail</th>
+                                        <th>Başlık</th>
+                                        <th>Kategori</th>
+                                        <th>Video ID</th>
+                                        <th>Sıra</th>
+                                        <th>Öğretmen ID</th>
+                                        <th class="text-center">İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model != null && Model.Any())
+                                    {
+                                        @foreach (var video in Model.OrderBy(v => v.Sira).ThenBy(v => v.Id))
+                                        {
+                                            var kategoriAdi = video.Kategori switch
+                                            {
+                                                OzgurSeyhanWebSitesi.Core.Models.VideoKategorisi.YoutubeVideolarim => "🎧 İngilizceni Geliştirecek Podcastler",
+                                                OzgurSeyhanWebSitesi.Core.Models.VideoKategorisi.IngilizceniGelistirecekYoutubeKanallari => "📺 İngilizceni Geliştirecek YouTube Kanalları",
+                                                OzgurSeyhanWebSitesi.Core.Models.VideoKategorisi.GercekHayattanIngilizce => "🇺🇸 Gerçek Hayattan İngilizce",
+                                                OzgurSeyhanWebSitesi.Core.Models.VideoKategorisi.IngilizceniGelistirecekDersler => "🎓 İngilizceni Geliştirecek Dersler",
+                                                OzgurSeyhanWebSitesi.Core.Models.VideoKategorisi.IngilizceniGelistirecekTuyolar => "💡 İngilizceni Geliştirecek Tüyolar",
+                                                OzgurSeyhanWebSitesi.Core.Models.VideoKategorisi.IngilizceniGelistirecekWebSiteleri => "🌐 İngilizceni Geliştirecek Web Siteleri",
+                                                _ => "Diğer"
+                                            };
+                                            <tr>
+                                                <td>@video.Id</td>
+                                                <td>
+                                                    <img src="https://img.youtube.com/vi/@video.VideoId/default.jpg" 
+                                                         alt="@video.Baslik" 
+                                                         class="img-thumbnail" 
+                                                         style="width: 100px;">
+                                                </td>
+                                                <td>
+                                                    <strong>@video.Baslik</strong>
+                                                    @if (!string.IsNullOrEmpty(video.Aciklama))
+                                                    {
+                                                        <br /><small class="text-muted">@video.Aciklama</small>
+                                                    }
+                                                    else
+                                                    {
+                                                        <br /><small class="text-muted"><i>Açıklama bulunmuyor</i></small>
+                                                    }
+                                                </td>
+                                                <td><span class="badge badge-info">@kategoriAdi</span></td>
+                                                <td><code>@video.VideoId</code></td>
+                                                <td><span class="badge badge-primary">@video.Sira</span></td>
+                                                <td>@video.OgretmenId</td>
+                                                <td class="text-center">
+                                                    <a href="@video.Url" 
+                                                       target="_blank" 
+                                                       class="btn btn-info btn-sm" 
+                                                       title="YouTube'da İzle">
+                                                        <i class="la la-play"></i>
+                                                    </a>
+                                                    <button type="button" 
+                                                            class="btn btn-success btn-sm"
+                                                            title="Açıklama Ekle/Düzenle"
+                                                            onclick="showAciklamaModal(@video.Id)">
+                                                        <i class="la la-file-text"></i>
+                                                    </button>
+                                                    <input type="hidden" id="videoData_@video.Id" 
+                                                           data-baslik="@Html.Encode(video.Baslik)"
+                                                           data-aciklama="@Html.Encode(video.Aciklama ?? "")" />
+                                                    <a href="@Url.Action("VideoEdit", "Youtube", new { id = video.Id })" 
+                                                       class="btn btn-warning btn-sm" 
+                                                       title="Düzenle">
+                                                        <i class="la la-edit"></i>
+                                                    </a>
+                                                    <form method="post" 
+                                                          action="@Url.Action("VideoDelete", "Youtube", new { id = video.Id })" 
+                                                          style="display:inline;"
+                                                          onsubmit="return confirm('Bu videoyu silmek istediğinizden emin misiniz?');">
+                                                        <button type="submit" class="btn btn-danger btn-sm" title="Sil">
+                                                            <i class="la la-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="6" class="text-center">Henüz video eklenmemiş.</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Açıklama Modal -->
+<div class="modal fade" id="aciklamaModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Video Açıklaması Ekle/Düzenle</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="modalVideoId" />
+                <div class="form-group">
+                    <label><strong>Video:</strong></label>
+                    <p id="modalVideoBaslik" class="form-control-plaintext"></p>
+                </div>
+                <div class="form-group">
+                    <label for="modalAciklamaText">Açıklama:</label>
+                    <textarea id="modalAciklamaText" class="form-control" rows="6" 
+                              placeholder="Buraya video açıklamasını yazın..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-primary" onclick="saveVideoAciklama()">
+                    <i class="la la-save"></i> Kaydet
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Video Açıklama Fonksiyonları
+    var API_BASE_URL = '@(ViewBag.ApiUrl ?? "https://localhost:7101")';
+    console.log('Script yüklendi - API URL:', API_BASE_URL);
+    
+    function showAciklamaModal(videoId) {
+        console.log('=== showAciklamaModal CALLED ===');
+        console.log('Video ID:', videoId);
+        
+        if (!videoId) {
+            alert('Video ID bulunamadı!');
+            return;
+        }
+        
+        var dataElement = document.getElementById('videoData_' + videoId);
+        if (!dataElement) {
+            alert('Video verisi bulunamadı! Element ID: videoData_' + videoId);
+            return;
+        }
+        
+        var baslik = dataElement.getAttribute('data-baslik') || '';
+        var aciklama = dataElement.getAttribute('data-aciklama') || '';
+        
+        console.log('Video Baslik:', baslik);
+        console.log('Mevcut Aciklama:', aciklama);
+        
+        document.getElementById('modalVideoId').value = videoId;
+        document.getElementById('modalVideoBaslik').textContent = baslik;
+        document.getElementById('modalAciklamaText').value = aciklama;
+        
+        $('#aciklamaModal').modal('show');
+    }
+    
+    function saveVideoAciklama() {
+        console.log('=== saveVideoAciklama CALLED ===');
+        
+        var videoId = document.getElementById('modalVideoId').value;
+        var aciklama = document.getElementById('modalAciklamaText').value;
+        
+        console.log('Video ID:', videoId);
+        console.log('Aciklama:', aciklama);
+        
+        if (!videoId) {
+            alert('Video ID hatası!');
+            return;
+        }
+        
+        var url = API_BASE_URL + '/api/YoutubeVideo/' + videoId + '/aciklama';
+        console.log('Request URL:', url);
+        
+        fetch(url, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ aciklama: aciklama })
+        })
+        .then(function(response) {
+            console.log('Response status:', response.status);
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('HTTP ' + response.status);
+        })
+        .then(function(data) {
+            console.log('SUCCESS:', data);
+            $('#aciklamaModal').modal('hide');
+            alert('Açıklama başarıyla kaydedildi!');
+            setTimeout(function() { location.reload(); }, 500);
+        })
+        .catch(function(error) {
+            console.error('ERROR:', error);
+            alert('Hata: ' + error.message);
+        });
+    }
+    
+    console.log('Fonksiyonlar tanımlandı - showAciklamaModal:', typeof showAciklamaModal);
+</script>

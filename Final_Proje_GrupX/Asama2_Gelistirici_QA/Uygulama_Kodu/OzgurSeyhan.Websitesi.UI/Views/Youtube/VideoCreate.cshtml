@@ -1,0 +1,113 @@
+@{
+    ViewData["Title"] = "Video Ekle";
+}
+
+<div class="content">
+    <div class="container-fluid">
+        <h4 class="page-title">Yeni Video Ekle</h4>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">YouTube Video URL'si ile Ekle</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="@Url.Action("VideoCreate", "Youtube")">
+                            <div class="form-group">
+                                <label for="videoUrl">YouTube Video URL</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="videoUrl" 
+                                       name="videoUrl" 
+                                       placeholder="https://www.youtube.com/watch?v=xxxxxx" 
+                                       required>
+                                <small class="form-text text-muted">
+                                    YouTube video URL'sini buraya yapıştırın. Video bilgileri otomatik olarak çekilecektir.
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="kategori">Videoyu Nereye Eklemek İstiyorsunuz?</label>
+                                <select class="form-control" id="kategori" name="kategori" required>
+                                    <option value="1" selected>🎧 İngilizceni Geliştirecek Podcastler</option>
+                                    <option value="2">📺 İngilizceni Geliştirecek YouTube Kanalları</option>
+                                    <option value="4">🎓 İngilizceni Geliştirecek Dersler</option>
+                                    <option value="5">💡 İngilizceni Geliştirecek Tüyolar</option>
+                                    <option value="6">🌐 İngilizceni Geliştirecek Web Siteleri</option>
+                                    <option value="3">🇺🇸 Gerçek Hayattan İngilizce (Native Speaker)</option>
+                                </select>
+                                <small class="form-text text-muted">
+                                    Video hangi bölümde görünecek?
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="kategoriBaslik">Kategori Başlığı (Opsiyonel)</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="kategoriBaslik" 
+                                       name="kategoriBaslik" 
+                                       placeholder="Örn: 5 Dakikada İngilizce, Günlük Konuşma Pratikleri" 
+                                       maxlength="200">
+                                <small class="form-text text-muted">
+                                    <strong>Podcast için:</strong> Video kartının üstünde görünecek özel bir başlık ekleyebilirsiniz (Örn: "Serisi #1", "Temeller").
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sira">Sıra Numarası</label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="sira" 
+                                       name="sira" 
+                                       placeholder="Boş bırakırsan otomatik sıralanacak"
+                                       min="0">
+                                <small class="form-text text-muted">
+                                    Boş bırakırsan en sona eklenir. Videolar küçükten büyüğe sıralanır (0 en başta).
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="la la-save"></i> Video Ekle
+                                </button>
+                                <a href="@Url.Action("VideoIndex", "Youtube")" class="btn btn-secondary">
+                                    <i class="la la-times"></i> İptal
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card card-info">
+                    <div class="card-body">
+                        <h5><i class="la la-info-circle"></i> Nasıl Kullanılır?</h5>
+                        <ol>
+                            <li>YouTube'da video sayfasına gidin</li>
+                            <li>Tarayıcı adres çubuğundan URL'yi kopyalayın</li>
+                            <li>URL'nin içinde "v=" parametresi olduğundan emin olun</li>
+                            <li>Videoyu nereye ekleyeceğinizi seçin</li>
+                            <li>Buraya yapıştırıp "Video Ekle" butonuna tıklayın</li>
+                        </ol>
+                        <hr>
+                        <p><strong>Örnek URL:</strong></p>
+                        <code style="word-break: break-all;">
+                            https://www.youtube.com/watch?v=dQw4w9WgXcQ
+                        </code>
+                        <hr>
+                        <div class="alert alert-info">
+                            <strong>Kategoriler:</strong>
+                            <ul class="mb-0">
+                                <li><strong>🎧 İngilizceni Geliştirecek Podcastler:</strong> Ana sayfada "Podcastler" bölümünde görünür</li>
+                                <li><strong>� İngilizceni Geliştirecek YouTube Kanalları:</strong> Kaliteli YouTube kanallarından seçilmiş videolar</li>                                <li><strong>🎓 İngilizceni Geliştirecek Dersler:</strong> Eğitim videoları ve ders serileri (playlist'lerle birlikte görünür)</li>                                <li><strong>🇺🇸 Gerçek Hayattan İngilizce:</strong> Native American speaker ile günlük konuşmalar</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

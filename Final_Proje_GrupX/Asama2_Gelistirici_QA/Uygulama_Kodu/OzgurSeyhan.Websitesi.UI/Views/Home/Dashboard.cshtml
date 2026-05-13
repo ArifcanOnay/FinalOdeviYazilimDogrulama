@@ -1,0 +1,104 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="content">
+    <div class="container-fluid">
+        <h4 class="page-title">Dashboard</h4>
+        
+        <!-- İstatistik Kartları Component -->
+        @await Component.InvokeAsync("StatisticsCards", new { 
+            videoCount = ViewBag.VideoCount, 
+            playlistCount = ViewBag.PlaylistCount, 
+            ozelDersCount = ViewBag.OzelDersCount, 
+            podcastCount = ViewBag.PodcastCount 
+        })
+
+        <!-- Hoşgeldin Kartı ve Hızlı Erişim -->
+        <div class="row">
+            <div class="col-md-8">
+                @await Component.InvokeAsync("WelcomeCard")
+            </div>
+
+            <div class="col-md-4">
+                @await Component.InvokeAsync("QuickAccess")
+            </div>
+        </div>
+
+        <!-- Son Aktiviteler -->
+        <div class="row">
+            <div class="col-md-12">
+                @await Component.InvokeAsync("RecentActivities")
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-stats {
+        border-radius: 12px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card-stats:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    
+    .card-stats .icon-big {
+        font-size: 3.5rem;
+        opacity: 0.8;
+    }
+    
+    .card-stats.card-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .card-stats.card-success {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+    }
+    
+    .card-stats.card-info {
+        background: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%);
+        color: white;
+    }
+    
+    .card-stats.card-warning {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+    }
+    
+    .card {
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    }
+    
+    .list-group-item {
+        border: none;
+        border-radius: 8px !important;
+        margin-bottom: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+        transform: translateX(5px);
+    }
+    
+    .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 30px;
+        color: #1f2d3d;
+    }
+</style>

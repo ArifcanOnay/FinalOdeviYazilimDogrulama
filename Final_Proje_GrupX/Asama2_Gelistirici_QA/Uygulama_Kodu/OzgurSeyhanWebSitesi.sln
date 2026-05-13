@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36414.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzgurSeyhanWebSitesi.Api", "OzgurSeyhanWebSitesi\OzgurSeyhanWebSitesi.Api.csproj", "{BF6BE497-83D6-4C16-B0D4-27CF696BEF34}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzgurSeyhanWebSitesi.Core", "OzgurSeyhanWebSitesi.Core\OzgurSeyhanWebSitesi.Core.csproj", "{10AA205C-B472-40FB-9858-501CDA95C84D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzgurSeyhanWebSitesi.Repository", "OzgurSeyhanWebSitesi.Repository\OzgurSeyhanWebSitesi.Repository.csproj", "{C2DD5E9F-C732-4EF9-B115-8007F4C349DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzgurSeyhanWebSitesi.Bussinies", "OzgurSeyhanWebSitesi.Service\OzgurSeyhanWebSitesi.Bussinies.csproj", "{04AE67BA-1F8C-4A4F-9251-AE65A19E7D84}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzgurSeyhan.Websitesi.UI", "OzgurSeyhan.Websitesi.UI\OzgurSeyhan.Websitesi.UI.csproj", "{2BE98693-86A0-49BD-9985-D7B191D9545A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BF6BE497-83D6-4C16-B0D4-27CF696BEF34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF6BE497-83D6-4C16-B0D4-27CF696BEF34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF6BE497-83D6-4C16-B0D4-27CF696BEF34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF6BE497-83D6-4C16-B0D4-27CF696BEF34}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10AA205C-B472-40FB-9858-501CDA95C84D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10AA205C-B472-40FB-9858-501CDA95C84D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10AA205C-B472-40FB-9858-501CDA95C84D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10AA205C-B472-40FB-9858-501CDA95C84D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2DD5E9F-C732-4EF9-B115-8007F4C349DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2DD5E9F-C732-4EF9-B115-8007F4C349DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2DD5E9F-C732-4EF9-B115-8007F4C349DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2DD5E9F-C732-4EF9-B115-8007F4C349DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04AE67BA-1F8C-4A4F-9251-AE65A19E7D84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04AE67BA-1F8C-4A4F-9251-AE65A19E7D84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04AE67BA-1F8C-4A4F-9251-AE65A19E7D84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04AE67BA-1F8C-4A4F-9251-AE65A19E7D84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2BE98693-86A0-49BD-9985-D7B191D9545A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BE98693-86A0-49BD-9985-D7B191D9545A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BE98693-86A0-49BD-9985-D7B191D9545A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BE98693-86A0-49BD-9985-D7B191D9545A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D7B0F0E0-D92A-4014-830C-0CB0F9694855}
+	EndGlobalSection
+EndGlobal

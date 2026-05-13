@@ -1,0 +1,3200 @@
+@model List<OzgurSeyhan.Websitesi.UI.Controllers.FlowPuzzleSentenceDto>
+@{
+    ViewData["Title"] = "Cümlenin Arkası - Fiiller";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentNoun = ViewBag.CurrentNoun as OzgurSeyhan.Websitesi.UI.Controllers.FlowPuzzleNounDto;
+    var currentPage = (int)ViewBag.CurrentPage;
+    var totalPages = (int)ViewBag.TotalPages;
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .flow-container {
+        max-width: 1600px;
+        margin: 20px auto;
+        padding: 20px;
+    }
+
+    .game-header {
+        text-align: center;
+        color: white;
+        margin-bottom: 18px;
+    }
+
+    .game-header h1 {
+        font-size: 2.6rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .game-header p {
+        font-size: 1.05rem;
+        opacity: 0.95;
+    }
+
+    .current-noun-display {
+        background: white;
+        border-radius: 18px;
+        padding: 18px;
+        margin-bottom: 18px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+        text-align: center;
+    }
+
+    .current-noun-display h2 {
+        color: #5a63d8;
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 12px;
+    }
+
+    .mode-switch {
+        display: inline-flex;
+        gap: 10px;
+        background: #eef2ff;
+        border-radius: 999px;
+        padding: 6px;
+    }
+
+    .mode-btn {
+        border: none;
+        border-radius: 999px;
+        padding: 10px 16px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all .2s ease;
+        background: transparent;
+        color: #4b4f8c;
+    }
+
+    .mode-btn.active {
+        background: #4b55d6;
+        color: #fff;
+    }
+
+    .chain-status {
+        margin-top: 14px;
+        font-size: 0.96rem;
+        font-weight: 700;
+        color: #45506e;
+    }
+
+    .chain-summary {
+        margin-top: 8px;
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #4b55d6;
+    }
+
+    .modules-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1.2fr;
+        gap: 18px;
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    .chain-overlay {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        overflow: visible;
+        z-index: 10;
+    }
+
+    .module-card {
+        background: white;
+        border-radius: 18px;
+        padding: 16px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+        position: relative;
+        z-index: 2;
+    }
+
+    .module-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        margin-bottom: 6px;
+        text-align: center;
+    }
+
+    .module-title.left { color: #1d68be; }
+    .module-title.middle { color: #8e44ad; }
+    .module-title.right { color: #0d8a61; }
+
+    .module-subtitle {
+        text-align: center;
+        color: #666;
+        font-size: 0.88rem;
+        margin-bottom: 12px;
+        min-height: 44px;
+    }
+
+    .pair-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        padding: 0 4px;
+        position: relative;
+        border-radius: 12px;
+    }
+
+    .pair-col {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .pair-col-title {
+        text-align: center;
+        font-size: 0.82rem;
+        font-weight: 700;
+        border-radius: 10px;
+        padding: 6px;
+    }
+
+    .pair-col-title.en { background: #e3f2fd; color: #1565c0; }
+    .pair-col-title.tr { background: #fce4ec; color: #ad1457; }
+
+    .pair-item {
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        padding: 9px 10px;
+        text-align: center;
+        font-size: 0.86rem;
+        font-weight: 600;
+        cursor: pointer;
+        user-select: none;
+        touch-action: none;
+        transition: all .2s ease;
+        line-height: 1.35;
+        position: relative;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .pair-item:hover:not(.matched) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+    }
+
+    .pair-item.en { background: #eef6ff; color: #1a5ea5; border-color: #9dc6f6; }
+    .pair-item.tr { background: #fff1f6; color: #b71c59; border-color: #f7b9d2; }
+
+    .pair-item.startable {
+        box-shadow: inset 0 0 0 1px rgba(90, 99, 216, 0.35);
+    }
+
+    .pair-item.in-chain {
+        border-color: #ffa000 !important;
+        background: #fff3cd !important;
+        color: #8a5b00 !important;
+    }
+
+    .pair-item.matched {
+        background: #e8f5e9 !important;
+        border-color: #66bb6a !important;
+        color: #2e7d32 !important;
+        cursor: default;
+        pointer-events: none;
+    }
+
+    .pair-item.chain-complete {
+        animation: chainGlow .55s ease;
+    }
+
+    .pair-item.startable::after,
+    .pair-item.in-chain::after,
+    .pair-item.matched::after {
+        content: attr(data-chain-mark);
+        position: absolute;
+        top: -12px;
+        right: -12px;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.82rem;
+        font-weight: 800;
+        background: white;
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+    }
+
+    .pair-item.startable::after {
+        border: 2px solid #5a63d8;
+        color: #5a63d8;
+    }
+
+    .pair-item.in-chain::after {
+        border: 2px solid #ffa000;
+        color: #b06a00;
+    }
+
+    .pair-item.matched::after {
+        border: 2px solid #66bb6a;
+        color: #2e7d32;
+    }
+
+    .module-progress {
+        margin-top: 12px;
+        text-align: center;
+        font-weight: 700;
+        color: #4b3fbf;
+        font-size: 0.9rem;
+    }
+
+    .pagination-controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        margin-top: 6px;
+    }
+
+    .tense-tabs-nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        margin-bottom: 20px;
+    }
+
+    .tense-tab-btn {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        border: 2px solid white;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all .2s ease;
+        background: transparent;
+        color: white;
+    }
+
+    .tense-tab-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .tense-tab-btn.active {
+        background: white;
+        color: #667eea;
+        border-color: white;
+    }
+
+    .modals-area {
+        margin: -4px 0 20px;
+        padding: 16px;
+        border-radius: 15px;
+        background: rgba(255, 255, 255, 0.13);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        color: white;
+        text-align: center;
+    }
+
+    .modals-area.hidden {
+        display: none;
+    }
+
+    .modals-title {
+        font-size: 1rem;
+        font-weight: 800;
+        margin-bottom: 10px;
+    }
+
+    .modals-chips {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .modal-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 7px 12px;
+        border-radius: 999px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        background: rgba(255, 255, 255, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        color: #fff;
+    }
+
+    .modals-note {
+        margin-top: 10px;
+        font-size: 0.88rem;
+        opacity: 0.92;
+    }
+
+    .modal-groups {
+        margin-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .modal-group-btn {
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 0.84rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all .2s ease;
+    }
+
+    .modal-group-btn.active {
+        background: #fff;
+        color: #5963d6;
+        border-color: #fff;
+    }
+
+    .btn-page {
+        padding: 10px 20px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        border: none;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: all .2s ease;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-page:hover:not(.disabled) {
+        transform: translateY(-1px);
+        color: white;
+    }
+
+    .btn-page.disabled {
+        opacity: .5;
+        pointer-events: none;
+    }
+
+    .page-info {
+        color: white;
+        font-size: 1rem;
+        font-weight: 700;
+        padding: 8px 16px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.2);
+    }
+
+    body.chain-dragging {
+        cursor: grabbing;
+    }
+
+    @@keyframes chainGlow {
+        0% {
+            box-shadow: 0 0 0 rgba(102, 187, 106, 0);
+            transform: scale(1);
+        }
+
+        45% {
+            box-shadow: 0 0 0 10px rgba(102, 187, 106, 0.18);
+            transform: scale(1.03);
+        }
+
+        100% {
+            box-shadow: 0 0 0 rgba(102, 187, 106, 0);
+            transform: scale(1);
+        }
+    }
+
+    @@media (max-width: 1200px) {
+        .modules-grid {
+            grid-template-columns: 1fr;
+        }
+
+    }
+</style>
+
+<div class="flow-container">
+    <div class="game-header">
+        <h1><i class="fas fa-graduation-cap me-2"></i>Fiil Öğrenme Oyunu</h1>
+        <p>Solda fiil kalıbı, ortada cümle devamı, sağda tam Türkçe çeviri ile fiilleri pekiştir.</p>
+    </div>
+
+    @if (currentNoun != null && Model != null && Model.Any())
+    {
+        <div class="current-noun-display">
+            <h2>@currentNoun.TurkishMeaning</h2>
+            <div class="chain-status" id="chainStatusText">Soldaki İngilizce karttan başla. Doğru yolu kendin bul ve sürüklemeyi son karta kadar bırakma.</div>
+            <div class="chain-summary" id="chainSummaryText">Tüm cümleler (@Model.Count)</div>
+        </div>
+
+        <!-- TABS NAV -->
+        <div class="tense-tabs-nav">
+            <button class="tense-tab-btn active" data-tense="0">1. Simple Present</button>
+            <button class="tense-tab-btn" data-tense="1">2. Present Continuous</button>
+            <button class="tense-tab-btn" data-tense="2">3. Simple Past</button>
+            <button class="tense-tab-btn" data-tense="3">4. Past Continuous</button>
+            <button class="tense-tab-btn" data-tense="4">5. Simple Future</button>
+            <button class="tense-tab-btn" data-tense="5">6. Present Perfect</button>
+            <button class="tense-tab-btn" data-tense="6">7. Past Perfect</button>
+            <button class="tense-tab-btn" data-tense="7">8. WH-Questions</button>
+            <button class="tense-tab-btn" data-tense="8">9. Modal Verbs</button>
+        </div>
+
+        <div class="modals-area hidden" id="modalsArea">
+            <div class="modals-title">9. Modal Verbs</div>
+            <div class="modals-chips">
+                <span class="modal-chip">can</span>
+                <span class="modal-chip">could</span>
+                <span class="modal-chip">would</span>
+                <span class="modal-chip">should</span>
+                <span class="modal-chip">may</span>
+                <span class="modal-chip">might</span>
+                <span class="modal-chip">must</span>
+            </div>
+            <div class="modals-note" id="modalsNote">9. sekmede eşleştirme oyunu modal cümlelerle devam eder.</div>
+            <div class="modal-groups" id="modalGroups">
+                <button class="modal-group-btn active" data-modal-group="affirmative">A) Olumlu</button>
+                <button class="modal-group-btn" data-modal-group="negative">B) Olumsuz</button>
+                <button class="modal-group-btn" data-modal-group="yesNo">C) Soru</button>
+                <button class="modal-group-btn" data-modal-group="wh">D) W-Soru</button>
+            </div>
+        </div>
+
+        <div class="modals-area hidden" id="whQuestionsArea">
+            <div class="modals-title">8. WH-Questions</div>
+            <div class="modals-chips">
+                <span class="modal-chip">who</span>
+                <span class="modal-chip">what</span>
+                <span class="modal-chip">where</span>
+                <span class="modal-chip">when</span>
+                <span class="modal-chip">why</span>
+                <span class="modal-chip">how</span>
+            </div>
+            <div class="modals-note">W-Soru sekmesinde olumlu ve olumsuz soru gruplari ayri oynanir.</div>
+            <div class="modal-groups" id="whGroups">
+                <button class="modal-group-btn wh-group-btn active" data-wh-group="affirmative">A) Olumlu W-Soru</button>
+                <button class="modal-group-btn wh-group-btn" data-wh-group="negative">B) Olumsuz W-Soru</button>
+            </div>
+        </div>
+
+        <div class="modules-grid">
+            <svg class="chain-overlay" id="chainOverlay" aria-hidden="true"></svg>
+
+            <div class="module-card">
+                <div class="module-title left">Cümlenin Başı</div>
+                <div class="module-subtitle">Seçilen tense için 3 form (olumlu, olumsuz, soru)</div>
+                <div class="pair-grid" style="grid-template-columns: 1fr;">
+                    <div class="pair-col" id="headEnglishCol">
+                        <div class="pair-col-title en">İngilizce</div>
+                    </div>
+                </div>
+                <div class="module-progress" id="headProgressText">Başlangıç halkası buradan açılır</div>
+            </div>
+
+            <div class="module-card">
+                <div class="module-title middle">Cümlenin Arkası</div>
+                <div class="module-subtitle" id="tailSubtitle">Fiil kalıbı + cümle devamı</div>
+                <div class="pair-grid" style="grid-template-columns: 1fr;">
+                    <div class="pair-col" id="tailEnglishCol">
+                        <div class="pair-col-title en">İngilizce</div>
+                    </div>
+                </div>
+                <div class="module-progress" id="tailProgressText">Zincirin orta halkaları burada</div>
+            </div>
+
+            <div class="module-card">
+                <div class="module-title right">Tam Cümle Çevirisi</div>
+                <div class="module-subtitle">Baş + Arka birleşimi: sadece Türkçe anlam ile doğru cevabı bul</div>
+                <div class="pair-grid" style="grid-template-columns: 1fr;">
+                    <div class="pair-col" id="finalTurkishCol">
+                        <div class="pair-col-title tr">Tam Türkçe</div>
+                    </div>
+                </div>
+                <div class="module-progress" id="finalProgressText">Son halkada tüm zincir yeşile döner</div>
+            </div>
+        </div>
+
+        <div class="pagination-controls">
+            <a href="@Url.Action("FlowPuzzleGame", "Home", new { page = currentPage - 1 })"
+               class="btn-page @(currentPage <= 1 ? "disabled" : "")">
+                <i class="fas fa-chevron-left"></i> Önceki
+            </a>
+            <span class="page-info">@currentPage / @totalPages</span>
+            <a href="@Url.Action("FlowPuzzleGame", "Home", new { page = currentPage + 1 })"
+               class="btn-page @(currentPage >= totalPages ? "disabled" : "")">
+                Sonraki <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+    }
+</div>
+
+@if (Model != null && Model.Any())
+{
+<script>
+    const rawSentences = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+        Model.Select(s => new
+        {
+            id = s.Id,
+            displayOrder = s.DisplayOrder,
+            preposition = s.Preposition,
+            detSing = s.DeterminerSingular,
+            detPlural = s.DeterminerPlural,
+            nounSing = s.NounSingular,
+            nounPlural = s.NounPlural,
+            trSing = s.TurkishSingular,
+            trPlural = s.TurkishPlural
+        })));
+
+    const currentNounEn = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((currentNoun?.SingularForm ?? string.Empty).ToLowerInvariant()));
+    const isVerbMode = detectVerbMode(rawSentences);
+    const MODAL_TENSE_ID = 8;
+    const WH_TENSE_ID = 7;
+    let currentModalGroup = 'affirmative';
+    let currentWhGroup = 'affirmative';
+
+    const WHO_W_QUESTION_BY_VERB = {
+        be: { head: 'Who is he', tail: 'with at the event?', tr: 'Etkinlikte kimle birlikte?' },
+        have: { head: 'Who does she have', tail: 'lunch with on Fridays?', tr: 'Cuma gunleri kiminle ogle yemegi yer?' },
+        do: { head: 'Who do they', tail: 'do this task with?', tr: 'Bu gorevi kiminle yaparlar?' },
+        say: { head: 'Who do I', tail: 'say this to first?', tr: 'Bunu once kime soylerim?' },
+        get: { head: 'Who do we', tail: 'get help from in this office?', tr: 'Bu ofiste kimden yardim aliriz?' },
+        make: { head: 'Who do you', tail: 'make this plan with?', tr: 'Bu plani kiminle yaparsin?' },
+        see: { head: 'Who do I', tail: 'see about this issue?', tr: 'Bu konu icin kimi gorurum?' },
+        know: { head: 'Who does she', tail: 'know in that company?', tr: 'O sirkette kimi taniyor?' },
+        take: { head: 'Who does he', tail: 'take to the station?', tr: 'Istasyona kimi goturur?' },
+        give: { head: 'Who do they', tail: 'give priority to?', tr: 'Kime oncelik verirler?' },
+        find: { head: 'Who do we', tail: 'find reliable in this team?', tr: 'Bu ekipte kimi guvenilir buluruz?' },
+        think: { head: 'Who do I', tail: 'think can solve this quickly?', tr: 'Bunu hizlica kimin cozebilecegini dusunuyorum?' },
+        tell: { head: 'Who do you', tail: 'tell the news to first?', tr: 'Haberi once kime verirsin?' },
+        become: { head: 'Who does he', tail: 'become close to over time?', tr: 'Zamanla kime yakinlasir?' },
+        show: { head: 'Who does she', tail: 'show the draft to first?', tr: 'Taslagi once kime gosterir?' },
+        leave: { head: 'Who do they', tail: 'leave the keys with?', tr: 'Anahtarlari kime birakirlar?' },
+        feel: { head: 'Who do I', tail: 'feel safest with?', tr: 'Kendimi en guvende kimin yaninda hissederim?' },
+        put: { head: 'Who does she', tail: 'put in charge of this task?', tr: 'Bu gorevin basina kimi koyar?' },
+        bring: { head: 'Who do you', tail: 'bring to the workshop?', tr: 'Atolyeye kimi getirirsin?' },
+        keep: { head: 'Who do I', tail: 'keep in the loop on this?', tr: 'Bu konuda kimi surekli haberdar tutarim?' },
+        let: { head: 'Who does she', tail: 'let into the meeting room?', tr: 'Toplanti odasina kimi alir?' },
+        begin: { head: 'Who do they', tail: 'begin this project with?', tr: 'Bu projeye kiminle baslarlar?' },
+        seem: { head: 'Who does it', tail: 'seem most useful for?', tr: 'Bu en cok kime faydali gorunuyor?' },
+        help: { head: 'Who do we', tail: 'help first in an emergency?', tr: 'Acil durumda once kime yardim ederiz?' },
+        go: { head: 'Who do I', tail: 'go with on weekends?', tr: 'Hafta sonlari kiminle giderim?' },
+        come: { head: 'Who does she', tail: 'come with to class?', tr: 'Derse kiminle gelir?' },
+        talk: { head: 'Who do you', tail: 'talk to when you need advice?', tr: 'Tavsiyeye ihtiyacin oldugunda kiminle konusursun?' },
+        turn: { head: 'Who does it', tail: 'turn to for support?', tr: 'Destek icin kime yonelir?' },
+        start: { head: 'Who do we', tail: 'start this lesson with?', tr: 'Bu derse kiminle baslariz?' },
+        play: { head: 'Who does he', tail: 'play against in the final?', tr: 'Finalde kime karsi oynar?' }
+    };
+
+    const WHO_MODAL_WH_BY_VERB = {
+        be: { en: 'Who might he be with right now?', tr: 'Su an kimle birlikte olabilir?' },
+        have: { en: 'Who may she have lunch with tomorrow?', tr: 'Yarin kiminle ogle yemegi yiyebilir?' },
+        do: { en: 'Who should they do this task with?', tr: 'Bu gorevi kiminle yapmalilar?' },
+        say: { en: 'Who should I say this to first?', tr: 'Bunu once kime soylemeliyim?' },
+        get: { en: 'Who can we get support from quickly?', tr: 'Hizlica kimden destek alabiliriz?' },
+        make: { en: 'Who could you make this project with?', tr: 'Bu projeyi kiminle yapabilirdin?' },
+        see: { en: 'Who should I see about this problem?', tr: 'Bu sorun icin kimi gormeliyim?' },
+        know: { en: 'Who might she know at this company?', tr: 'Bu sirkette kimi taniyor olabilir?' },
+        take: { en: 'Who should he take to the appointment?', tr: 'Randevuya kimi goturmeli?' },
+        give: { en: 'Who should they give this chance to?', tr: 'Bu firsati kime vermeliler?' },
+        find: { en: 'Who might we find in the office now?', tr: 'Su an ofiste kimi bulabiliriz?' },
+        think: { en: 'Who should I think about hiring?', tr: 'Kimi ise almayi dusunmeliyim?' },
+        tell: { en: 'Who must you tell about this update?', tr: 'Bu guncellemeyi kime bildirmek zorundasin?' },
+        become: { en: 'Who could he become friends with here?', tr: 'Burada kimle arkadas olabilir?' },
+        show: { en: 'Who should she show the report to first?', tr: 'Raporu once kime gostermeli?' },
+        leave: { en: 'Who might they leave the documents with?', tr: 'Belgeleri kime birakabilirler?' },
+        feel: { en: 'Who can I feel comfortable speaking with?', tr: 'Kiminle konusurken rahat hissedebilirim?' },
+        put: { en: 'Who should she put in charge today?', tr: 'Bugun gorevin basina kimi koymali?' },
+        bring: { en: 'Who can you bring to the session?', tr: 'Oturuma kimi getirebilirsin?' },
+        keep: { en: 'Who should I keep informed about this?', tr: 'Bu konuda kimi bilgilendirmeliyim?' },
+        let: { en: 'Who may she let into the lab?', tr: 'Laboratuvara kimi alabilir?' },
+        begin: { en: 'Who should they begin with in round one?', tr: 'Ilk turda kiminle baslamalilar?' },
+        seem: { en: 'Who might it seem difficult for at first?', tr: 'Ilk basta kime zor gorunebilir?' },
+        help: { en: 'Who should we help first today?', tr: 'Bugun once kime yardim etmeliyiz?' },
+        go: { en: 'Who might I go with this weekend?', tr: 'Bu hafta sonu kiminle gidebilirim?' },
+        come: { en: 'Who may she come with to the meeting?', tr: 'Toplantiya kiminle gelebilir?' },
+        talk: { en: 'Who should you talk to before deciding?', tr: 'Karar vermeden once kiminle konusmalisin?' },
+        turn: { en: 'Who might it turn to for help?', tr: 'Yardim icin kime yonelebilir?' },
+        start: { en: 'Who should we start this project with?', tr: 'Bu projeye kiminle baslamaliyiz?' },
+        play: { en: 'Who might he play against next?', tr: 'Siradaki maci kime karsi oynayabilir?' }
+    };
+
+    const MODAL_MATCHING_BY_VERB = {
+        be: {
+            affirmative: [
+                { en: 'He can be very calm in stressful situations.', tr: 'O, stresli durumlarda cok sakin olabilir.' },
+                { en: 'He could be the right person for this role.', tr: 'Bu rol icin dogru kisi o olabilir.' },
+                { en: 'He would be happier if he worked less.', tr: 'Daha az calissaydi daha mutlu olurdu.' },
+                { en: 'He should be more careful with his words.', tr: 'Sozlerine daha dikkatli olmali.' },
+                { en: 'He may be late because of traffic.', tr: 'Trafikten dolayi gec kalabilir.' },
+                { en: 'He might be at the gym right now.', tr: 'Su an spor salonunda olabilir.' },
+                { en: 'He must be exhausted after the night shift.', tr: 'Gece vardiyasindan sonra cok bitkin olmali.' }
+            ],
+            negative: [
+                { en: 'He can\'t be calm when he\'s hungry.', tr: 'Acken sakin olamaz.' },
+                { en: 'He couldn\'t be the right person for that job.', tr: 'O is icin dogru kisi olamazdi.' },
+                { en: 'He wouldn\'t be happier if he stayed at the same company.', tr: 'Ayni sirkette kalsaydi daha mutlu olmazdi.' },
+                { en: 'He shouldn\'t be rude to customers.', tr: 'Musterilere kaba olmamali.' },
+                { en: 'He may not be available this afternoon.', tr: 'Bu ogleden sonra musait olmayabilir.' },
+                { en: 'He might not be at home yet.', tr: 'Henuz evde olmayabilir.' },
+                { en: 'He mustn\'t be alone in the lab.', tr: 'Laboratuvarda yalniz olmamali.' }
+            ],
+            yesNo: [
+                { en: 'Can he be calm in stressful situations?', tr: 'Stresli durumlarda sakin olabilir mi?' },
+                { en: 'Could he be the right person for this role?', tr: 'Bu rol icin dogru kisi o olabilir mi?' },
+                { en: 'Would he be happier if he worked less?', tr: 'Daha az calissa daha mutlu olur muydu?' },
+                { en: 'Should he be more careful with his words?', tr: 'Sozlerine daha dikkatli olmali mi?' },
+                { en: 'May he be late because of traffic?', tr: 'Trafikten dolayi gec kalabilir mi?' },
+                { en: 'Might he be at the gym right now?', tr: 'Su an spor salonunda olabilir mi?' },
+                { en: 'Must he be exhausted after the night shift?', tr: 'Gece vardiyasindan sonra bitkin olmali mi?' }
+            ],
+            wh: [
+                { en: 'How can he be so calm all the time?', tr: 'Nasil oluyor da her zaman bu kadar sakin olabiliyor?' },
+                { en: 'Where could he be right now?', tr: 'Su an nerede olabilir?' },
+                { en: 'Why would he be upset about that?', tr: 'Neden buna uzulurdu?' },
+                { en: 'What should he be responsible for?', tr: 'O, neyden sorumlu olmali?' },
+                { en: 'When may he be ready to leave?', tr: 'Ne zaman cikmaya hazir olabilir?' },
+                { en: 'Why might he be late today?', tr: 'Bugun neden gec kaliyor olabilir?' },
+                { en: 'Why must he be here so early?', tr: 'Neden burada bu kadar erken olmak zorunda?' }
+            ]
+        },
+        have: {
+            affirmative: [
+                { en: 'She can have a short call during her break.', tr: 'Molasi sirasinda kisa bir telefon gorusmesi yapabilir.' },
+                { en: 'She could have more time if she planned better.', tr: 'Daha iyi plan yapsaydi daha fazla zamani olabilirdi.' },
+                { en: 'She would have better results with regular practice.', tr: 'Duzenli pratikle daha iyi sonuclar alirdi.' },
+                { en: 'She should have a backup copy of the file.', tr: 'Dosyanin yedegini bulundurmali.' },
+                { en: 'She may have a fever, so she stayed home.', tr: 'Atesi olabilir; bu yuzden evde kaldi.' },
+                { en: 'She might have an appointment this afternoon.', tr: 'Bu ogleden sonra bir randevusu olabilir.' },
+                { en: 'She must have her ID to enter the building.', tr: 'Binaya girmek icin kimligi yaninda olmali.' }
+            ],
+            negative: [
+                { en: 'She can\'t have coffee after 6 p.m.', tr: 'Aksam 6dan sonra kahve icemez.' },
+                { en: 'She couldn\'t have the meeting today.', tr: 'Bugun toplantiyi yapamadi.' },
+                { en: 'She wouldn\'t have the same problem if she updated the app.', tr: 'Uygulamayi guncellese ayni sorunu yasamazdi.' },
+                { en: 'She shouldn\'t have so much sugar every day.', tr: 'Her gun bu kadar cok seker tuketmemeli.' },
+                { en: 'She may not have enough money for the ticket.', tr: 'Bilet icin yeterli parasi olmayabilir.' },
+                { en: 'She might not have the right address.', tr: 'Dogru adres onda olmayabilir.' },
+                { en: 'She mustn\'t have her phone on during the exam.', tr: 'Sinavda telefonu acik olmamali.' }
+            ],
+            yesNo: [
+                { en: 'Can she have a short call during her break?', tr: 'Molasinda kisa bir gorusme yapabilir mi?' },
+                { en: 'Could she have more time if she planned better?', tr: 'Daha iyi plan yapsa daha fazla zamani olabilir miydi?' },
+                { en: 'Would she have better results with regular practice?', tr: 'Duzenli pratik yapsa daha iyi sonuclar alir miydi?' },
+                { en: 'Should she have a backup copy of the file?', tr: 'Dosyanin yedegini bulundurmali mi?' },
+                { en: 'May she have a fever?', tr: 'Atesi olabilir mi?' },
+                { en: 'Might she have an appointment this afternoon?', tr: 'Bu ogleden sonra randevusu olabilir mi?' },
+                { en: 'Must she have her ID to enter the building?', tr: 'Binaya girmek icin kimligi yaninda olmak zorunda mi?' }
+            ],
+            wh: [
+                { en: 'What can she have for lunch today?', tr: 'Bugun ogle yemeginde ne yiyebilir?' },
+                { en: 'How could she have forgotten the password?', tr: 'Sifreyi nasil unutmus olabilir?' },
+                { en: 'Why would she have a problem with that?', tr: 'Neden bununla ilgili bir sorunu olurdu?' },
+                { en: 'What should she have in her emergency bag?', tr: 'Acil durum cantasinda ne olmali?' },
+                { en: 'When may she have the results?', tr: 'Sonuclari ne zaman alabilir?' },
+                { en: 'What might she have left at home?', tr: 'Evde ne unutmus olabilir?' },
+                { en: 'Why must she have her ID?', tr: 'Neden kimligi yaninda olmak zorunda?' }
+            ]
+        },
+        do: {
+            affirmative: [
+                { en: 'They can do the training online.', tr: 'Egitimi online yapabilirler.' },
+                { en: 'They could do it faster with better tools.', tr: 'Daha iyi araclarla daha hizli yapabilirlerdi.' },
+                { en: 'They would do the job for a higher salary.', tr: 'Daha yuksek maas icin isi yaparlardi.' },
+                { en: 'They should do a quick test before they publish.', tr: 'Yayinlamadan once hizli bir test yapmalilar.' },
+                { en: 'They may do the presentation tomorrow.', tr: 'Sunumu yarin yapabilirler.' },
+                { en: 'They might do the event in June instead.', tr: 'Etkinligi onun yerine haziranda yapabilirler.' },
+                { en: 'They must do the safety check every week.', tr: 'Her hafta guvenlik kontrolu yapmak zorundalar.' }
+            ],
+            negative: [
+                { en: 'They can\'t do it without permission.', tr: 'Izin olmadan bunu yapamazlar.' },
+                { en: 'They couldn\'t do the task on time.', tr: 'Gorevi zamaninda yapamadilar.' },
+                { en: 'They wouldn\'t do it again after that experience.', tr: 'O deneyimden sonra bunu bir daha yapmazlardi.' },
+                { en: 'They shouldn\'t do this without reading the rules.', tr: 'Kurallari okumadan bunu yapmamalilar.' },
+                { en: 'They may not do the meeting today.', tr: 'Bugun toplantiyi yapmayabilirler.' },
+                { en: 'They might not do the trip if it\'s too expensive.', tr: 'Cok pahali olursa geziyi yapmayabilirler.' },
+                { en: 'They mustn\'t do experiments alone.', tr: 'Deneyleri tek baslarina yapmamalilar.' }
+            ],
+            yesNo: [
+                { en: 'Can they do the training online?', tr: 'Egitimi online yapabilirler mi?' },
+                { en: 'Could they do it faster with better tools?', tr: 'Daha iyi araclarla daha hizli yapabilirler miydi?' },
+                { en: 'Would they do the job for a higher salary?', tr: 'Daha yuksek maas icin isi yaparlar miydi?' },
+                { en: 'Should they do a quick test before they publish?', tr: 'Yayinlamadan once hizli test yapmalilar mi?' },
+                { en: 'May they do the presentation tomorrow?', tr: 'Sunumu yarin yapabilirler mi?' },
+                { en: 'Might they do the event in June instead?', tr: 'Etkinligi haziranda yapabilirler mi?' },
+                { en: 'Must they do the safety check every week?', tr: 'Her hafta guvenlik kontrolu yapmak zorundalar mi?' }
+            ],
+            wh: [
+                { en: 'What can they do to fix this problem?', tr: 'Bu sorunu cozmek icin ne yapabilirler?' },
+                { en: 'How could they do it more efficiently?', tr: 'Bunu daha verimli nasil yapabilirlerdi?' },
+                { en: 'Why would they do that without asking?', tr: 'Neden sormadan bunu yaparlardi?' },
+                { en: 'What should they do first?', tr: 'Ilk ne yapmalilar?' },
+                { en: 'When may they do the interview?', tr: 'Gorusmeyi ne zaman yapabilirler?' },
+                { en: 'Where might they do the meeting?', tr: 'Toplantiyi nerede yapabilirler?' },
+                { en: 'What must they do before they leave?', tr: 'Ayrilmadan once ne yapmak zorundalar?' }
+            ]
+        },
+        say: {
+            affirmative: [
+                { en: 'I can say it more clearly if you want.', tr: 'Istersen daha net soyleyebilirim.' },
+                { en: 'I could say a few words at the end.', tr: 'Sonunda birkac soz soyleyebilirdim.' },
+                { en: 'I would say yes, but I need to think.', tr: 'Evet derdim ama dusunmem lazim.' },
+                { en: 'I should say sorry for being late.', tr: 'Gec kaldigim icin ozur dilemeliyim.' },
+                { en: 'I may say something stupid when I\'m nervous.', tr: 'Gerilince sacma bir sey soyleyebilirim.' },
+                { en: 'I might say no if the price is too high.', tr: 'Fiyat cok yuksekse hayir diyebilirim.' },
+                { en: 'I must say this: you did a great job.', tr: 'Sunu soylemeliyim: harika is cikardin.' }
+            ],
+            negative: [
+                { en: 'I can\'t say his name correctly.', tr: 'Onun adini dogru soyleyemiyorum.' },
+                { en: 'I couldn\'t say anything during the meeting.', tr: 'Toplanti sirasinda hicbir sey soyleyemedim.' },
+                { en: 'I wouldn\'t say that to him.', tr: 'Ona oyle soylemezdim.' },
+                { en: 'I shouldn\'t say that in public.', tr: 'Bunu herkesin icinde soylememeliyim.' },
+                { en: 'I may not say anything if they ask me directly.', tr: 'Bana dogrudan sorarlarsa hicbir sey soylemeyebilirim.' },
+                { en: 'I might not say yes this time.', tr: 'Bu sefer evet demeyebilirim.' },
+                { en: 'I mustn\'t say anything about it.', tr: 'Bunun hakkinda hicbir sey soylememeliyim.' }
+            ],
+            yesNo: [
+                { en: 'Can I say it more clearly?', tr: 'Daha net soyleyebilir miyim?' },
+                { en: 'Could I say a few words at the end?', tr: 'Sonunda birkac soz soyleyebilir miyim?' },
+                { en: 'Would I say yes if I had more time?', tr: 'Daha cok zamanim olsaydi evet der miydim?' },
+                { en: 'Should I say sorry for being late?', tr: 'Gec kaldigim icin ozur dilemeli miyim?' },
+                { en: 'May I say something?', tr: 'Bir sey soyleyebilir miyim?' },
+                { en: 'Might I say no?', tr: 'Hayir diyebilir miyim?' },
+                { en: 'Must I say it now?', tr: 'Bunu simdi soylemek zorunda miyim?' }
+            ],
+            wh: [
+                { en: 'What can I say to explain this?', tr: 'Bunu aciklamak icin ne soyleyebilirim?' },
+                { en: 'How could I say it politely?', tr: 'Bunu kibarca nasil soyleyebilirdim?' },
+                { en: 'Why would I say that?', tr: 'Ben niye oyle derdim?' },
+                { en: 'What should I say to my teacher?', tr: 'Ogretmenime ne soylemeliyim?' },
+                { en: 'When may I say my opinion?', tr: 'Gorusumu ne zaman soyleyebilirim?' },
+                { en: 'What might I say if they insist?', tr: 'Israr ederlerse ne diyebilirim?' },
+                { en: 'What must I say in the email?', tr: 'E-postada ne soylemem gerekiyor?' }
+            ]
+        },
+        get: {
+            affirmative: [
+                { en: 'We can get there in 15 minutes by taxi.', tr: 'Taksiyle 15 dakikada oraya varabiliriz.' },
+                { en: 'We could get a better deal if we wait.', tr: 'Beklersek daha iyi bir anlasma yapabiliriz.' },
+                { en: 'We would get the job done faster with more people.', tr: 'Daha fazla kisiyle isi daha hizli bitirirdik.' },
+                { en: 'We should get some rest before the trip.', tr: 'Yolculuktan once biraz dinlenmeliyiz.' },
+                { en: 'We may get an email from them today.', tr: 'Bugun onlardan bir e-posta alabiliriz.' },
+                { en: 'We might get stuck in traffic.', tr: 'Trafikte kalabiliriz.' },
+                { en: 'We must get permission before we record.', tr: 'Kayit yapmadan once izin almamiz gerekiyor.' }
+            ],
+            negative: [
+                { en: 'We can\'t get inside without a ticket.', tr: 'Bilet olmadan iceri giremeyiz.' },
+                { en: 'We couldn\'t get any signal in that area.', tr: 'O bolgede sinyal alamadik.' },
+                { en: 'We wouldn\'t get good results without practice.', tr: 'Pratik olmadan iyi sonuc alamazdik.' },
+                { en: 'We shouldn\'t get too excited yet.', tr: 'Daha simdiden cok heyecanlanmamaliyiz.' },
+                { en: 'We may not get the results today.', tr: 'Sonuclari bugun alamayabiliriz.' },
+                { en: 'We might not get a reply this week.', tr: 'Bu hafta cevap alamayabiliriz.' },
+                { en: 'We mustn\'t get involved in that conflict.', tr: 'O tartismaya karismamaliyiz.' }
+            ],
+            yesNo: [
+                { en: 'Can we get there in 15 minutes by taxi?', tr: 'Taksiyle 15 dakikada oraya varabilir miyiz?' },
+                { en: 'Could we get a better deal if we wait?', tr: 'Beklersek daha iyi bir anlasma yapabilir miyiz?' },
+                { en: 'Would we get the job done faster with more people?', tr: 'Daha fazla kisiyle isi daha hizli bitirir miydik?' },
+                { en: 'Should we get some rest before the trip?', tr: 'Yolculuktan once dinlenmeli miyiz?' },
+                { en: 'May we get an email from them today?', tr: 'Bugun onlardan e-posta alabilir miyiz?' },
+                { en: 'Might we get stuck in traffic?', tr: 'Trafikte kalabilir miyiz?' },
+                { en: 'Must we get permission before we record?', tr: 'Kayit yapmadan once izin almak zorunda miyiz?' }
+            ],
+            wh: [
+                { en: 'How can we get to the airport from here?', tr: 'Buradan havaalanina nasil gidebiliriz?' },
+                { en: 'Where could we get cheap tickets?', tr: 'Ucuz biletleri nereden bulabilirdik?' },
+                { en: 'Why would we get rejected?', tr: 'Neden reddedilirdik?' },
+                { en: 'When should we get there to be on time?', tr: 'Zamaninda olmak icin oraya ne zaman varmaliyiz?' },
+                { en: 'When may we get the final answer?', tr: 'Son cevabi ne zaman alabiliriz?' },
+                { en: 'What might we get if we complain?', tr: 'Sikayet edersek ne elde edebiliriz?' },
+                { en: 'What must we get ready before we leave?', tr: 'Cikmadan once neyi hazirlamak zorundayiz?' }
+            ]
+        },
+        make: {
+            affirmative: [
+                { en: 'You can make a simple budget in an hour.', tr: 'Bir saatte basit bir butce yapabilirsin.' },
+                { en: 'You could make the email shorter and clearer.', tr: 'E-postayi daha kisa ve daha net yapabilirdin.' },
+                { en: 'You would make a good impression if you arrived on time.', tr: 'Zamaninda gelseydin iyi bir izlenim birakirdin.' },
+                { en: 'You should make a checklist before you pack.', tr: 'Valiz hazirlamadan once bir kontrol listesi yapmalisin.' },
+                { en: 'You may make a few mistakes at the beginning.', tr: 'Baslangicta birkac hata yapabilirsin.' },
+                { en: 'You might make friends faster if you join a club.', tr: 'Bir kulube katilirsan daha hizli arkadas edinebilirsin.' },
+                { en: 'You must make a decision by Friday.', tr: 'Cuma gunune kadar bir karar vermelisin.' }
+            ],
+            negative: [
+                { en: 'You can\'t make that kind of noise in the library.', tr: 'Kutuphanede oyle gurultu yapamazsin.' },
+                { en: 'You couldn\'t make the payment because your card failed.', tr: 'Kartin calismadigi icin odemeyi yapamadin.' },
+                { en: 'You wouldn\'t make that comment if you knew the full story.', tr: 'Tum hikayeyi bilseydin o yorumu yapmazdin.' },
+                { en: 'You shouldn\'t make promises you can\'t keep.', tr: 'Tutamayacagin sozler vermemelisin.' },
+                { en: 'You may not make it to class if you leave late.', tr: 'Gec cikarsan derse yetisemeyebilirsin.' },
+                { en: 'You might not make enough time for exercise this week.', tr: 'Bu hafta spora yeterince zaman ayiramayabilirsin.' },
+                { en: 'You mustn\'t make copies of these documents.', tr: 'Bu belgelerin kopyasini cikarmamalisin.' }
+            ],
+            yesNo: [
+                { en: 'Can you make a simple budget in an hour?', tr: 'Bir saatte basit bir butce yapabilir misin?' },
+                { en: 'Could you make the email shorter and clearer?', tr: 'E-postayi daha kisa ve daha net yapabilir misin?' },
+                { en: 'Would you make a good impression if you arrived on time?', tr: 'Zamaninda gelsen iyi bir izlenim birakir miydin?' },
+                { en: 'Should you make a checklist before you pack?', tr: 'Valiz hazirlamadan once kontrol listesi yapmali misin?' },
+                { en: 'May you make a few mistakes at the beginning?', tr: 'Baslangicta birkac hata yapabilir misin?' },
+                { en: 'Might you make friends faster if you join a club?', tr: 'Bir kulube katilirsan daha hizli arkadas edinebilir misin?' },
+                { en: 'Must you make a decision by Friday?', tr: 'Cuma gunune kadar karar vermek zorunda misin?' }
+            ],
+            wh: [
+                { en: 'What can you make with these ingredients?', tr: 'Bu malzemelerle ne yapabilirsin?' },
+                { en: 'How could you make this design more modern?', tr: 'Bu tasarimi nasil daha modern yapabilirdin?' },
+                { en: 'Why would you make such a big change now?', tr: 'Neden simdi bu kadar buyuk bir degisiklik yapardin?' },
+                { en: 'What should you make sure to bring?', tr: 'Yanina getirdiginden emin olman gereken sey ne?' },
+                { en: 'How many changes may you make before the deadline?', tr: 'Son tarihten once kac degisiklik yapabilirsin?' },
+                { en: 'What might you make if you had more free time?', tr: 'Daha fazla bos zamanin olsaydi ne uretebilirdin?' },
+                { en: 'What must you make clear in your message?', tr: 'Mesajinda neyi netlestirmek zorundasin?' }
+            ]
+        },
+        see: {
+            affirmative: [
+                { en: 'I can see the menu from here.', tr: 'Menuyu buradan gorebiliyorum.' },
+                { en: 'I could see the smoke from my balcony.', tr: 'Dumani balkonumdan gorebiliyordum.' },
+                { en: 'I would see a doctor if the pain continued.', tr: 'Agri devam ederse doktora giderdim.' },
+                { en: 'I should see my advisor before choosing courses.', tr: 'Dersleri secmeden once danismanimi gormeliyim.' },
+                { en: 'I may see him at the conference next month.', tr: 'Onu gelecek ay konferansta gorebilirim.' },
+                { en: 'I might see you after class if I finish early.', tr: 'Erken bitirirsem dersten sonra seni gorebilirim.' },
+                { en: 'I must see the manager about this issue.', tr: 'Bu konu hakkinda muduru gormem gerekiyor.' }
+            ],
+            negative: [
+                { en: 'I can\'t see anything without my glasses.', tr: 'Gozlugum olmadan hicbir sey goremiyorum.' },
+                { en: 'I couldn\'t see the screen because of the sunlight.', tr: 'Gunes isigindan dolayi ekrani goremedim.' },
+                { en: 'I wouldn\'t see that movie again.', tr: 'O filmi bir daha izlemezdim.' },
+                { en: 'I shouldn\'t see him alone if I feel unsafe.', tr: 'Kendimi guvensiz hissedersem onunla yalniz gorusmemeliyim.' },
+                { en: 'I may not see the results today.', tr: 'Sonuclari bugun goremeyebilirim.' },
+                { en: 'I might not see you this weekend.', tr: 'Bu hafta sonu seni goremeyebilirim.' },
+                { en: 'I mustn\'t see the patient without gloves.', tr: 'Eldivensiz hastayi gormemeliyim.' }
+            ],
+            yesNo: [
+                { en: 'Can I see the menu from here?', tr: 'Menuyu buradan gorebilir miyim?' },
+                { en: 'Could I see the smoke from my balcony?', tr: 'Dumani balkonumdan gorebilir miydim?' },
+                { en: 'Would I see a doctor if the pain continued?', tr: 'Agri devam ederse doktora gider miydim?' },
+                { en: 'Should I see my advisor before choosing courses?', tr: 'Dersleri secmeden once danismanimi gormeli miyim?' },
+                { en: 'May I see him at the conference next month?', tr: 'Onu gelecek ay konferansta gorebilir miyim?' },
+                { en: 'Might I see you after class if I finish early?', tr: 'Erken bitirirsem dersten sonra seni gorebilir miyim?' },
+                { en: 'Must I see the manager about this issue?', tr: 'Bu konu icin muduru gormek zorunda miyim?' }
+            ],
+            wh: [
+                { en: 'What can I see near the entrance?', tr: 'Girisin yakininda ne gorebilirim?' },
+                { en: 'Where could I see the announcement?', tr: 'Duyuruyu nerede gorebilirdim?' },
+                { en: 'Why would I see a doctor for this?', tr: 'Neden bunun icin doktora giderdim?' },
+                { en: 'When should I see you again?', tr: 'Seni ne zaman tekrar gormeliyim?' },
+                { en: 'When may I see the final report?', tr: 'Son raporu ne zaman gorebilirim?' },
+                { en: 'Who might I see at the networking event?', tr: 'Networking etkinliginde kimi gorebilirim?' },
+                { en: 'Who must I see to reset my account?', tr: 'Hesabimi sifirlamak icin kimi gormem gerekiyor?' }
+            ]
+        },
+        know: {
+            affirmative: [
+                { en: 'She can know the rules by reading the guide.', tr: 'Rehberi okuyarak kurallari ogrenebilir.' },
+                { en: 'She could know the answer if she checks the notes.', tr: 'Notlara bakarsa cevabi bilebilirdi.' },
+                { en: 'She would know what to do if someone explained it.', tr: 'Biri aciklasaydi ne yapacagini bilirdi.' },
+                { en: 'She should know the basic safety steps.', tr: 'Temel guvenlik adimlarini bilmesi gerekir.' },
+                { en: 'She may know someone who works there.', tr: 'Orada calisan birini taniyor olabilir.' },
+                { en: 'She might know the password.', tr: 'Sifreyi biliyor olabilir.' },
+                { en: 'She must know the truth by now.', tr: 'Artik gercegi biliyor olmali.' }
+            ],
+            negative: [
+                { en: 'She can\'t know everything about the project.', tr: 'Proje hakkinda her seyi bilemez.' },
+                { en: 'She couldn\'t know the schedule because it changed.', tr: 'Program degistigi icin bilemezdi.' },
+                { en: 'She wouldn\'t know where to start without help.', tr: 'Yardim olmadan nereden baslayacagini bilemezdi.' },
+                { en: 'She shouldn\'t know confidential details.', tr: 'Gizli detaylari bilmemeli.' },
+                { en: 'She may not know the new policy yet.', tr: 'Yeni politikayi henuz bilmiyor olabilir.' },
+                { en: 'She might not know his real name.', tr: 'Onun gercek adini bilmiyor olabilir.' },
+                { en: 'She mustn\'t know about the surprise.', tr: 'Surprizi kesinlikle bilmemeli.' }
+            ],
+            yesNo: [
+                { en: 'Can she know the rules by reading the guide?', tr: 'Rehberi okuyarak kurallari ogrenebilir mi?' },
+                { en: 'Could she know the answer if she checks the notes?', tr: 'Notlara bakarsa cevabi bilebilir miydi?' },
+                { en: 'Would she know what to do if someone explained it?', tr: 'Biri aciklasa ne yapacagini bilir miydi?' },
+                { en: 'Should she know the basic safety steps?', tr: 'Temel guvenlik adimlarini bilmesi gerekir mi?' },
+                { en: 'May she know someone who works there?', tr: 'Orada calisan birini taniyor olabilir mi?' },
+                { en: 'Might she know the password?', tr: 'Sifreyi biliyor olabilir mi?' },
+                { en: 'Must she know the truth by now?', tr: 'Artik gercegi biliyor olmali mi?' }
+            ],
+            wh: [
+                { en: 'How can she know which option is better?', tr: 'Hangi secenegin daha iyi oldugunu nasil bilebilir?' },
+                { en: 'Where could she know that from?', tr: 'Bunu nereden biliyor olabilirdi?' },
+                { en: 'Why would she know the answer already?', tr: 'Neden simdiden cevabi biliyor olurdu?' },
+                { en: 'What should she know before the interview?', tr: 'Mulakattan once ne bilmesi gerekir?' },
+                { en: 'How may she know if the email is real?', tr: 'E-postanin gercek olup olmadigini nasil anlayabilir?' },
+                { en: 'Who might she know in that company?', tr: 'O sirkette kimi taniyor olabilir?' },
+                { en: 'Why must she know it today?', tr: 'Neden bunu bugun bilmek zorunda?' }
+            ]
+        },
+        take: {
+            affirmative: [
+                { en: 'He can take the earlier train.', tr: 'Daha erken trene binebilir.' },
+                { en: 'He could take a taxi if it rains.', tr: 'Yagmur yagara taksiye binebilirdi.' },
+                { en: 'He would take the offer if the salary was higher.', tr: 'Maas daha yuksek olsaydi teklifi kabul ederdi.' },
+                { en: 'He should take notes during the lecture.', tr: 'Ders sirasinda not almali.' },
+                { en: 'He may take a day off next week.', tr: 'Gelecek hafta bir gun izin alabilir.' },
+                { en: 'He might take a different route to avoid traffic.', tr: 'Trafikten kacinmak icin farkli bir yol secebilir.' },
+                { en: 'He must take this medicine after meals.', tr: 'Bu ilaci yemeklerden sonra almak zorunda.' }
+            ],
+            negative: [
+                { en: 'He can\'t take photos inside the museum.', tr: 'Muzede fotograf cekemez.' },
+                { en: 'He couldn\'t take the call because he was driving.', tr: 'Araba kullandigi icin aramayi acamadi.' },
+                { en: 'He wouldn\'t take that job without a contract.', tr: 'Sozlesme olmadan o isi kabul etmezdi.' },
+                { en: 'He shouldn\'t take risks with his health.', tr: 'Sagligiyla ilgili risk almamali.' },
+                { en: 'He may not take the exam this term.', tr: 'Bu donem sinava girmeyebilir.' },
+                { en: 'He might not take the invitation seriously.', tr: 'Daveti ciddiye almayabilir.' },
+                { en: 'He mustn\'t take more than two pills a day.', tr: 'Gunde ikiden fazla hap almamali.' }
+            ],
+            yesNo: [
+                { en: 'Can he take the earlier train?', tr: 'Daha erken trene binebilir mi?' },
+                { en: 'Could he take a taxi if it rains?', tr: 'Yagmur yagara taksiye binebilir miydi?' },
+                { en: 'Would he take the offer if the salary was higher?', tr: 'Maas daha yuksek olsaydi teklifi kabul eder miydi?' },
+                { en: 'Should he take notes during the lecture?', tr: 'Ders sirasinda not almali mi?' },
+                { en: 'May he take a day off next week?', tr: 'Gelecek hafta bir gun izin alabilir mi?' },
+                { en: 'Might he take a different route to avoid traffic?', tr: 'Trafikten kacinmak icin farkli yol secebilir mi?' },
+                { en: 'Must he take this medicine after meals?', tr: 'Bu ilaci yemeklerden sonra almak zorunda mi?' }
+            ],
+            wh: [
+                { en: 'Which bus can he take from here?', tr: 'Buradan hangi otobuse binebilir?' },
+                { en: 'How could he take care of it alone?', tr: 'Bunu tek basina nasil halledebilirdi?' },
+                { en: 'Why would he take that risk?', tr: 'Neden o riski alirdi?' },
+                { en: 'What should he take with him to the interview?', tr: 'Mulakata yaninda ne goturmeli?' },
+                { en: 'When may he take a break?', tr: 'Ne zaman mola verebilir?' },
+                { en: 'Where might he take you for dinner?', tr: 'Seni aksam yemegine nereye goturebilir?' },
+                { en: 'What must he take to prove his identity?', tr: 'Kimligini kanitlamak icin ne goturmek zorunda?' }
+            ]
+        },
+        give: {
+            affirmative: [
+                { en: 'They can give you a discount if you pay today.', tr: 'Bugun odersen sana indirim yapabilirler.' },
+                { en: 'They could give us more time to finish the task.', tr: 'Gorevi bitirmemiz icin bize daha fazla zaman verebilirlerdi.' },
+                { en: 'They would give feedback, but they are busy this week.', tr: 'Geri bildirim verirlerdi ama bu hafta yogunlar.' },
+                { en: 'They should give clear instructions to new staff.', tr: 'Yeni personele net talimatlar vermeliler.' },
+                { en: 'They may give an answer by the end of the day.', tr: 'Gun sonuna kadar bir cevap verebilirler.' },
+                { en: 'They might give up if the project gets too hard.', tr: 'Proje cok zorlasirsa pes edebilirler.' },
+                { en: 'They must give a reason for the delay.', tr: 'Gecikme icin bir sebep belirtmek zorundalar.' }
+            ],
+            negative: [
+                { en: 'They can\'t give personal data to anyone.', tr: 'Kimseye kisisel veri veremezler.' },
+                { en: 'They couldn\'t give a good explanation yesterday.', tr: 'Dun iyi bir aciklama yapamadilar.' },
+                { en: 'They wouldn\'t give him another chance.', tr: 'Ona bir sans daha vermezlerdi.' },
+                { en: 'They shouldn\'t give promises they can\'t keep.', tr: 'Tutamayacaklari sozler vermemeliler.' },
+                { en: 'They may not give a refund without a receipt.', tr: 'Fis olmadan iade yapmayabilirler.' },
+                { en: 'They might not give you a reply this week.', tr: 'Bu hafta sana cevap vermeyebilirler.' },
+                { en: 'They mustn\'t give food to the animals.', tr: 'Hayvanlara yemek vermemeliler.' }
+            ],
+            yesNo: [
+                { en: 'Can they give you a discount if you pay today?', tr: 'Bugun odersen sana indirim yapabilirler mi?' },
+                { en: 'Could they give us more time to finish the task?', tr: 'Gorevi bitirmemiz icin bize daha fazla zaman verebilirler miydi?' },
+                { en: 'Would they give feedback if they had more time?', tr: 'Daha fazla vakitleri olsaydi geri bildirim verirler miydi?' },
+                { en: 'Should they give clear instructions to new staff?', tr: 'Yeni personele net talimatlar vermeliler mi?' },
+                { en: 'May they give an answer by the end of the day?', tr: 'Gun sonuna kadar cevap verebilirler mi?' },
+                { en: 'Might they give up if the project gets too hard?', tr: 'Proje cok zorlasirsa pes edebilirler mi?' },
+                { en: 'Must they give a reason for the delay?', tr: 'Gecikme icin sebep belirtmek zorundalar mi?' }
+            ],
+            wh: [
+                { en: 'What can they give you to help you start?', tr: 'Baslamana yardimci olmak icin sana ne verebilirler?' },
+                { en: 'How could they give better support?', tr: 'Daha iyi destek nasil verebilirlerdi?' },
+                { en: 'Why would they give up on it so quickly?', tr: 'Neden bu kadar cabuk vazgecerlerdi?' },
+                { en: 'What should they give to new members first?', tr: 'Yeni uyelere once ne vermeliler?' },
+                { en: 'When may they give the final decision?', tr: 'Son karari ne zaman verebilirler?' },
+                { en: 'What might they give you as a small gift?', tr: 'Kucuk bir hediye olarak sana ne verebilirler?' },
+                { en: 'What must they give you in writing?', tr: 'Yazili olarak sana ne vermek zorundalar?' }
+            ]
+        },
+        find: {
+            affirmative: [
+                { en: 'We can find a quieter cafe near the campus.', tr: 'Kampusun yakininda daha sakin bir kafe bulabiliriz.' },
+                { en: 'We could find his email in the contact list.', tr: 'Iletisim listesinde onun e-postasini bulabilirdik.' },
+                { en: 'We would find it easier if we worked in smaller groups.', tr: 'Daha kucuk gruplar halinde calissak daha kolay bulurduk.' },
+                { en: 'We should find a safe place to park.', tr: 'Park etmek icin guvenli bir yer bulmaliyiz.' },
+                { en: 'We may find the answer in the FAQ section.', tr: 'Cevabi SSS bolumunde bulabiliriz.' },
+                { en: 'We might find better examples in the next chapter.', tr: 'Daha iyi ornekleri bir sonraki bolumde bulabiliriz.' },
+                { en: 'We must find out who sent this message.', tr: 'Bu mesaji kimin gonderdigini bulmaliyiz.' }
+            ],
+            negative: [
+                { en: 'We can\'t find the entrance because the sign is missing.', tr: 'Tabela olmadigi icin girisi bulamiyoruz.' },
+                { en: 'We couldn\'t find a seat on the bus.', tr: 'Otobuste yer bulamadik.' },
+                { en: 'We wouldn\'t find the problem if we ignored the logs.', tr: 'Loglari gormezden gelsek sorunu bulamazdik.' },
+                { en: 'We shouldn\'t find excuses; we should fix it.', tr: 'Bahane bulmamaliyiz; duzeltmeliyiz.' },
+                { en: 'We may not find a hotel room this late.', tr: 'Bu kadar gec bir saatte otel odasi bulamayabiliriz.' },
+                { en: 'We might not find his phone number online.', tr: 'Onun telefon numarasini internette bulamayabiliriz.' },
+                { en: 'We mustn\'t find private information by hacking.', tr: 'Hackleyerek ozel bilgi bulmaya calismamaliyiz.' }
+            ],
+            yesNo: [
+                { en: 'Can we find a quieter cafe near the campus?', tr: 'Kampusun yakininda daha sakin bir kafe bulabilir miyiz?' },
+                { en: 'Could we find his email in the contact list?', tr: 'Iletisim listesinde onun e-postasini bulabilir miydik?' },
+                { en: 'Would we find it easier if we worked in smaller groups?', tr: 'Kucuk gruplarda calissak daha kolay bulur muyduk?' },
+                { en: 'Should we find a safe place to park?', tr: 'Park etmek icin guvenli bir yer bulmali miyiz?' },
+                { en: 'May we find the answer in the FAQ section?', tr: 'Cevabi SSS bolumunde bulabilir miyiz?' },
+                { en: 'Might we find better examples in the next chapter?', tr: 'Daha iyi ornekleri bir sonraki bolumde bulabilir miyiz?' },
+                { en: 'Must we find out who sent this message?', tr: 'Bu mesaji kimin gonderdigini bulmak zorunda miyiz?' }
+            ],
+            wh: [
+                { en: 'Where can we find a good study spot?', tr: 'Iyi bir calisma yerini nerede bulabiliriz?' },
+                { en: 'How could we find him without his address?', tr: 'Adresi olmadan onu nasil bulabilirdik?' },
+                { en: 'Why would we find this task so difficult?', tr: 'Neden bu gorevi bu kadar zor bulurduk?' },
+                { en: 'What should we find before we start?', tr: 'Baslamadan once ne bulmaliyiz?' },
+                { en: 'Where may we find the official form?', tr: 'Resmi formu nerede bulabiliriz?' },
+                { en: 'What might we find if we look deeper?', tr: 'Daha derine bakarsak ne bulabiliriz?' },
+                { en: 'What must we find before the deadline?', tr: 'Son tarihten once neyi bulmak zorundayiz?' }
+            ]
+        },
+        think: {
+            affirmative: [
+                { en: 'I can think more clearly after a short break.', tr: 'Kisa bir aradan sonra daha net dusunebilirim.' },
+                { en: 'I could think about your offer and reply tomorrow.', tr: 'Teklifini dusunup yarin cevap verebilirdim.' },
+                { en: 'I would think twice before signing that contract.', tr: 'O sozlesmeyi imzalamadan once iki kere dusunurdum.' },
+                { en: 'I should think about the long-term results.', tr: 'Uzun vadeli sonuclari dusunmeliyim.' },
+                { en: 'I may think it\'s too expensive for what it is.', tr: 'Degdigine gore pahali oldugunu dusunebilirim.' },
+                { en: 'I might think you\'re joking, so be clear.', tr: 'Saka yaptigini sanabilirim; o yuzden net ol.' },
+                { en: 'I must think positively before the interview.', tr: 'Mulakat oncesi olumlu dusunmeliyim.' }
+            ],
+            negative: [
+                { en: 'I can\'t think straight when I\'m hungry.', tr: 'Acken duzgun dusunemiyorum.' },
+                { en: 'I couldn\'t think of any good examples.', tr: 'Hic iyi ornek dusunemedim.' },
+                { en: 'I wouldn\'t think that way if I had more information.', tr: 'Daha fazla bilgi olsaydi oyle dusunmezdim.' },
+                { en: 'I shouldn\'t think about worst-case scenarios all day.', tr: 'Butun gun en kotu senaryoyu dusunmemeliyim.' },
+                { en: 'I may not think it\'s the right time to change jobs.', tr: 'Is degistirmek icin dogru zaman oldugunu dusunmeyebilirim.' },
+                { en: 'I might not think of the answer quickly.', tr: 'Cevabi hizlica aklima getiremeyebilirim.' },
+                { en: 'I mustn\'t think I\'m the only one with problems.', tr: 'Sorunlari olan tek kisinin ben oldugumu dusunmemeliyim.' }
+            ],
+            yesNo: [
+                { en: 'Can I think more clearly after a short break?', tr: 'Kisa bir aradan sonra daha net dusunebilir miyim?' },
+                { en: 'Could I think about your offer and reply tomorrow?', tr: 'Teklifini dusunup yarin cevap verebilir miyim?' },
+                { en: 'Would I think twice before signing that contract?', tr: 'O sozlesmeyi imzalamadan once iki kere dusunur muydum?' },
+                { en: 'Should I think about the long-term results?', tr: 'Uzun vadeli sonuclari dusunmeli miyim?' },
+                { en: 'May I think it\'s too expensive for what it is?', tr: 'Degdigine gore pahali oldugunu dusunebilir miyim?' },
+                { en: 'Might I think you\'re joking?', tr: 'Saka yaptigini dusunebilir miyim?' },
+                { en: 'Must I think positively before the interview?', tr: 'Mulakat oncesi olumlu dusunmek zorunda miyim?' }
+            ],
+            wh: [
+                { en: 'What can I think about to stay focused?', tr: 'Odakli kalmak icin ne dusunebilirim?' },
+                { en: 'How could I think of a better solution?', tr: 'Daha iyi bir cozumu nasil dusunebilirdim?' },
+                { en: 'Why would I think that he lied?', tr: 'Neden yalan soyledigini dusunurdum?' },
+                { en: 'What should I think about before I decide?', tr: 'Karar vermeden once ne dusunmeliyim?' },
+                { en: 'Why may I think the interview went badly?', tr: 'Mulakatin kotu gectigini neden dusunebilirim?' },
+                { en: 'What might I think if he doesn\'t reply?', tr: 'O cevap vermezse ne dusunebilirim?' },
+                { en: 'What must I think about first?', tr: 'Once neyi dusunmem gerekiyor?' }
+            ]
+        },
+        tell: {
+            affirmative: [
+                { en: 'You can tell me the details after class.', tr: 'Detaylari dersten sonra bana anlatabilirsin.' },
+                { en: 'You could tell him that you will be late.', tr: 'Ona gec kalacagini soyleyebilirdin.' },
+                { en: 'You would tell the truth if you trusted us.', tr: 'Bize guvensen gercegi soylerdin.' },
+                { en: 'You should tell your parents where you are.', tr: 'Ailene nerede oldugunu soylemelisin.' },
+                { en: 'You may tell the receptionist your name.', tr: 'Resepsiyona adini soyleyebilirsin.' },
+                { en: 'You might tell the story differently next time.', tr: 'Bir dahaki sefere hikayeyi farkli anlatabilirsin.' },
+                { en: 'You must tell the doctor about your symptoms.', tr: 'Doktora belirtilerini anlatmalisin.' }
+            ],
+            negative: [
+                { en: 'You can\'t tell by looking at it.', tr: 'Sadece bakarak anlayamazsin.' },
+                { en: 'You couldn\'t tell if he was serious.', tr: 'Onun ciddi olup olmadigini anlayamadin.' },
+                { en: 'You wouldn\'t tell anyone if it was private.', tr: 'Ozel olsaydi kimseye soylemezdin.' },
+                { en: 'You shouldn\'t tell them your password.', tr: 'Onlara sifreni soylememelisin.' },
+                { en: 'You may not tell jokes in this meeting.', tr: 'Bu toplantida saka yapmayabilirsin.' },
+                { en: 'You might not tell the difference at first.', tr: 'Ilk basta farki anlayamayabilirsin.' },
+                { en: 'You mustn\'t tell anyone about the surprise.', tr: 'Surprizi kimseye soylememelisin.' }
+            ],
+            yesNo: [
+                { en: 'Can you tell me the details after class?', tr: 'Detaylari dersten sonra bana anlatabilir misin?' },
+                { en: 'Could you tell him that you will be late?', tr: 'Ona gec kalacagini soyleyebilir misin?' },
+                { en: 'Would you tell the truth if you trusted us?', tr: 'Bize guvensen gercegi soyler miydin?' },
+                { en: 'Should you tell your parents where you are?', tr: 'Ailene nerede oldugunu soylemeli misin?' },
+                { en: 'May you tell the receptionist your name?', tr: 'Resepsiyona adini soyleyebilir misin?' },
+                { en: 'Might you tell the story differently next time?', tr: 'Bir dahaki sefere farkli anlatabilir misin?' },
+                { en: 'Must you tell the doctor about your symptoms?', tr: 'Doktora belirtilerini anlatmak zorunda misin?' }
+            ],
+            wh: [
+                { en: 'What can you tell me about the course?', tr: 'Bana kurs hakkinda ne anlatabilirsin?' },
+                { en: 'How could you tell that he was lying?', tr: 'Onun yalan soyledigini nasil anlayabildin?' },
+                { en: 'Why would you tell him that?', tr: 'Ona bunu neden soylerdin?' },
+                { en: 'When should you tell them the news?', tr: 'Haberi onlara ne zaman soylemelisin?' },
+                { en: 'What may you tell the customer?', tr: 'Musteriye ne soyleyebilirsin?' },
+                { en: 'Who might you tell if you need advice?', tr: 'Tavsiye gerekirse kime soyleyebilirsin?' },
+                { en: 'Who must you tell immediately?', tr: 'Hemen kime soylemek zorundasin?' }
+            ]
+        },
+        become: {
+            affirmative: [
+                { en: 'He can become more confident with practice.', tr: 'Pratikle daha ozguvenli olabilir.' },
+                { en: 'He could become a great engineer one day.', tr: 'Bir gun harika bir muhendis olabilir.' },
+                { en: 'He would become less stressed if he slept more.', tr: 'Daha cok uyusa daha az stresli olurdu.' },
+                { en: 'He should become more organized at work.', tr: 'Iste daha duzenli hale gelmeli.' },
+                { en: 'He may become famous after this project.', tr: 'Bu projeden sonra unlu olabilir.' },
+                { en: 'He might become impatient if we keep him waiting.', tr: 'Onu bekletmeye devam edersek sabirsiz olabilir.' },
+                { en: 'He must become more careful on the road.', tr: 'Yolda daha dikkatli olmali.' }
+            ],
+            negative: [
+                { en: 'He can\'t become fluent without speaking regularly.', tr: 'Duzenli konusmadan akici olamaz.' },
+                { en: 'He couldn\'t become a pilot because of his eyesight.', tr: 'Gozleri yuzunden pilot olamadi.' },
+                { en: 'He wouldn\'t become successful without learning from mistakes.', tr: 'Hatalardan ogrenmeden basarili olmazdi.' },
+                { en: 'He shouldn\'t become dependent on caffeine.', tr: 'Kafeine bagimli hale gelmemeli.' },
+                { en: 'He may not become ready by tomorrow.', tr: 'Yarin hazir olmayabilir.' },
+                { en: 'He might not become comfortable in a new city quickly.', tr: 'Yeni bir sehirde cabuk alisamayabilir.' },
+                { en: 'He mustn\'t become careless with confidential files.', tr: 'Gizli dosyalar konusunda dikkatsiz olmamali.' }
+            ],
+            yesNo: [
+                { en: 'Can he become more confident with practice?', tr: 'Pratikle daha ozguvenli olabilir mi?' },
+                { en: 'Could he become a great engineer one day?', tr: 'Bir gun harika bir muhendis olabilir mi?' },
+                { en: 'Would he become less stressed if he slept more?', tr: 'Daha cok uyusa daha az stresli olur muydu?' },
+                { en: 'Should he become more organized at work?', tr: 'Iste daha duzenli hale gelmeli mi?' },
+                { en: 'May he become famous after this project?', tr: 'Bu projeden sonra unlu olabilir mi?' },
+                { en: 'Might he become impatient if we keep him waiting?', tr: 'Bekletirsek sabirsiz olabilir mi?' },
+                { en: 'Must he become more careful on the road?', tr: 'Yolda daha dikkatli olmak zorunda mi?' }
+            ],
+            wh: [
+                { en: 'How can he become better at public speaking?', tr: 'Topluluk onunde konusmada nasil daha iyi olabilir?' },
+                { en: 'What could he become if he studied abroad?', tr: 'Yurt disinda okusaydi ne olabilirdi?' },
+                { en: 'Why would he become angry about that?', tr: 'Neden buna sinirlenirdi?' },
+                { en: 'What should he become aware of at work?', tr: 'Iste nelerin farkinda olmali?' },
+                { en: 'When may he become eligible to apply?', tr: 'Ne zaman basvurmaya uygun hale gelebilir?' },
+                { en: 'Why might he become anxious before exams?', tr: 'Sinavlardan once neden kaygili olabilir?' },
+                { en: 'What must he become good at for this job?', tr: 'Bu is icin hangi konuda iyi hale gelmesi gerekiyor?' }
+            ]
+        },
+        show: {
+            affirmative: [
+                { en: 'She can show you how to fill out the form.', tr: 'Sana formu nasil dolduracagini gosterebilir.' },
+                { en: 'She could show us the slides again.', tr: 'Slaytlari bize tekrar gosterebilirdi.' },
+                { en: 'She would show more interest if the topic was practical.', tr: 'Konu pratik olsaydi daha cok ilgi gosterirdi.' },
+                { en: 'She should show her ID at the entrance.', tr: 'Giriste kimligini gostermeli.' },
+                { en: 'She may show the results later today.', tr: 'Sonuclari bugun daha sonra gosterebilir.' },
+                { en: 'She might show up late because of the bus.', tr: 'Otobus yuzunden gec gelebilir.' },
+                { en: 'She must show the receipt to get a refund.', tr: 'Iade almak icin fisi gostermek zorunda.' }
+            ],
+            negative: [
+                { en: 'She can\'t show the report to anyone outside the team.', tr: 'Raporu ekip disindaki kimseye gosteremez.' },
+                { en: 'She couldn\'t show the email because her phone died.', tr: 'Telefonu kapandigi icin e-postayi gosteremedi.' },
+                { en: 'She wouldn\'t show her face after that mistake.', tr: 'O hatadan sonra ortalikta gorunmezdi.' },
+                { en: 'She shouldn\'t show personal documents on camera.', tr: 'Kamerada kisisel belgeleri gostermemeli.' },
+                { en: 'She may not show any improvement this week.', tr: 'Bu hafta hic gelisme gostermeyebilir.' },
+                { en: 'She might not show up if she feels sick.', tr: 'Kendini hasta hissederse gelmeyebilir.' },
+                { en: 'She mustn\'t show anger in front of customers.', tr: 'Musterilerin onunde ofke gostermemeli.' }
+            ],
+            yesNo: [
+                { en: 'Can she show you how to fill out the form?', tr: 'Sana formu nasil dolduracagini gosterebilir mi?' },
+                { en: 'Could she show us the slides again?', tr: 'Slaytlari bize tekrar gosterebilir miydi?' },
+                { en: 'Would she show more interest if the topic was practical?', tr: 'Konu pratik olsaydi daha cok ilgi gosterir miydi?' },
+                { en: 'Should she show her ID at the entrance?', tr: 'Giriste kimligini gostermeli mi?' },
+                { en: 'May she show the results later today?', tr: 'Sonuclari bugun daha sonra gosterebilir mi?' },
+                { en: 'Might she show up late because of the bus?', tr: 'Otobus yuzunden gec gelebilir mi?' },
+                { en: 'Must she show the receipt to get a refund?', tr: 'Iade almak icin fisi gostermek zorunda mi?' }
+            ],
+            wh: [
+                { en: 'What can she show to prove her identity?', tr: 'Kimligini kanitlamak icin ne gosterebilir?' },
+                { en: 'How could she show it more clearly?', tr: 'Bunu daha net nasil gosterebilirdi?' },
+                { en: 'Why would she show interest in that course?', tr: 'Neden o kursa ilgi gosterirdi?' },
+                { en: 'When should she show the document?', tr: 'Belgeyi ne zaman gostermeli?' },
+                { en: 'Where may she show her presentation?', tr: 'Sunumunu nerede yapabilir?' },
+                { en: 'When might she show the final version?', tr: 'Son hali ne zaman gosterebilir?' },
+                { en: 'What must she show at the entrance?', tr: 'Giriste ne gostermek zorunda?' }
+            ]
+        },
+        leave: {
+            affirmative: [
+                { en: 'They can leave early if they finish the report.', tr: 'Raporu bitirirlerse erken cikabilirler.' },
+                { en: 'They could leave a message on your voicemail.', tr: 'Sesli mesajina bir not birakabilirlerdi.' },
+                { en: 'They would leave immediately if there was an emergency.', tr: 'Acil bir durum olsa hemen ayrilirlardi.' },
+                { en: 'They should leave enough time for questions.', tr: 'Sorular icin yeterli zaman birakmalilar.' },
+                { en: 'They may leave for Izmir tomorrow morning.', tr: 'Yarin sabah Izmire dogru yola cikabilirler.' },
+                { en: 'They might leave late because the meeting is long.', tr: 'Toplanti uzun surdugu icin gec cikabilirler.' },
+                { en: 'They must leave the building during the drill.', tr: 'Tatbikat sirasinda binayi terk etmek zorundalar.' }
+            ],
+            negative: [
+                { en: 'They can\'t leave the kids alone at home.', tr: 'Cocuklari evde yalniz birakamazlar.' },
+                { en: 'They couldn\'t leave on time because the flight was delayed.', tr: 'Ucus geciktigi icin zamaninda ayrilamadilar.' },
+                { en: 'They wouldn\'t leave without saying goodbye.', tr: 'Vedalasmadan ayrilmazlardi.' },
+                { en: 'They shouldn\'t leave their bags unattended.', tr: 'Cantalarini gozetimsiz birakmamalilar.' },
+                { en: 'They may not leave today because of the storm.', tr: 'Firtinadan dolayi bugun ayrilamayabilirler.' },
+                { en: 'They might not leave until they get confirmation.', tr: 'Onay alana kadar ayrilmayabilirler.' },
+                { en: 'They mustn\'t leave the door open.', tr: 'Kapiyi acik birakmamalilar.' }
+            ],
+            yesNo: [
+                { en: 'Can they leave early if they finish the report?', tr: 'Raporu bitirirlerse erken cikabilirler mi?' },
+                { en: 'Could they leave a message on your voicemail?', tr: 'Sesli mesajina not birakabilirler miydi?' },
+                { en: 'Would they leave immediately if there was an emergency?', tr: 'Acil durum olsa hemen ayrilirlar miydi?' },
+                { en: 'Should they leave enough time for questions?', tr: 'Sorular icin yeterli zaman birakmalilar mi?' },
+                { en: 'May they leave for Izmir tomorrow morning?', tr: 'Yarin sabah Izmire gidebilirler mi?' },
+                { en: 'Might they leave late because the meeting is long?', tr: 'Toplanti uzun diye gec cikabilirler mi?' },
+                { en: 'Must they leave the building during the drill?', tr: 'Tatbikat sirasinda binayi terk etmek zorundalar mi?' }
+            ],
+            wh: [
+                { en: 'When can they leave without missing anything important?', tr: 'Onemli bir seyi kacirmadan ne zaman ayrilabilirler?' },
+                { en: 'Where could they leave their luggage?', tr: 'Bagajlarini nereye birakabilirlerdi?' },
+                { en: 'Why would they leave so suddenly?', tr: 'Neden bu kadar aniden ayrilirlardi?' },
+                { en: 'What should they leave out of the report?', tr: 'Rapordan neyi cikarmalilar?' },
+                { en: 'Where may they leave their bikes?', tr: 'Bisikletlerini nereye birakabilirler?' },
+                { en: 'Why might they leave early today?', tr: 'Bugun neden erken cikabilirler?' },
+                { en: 'When must they leave the hotel?', tr: 'Otelden ne zaman cikmak zorundalar?' }
+            ]
+        },
+        feel: {
+            affirmative: [
+                { en: 'I can feel the cold air coming in.', tr: 'Soguk havanin iceri girdigini hissedebiliyorum.' },
+                { en: 'I could feel my heart racing before the exam.', tr: 'Sinavdan once kalbimin hizla attigini hissedebiliyordum.' },
+                { en: 'I would feel safer if you stayed with me.', tr: 'Benimle kalsan daha guvende hissederdim.' },
+                { en: 'I should feel proud of this progress.', tr: 'Bu ilerlemeyle gurur duymaliyim.' },
+                { en: 'I may feel tired after the long flight.', tr: 'Uzun ucus sonrasi yorgun hissedebilirim.' },
+                { en: 'I might feel nervous on the first day.', tr: 'Ilk gun gergin hissedebilirim.' },
+                { en: 'I must feel better before I go back to work.', tr: 'Ise donmeden once daha iyi hissetmem gerekiyor.' }
+            ],
+            negative: [
+                { en: 'I can\'t feel my hands in this weather.', tr: 'Bu havada ellerimi hissedemiyorum.' },
+                { en: 'I couldn\'t feel anything because my leg was numb.', tr: 'Bacagim uyustugu icin hicbir sey hissedemedim.' },
+                { en: 'I wouldn\'t feel comfortable sharing that information.', tr: 'O bilgiyi paylasirken rahat hissetmezdim.' },
+                { en: 'I shouldn\'t feel guilty about resting.', tr: 'Dinlendigim icin suclu hissetmemeliyim.' },
+                { en: 'I may not feel ready to present today.', tr: 'Bugun sunum yapmaya hazir hissetmeyebilirim.' },
+                { en: 'I might not feel hungry until later.', tr: 'Daha sonra olana kadar acikmayabilirim.' },
+                { en: 'I mustn\'t feel like I\'m failing just because it\'s hard.', tr: 'Zor diye basarisiz oluyormus gibi hissetmemeliyim.' }
+            ],
+            yesNo: [
+                { en: 'Can I feel the cold air coming in?', tr: 'Soguk havanin iceri girdigini hissedebilir miyim?' },
+                { en: 'Could I feel my heart racing before the exam?', tr: 'Sinavdan once kalbimin hizla attigini hissedebilir miydim?' },
+                { en: 'Would I feel safer if you stayed with me?', tr: 'Benimle kalsan daha guvende hisseder miydim?' },
+                { en: 'Should I feel proud of this progress?', tr: 'Bu ilerlemeyle gurur duymali miyim?' },
+                { en: 'May I feel tired after the long flight?', tr: 'Uzun ucus sonrasi yorgun hissedebilir miyim?' },
+                { en: 'Might I feel nervous on the first day?', tr: 'Ilk gun gergin hissedebilir miyim?' },
+                { en: 'Must I feel better before I go back to work?', tr: 'Ise donmeden once daha iyi hissetmem mi gerekiyor?' }
+            ],
+            wh: [
+                { en: 'How can I feel more confident when I speak?', tr: 'Konusurken kendimi daha ozguvenli nasil hissedebilirim?' },
+                { en: 'Why could I feel so anxious yesterday?', tr: 'Dun neden bu kadar kaygili hissedebilirdim?' },
+                { en: 'When would I feel ready to move on?', tr: 'Ne zaman devam etmeye hazir hissederdim?' },
+                { en: 'How should I feel after getting that feedback?', tr: 'O geri bildirimi aldiktan sonra nasil hissetmeliyim?' },
+                { en: 'Why may I feel tired all the time?', tr: 'Neden surekli yorgun hissedebilirim?' },
+                { en: 'What might I feel if I skip breakfast?', tr: 'Kahvaltiyi atlarsam ne hissedebilirim?' },
+                { en: 'Why must I feel pressure at work?', tr: 'Iste neden baski hissetmek zorunda kaliyorum?' }
+            ]
+        },
+        put: {
+            affirmative: [
+                { en: 'She can put the files in a shared folder.', tr: 'Dosyalari paylasilan klasore koyabilir.' },
+                { en: 'She could put the meeting link in the calendar.', tr: 'Toplanti linkini takvime ekleyebilirdi.' },
+                { en: 'She would put more effort in if she had support.', tr: 'Destek olsa daha cok emek verirdi.' },
+                { en: 'She should put her phone on silent in class.', tr: 'Derste telefonunu sessize almali.' },
+                { en: 'She may put her bag under the seat.', tr: 'Cantasini koltugun altina koyabilir.' },
+                { en: 'She might put the wrong date by mistake.', tr: 'Yanlislikla yanlis tarihi yazabilir.' },
+                { en: 'She must put her signature on every page.', tr: 'Her sayfaya imza atmak zorunda.' }
+            ],
+            negative: [
+                { en: 'She can\'t put liquids in her carry-on bag.', tr: 'El bagajina sivi koyamaz.' },
+                { en: 'She couldn\'t put the password in correctly.', tr: 'Sifreyi dogru giremedi.' },
+                { en: 'She wouldn\'t put that photo online.', tr: 'O fotografi internete koymazdi.' },
+                { en: 'She shouldn\'t put her personal details in public comments.', tr: 'Kisisel bilgilerini herkese acik yorumlara yazmamali.' },
+                { en: 'She may not put posters on this wall.', tr: 'Bu duvara afis asmamali.' },
+                { en: 'She might not put it back in the right place.', tr: 'Onu dogru yerine geri koymayabilir.' },
+                { en: 'She mustn\'t put pressure on her injured knee.', tr: 'Sakat dizine baski uygulamamali.' }
+            ],
+            yesNo: [
+                { en: 'Can she put the files in a shared folder?', tr: 'Dosyalari paylasilan klasore koyabilir mi?' },
+                { en: 'Could she put the meeting link in the calendar?', tr: 'Toplanti linkini takvime ekleyebilir miydi?' },
+                { en: 'Would she put more effort in if she had support?', tr: 'Destek olsa daha cok emek verir miydi?' },
+                { en: 'Should she put her phone on silent in class?', tr: 'Derste telefonunu sessize almali mi?' },
+                { en: 'May she put her bag under the seat?', tr: 'Cantasini koltugun altina koyabilir mi?' },
+                { en: 'Might she put the wrong date by mistake?', tr: 'Yanlislikla yanlis tarihi yazabilir mi?' },
+                { en: 'Must she put her signature on every page?', tr: 'Her sayfaya imza atmak zorunda mi?' }
+            ],
+            wh: [
+                { en: 'Where can she put her suitcase?', tr: 'Valizini nereye koyabilir?' },
+                { en: 'How could she put it more safely?', tr: 'Onu daha guvenli nasil koyabilirdi?' },
+                { en: 'Why would she put that in the trash?', tr: 'Neden onu cope atardi?' },
+                { en: 'What should she put in her presentation first?', tr: 'Sunumuna once ne koymali?' },
+                { en: 'Where may she put her coat?', tr: 'Montunu nereye koyabilir?' },
+                { en: 'What might she put on her CV to improve it?', tr: 'CVsine gelistirmek icin ne ekleyebilir?' },
+                { en: 'What must she put on the form?', tr: 'Formda ne yazmak zorunda?' }
+            ]
+        },
+        bring: {
+            affirmative: [
+                { en: 'You can bring your laptop to the workshop.', tr: 'Dizustu bilgisayarini atolyeye getirebilirsin.' },
+                { en: 'You could bring some snacks for the road.', tr: 'Yol icin biraz atistirmalik getirebilirdin.' },
+                { en: 'You would bring better ideas if you researched first.', tr: 'Once arastirma yapsan daha iyi fikirler getirirdin.' },
+                { en: 'You should bring a charger just in case.', tr: 'Her ihtimale karsi sarj aleti getirmelisin.' },
+                { en: 'You may bring one guest to the event.', tr: 'Etkinlige bir misafir getirebilirsin.' },
+                { en: 'You might bring the wrong book by accident.', tr: 'Yanlislikla yanlis kitabi getirebilirsin.' },
+                { en: 'You must bring your ID to register.', tr: 'Kayit olmak icin kimligini getirmek zorundasin.' }
+            ],
+            negative: [
+                { en: 'You can\'t bring drinks into the computer room.', tr: 'Bilgisayar odasina icecek getiremezsin.' },
+                { en: 'You couldn\'t bring your phone because it was out of battery.', tr: 'Sarji bittigi icin telefonunu getiremedin.' },
+                { en: 'You wouldn\'t bring that up in a formal meeting.', tr: 'Resmi bir toplantida o konuyu acmazdin.' },
+                { en: 'You shouldn\'t bring up personal issues at work.', tr: 'Is yerinde kisisel sorunlari gundeme getirmemelisin.' },
+                { en: 'You may not bring your bicycle inside.', tr: 'Bisikletini iceri getiremeyebilirsin.' },
+                { en: 'You might not bring enough cash for the ticket.', tr: 'Bilet icin yeterince nakit getirmeyebilirsin.' },
+                { en: 'You mustn\'t bring sharp objects on the plane.', tr: 'Ucaga kesici alet getirmemelisin.' }
+            ],
+            yesNo: [
+                { en: 'Can you bring your laptop to the workshop?', tr: 'Dizustu bilgisayarini atolyeye getirebilir misin?' },
+                { en: 'Could you bring some snacks for the road?', tr: 'Yol icin biraz atistirmalik getirebilir misin?' },
+                { en: 'Would you bring better ideas if you researched first?', tr: 'Once arastirma yapsan daha iyi fikirler getirir miydin?' },
+                { en: 'Should you bring a charger just in case?', tr: 'Her ihtimale karsi sarj aleti getirmeli misin?' },
+                { en: 'May you bring one guest to the event?', tr: 'Etkinlige bir misafir getirebilir misin?' },
+                { en: 'Might you bring the wrong book by accident?', tr: 'Yanlislikla yanlis kitabi getirebilir misin?' },
+                { en: 'Must you bring your ID to register?', tr: 'Kayit olmak icin kimligini getirmek zorunda misin?' }
+            ],
+            wh: [
+                { en: 'What can you bring to make the trip easier?', tr: 'Yolculugu kolaylastirmak icin ne getirebilirsin?' },
+                { en: 'How could you bring it without damaging it?', tr: 'Onu zarar vermeden nasil getirebilirdin?' },
+                { en: 'Why would you bring that topic up now?', tr: 'O konuyu neden simdi acardin?' },
+                { en: 'What should you bring to the interview?', tr: 'Mulakata ne goturmelisin?' },
+                { en: 'Who may you bring with you?', tr: 'Yaninda kimi getirebilirsin?' },
+                { en: 'What might you bring as a small gift?', tr: 'Kucuk bir hediye olarak ne getirebilirsin?' },
+                { en: 'What must you bring for identification?', tr: 'Kimlik dogrulama icin ne getirmek zorundasin?' }
+            ]
+        },
+        keep: {
+            affirmative: [
+                { en: 'I can keep an eye on your bag for a minute.', tr: 'Cantana bir dakika goz kulak olabilirim.' },
+                { en: 'I could keep working, but I\'m getting tired.', tr: 'Calismaya devam edebilirdim ama yoruluyorum.' },
+                { en: 'I would keep this message as evidence.', tr: 'Bu mesaji kanit olarak saklardim.' },
+                { en: 'I should keep my receipts in case I need a refund.', tr: 'Iade gerekirse diye fislerimi saklamaliyim.' },
+                { en: 'I may keep the book for one more week.', tr: 'Kitabi bir hafta daha tutabilirim.' },
+                { en: 'I might keep it simple and focus on the basics.', tr: 'Basit tutup temel seylere odaklanabilirim.' },
+                { en: 'I must keep my promise to my team.', tr: 'Ekibime verdigim sozu tutmaliyim.' }
+            ],
+            negative: [
+                { en: 'I can\'t keep my eyes open after midnight.', tr: 'Gece yarisindan sonra gozlerimi acik tutamiyorum.' },
+                { en: 'I couldn\'t keep up with the pace of the class.', tr: 'Dersin temposuna ayak uyduramadim.' },
+                { en: 'I wouldn\'t keep that app on my phone.', tr: 'O uygulamayi telefonumda tutmazdim.' },
+                { en: 'I shouldn\'t keep delaying my tasks.', tr: 'Islerimi surekli ertelememeliyim.' },
+                { en: 'I may not keep this job if I miss deadlines.', tr: 'Son teslimleri kacirirsam bu isi surdurmeyebilirim.' },
+                { en: 'I might not keep calm if they start shouting.', tr: 'Bagirmaya baslarlarsa sakin kalamayabilirim.' },
+                { en: 'I mustn\'t keep confidential files on a personal device.', tr: 'Gizli dosyalari kisisel cihazda tutmamaliyim.' }
+            ],
+            yesNo: [
+                { en: 'Can I keep an eye on your bag for a minute?', tr: 'Cantana bir dakika goz kulak olabilir miyim?' },
+                { en: 'Could I keep working even if I\'m tired?', tr: 'Yorgun olsam bile calismaya devam edebilir miyim?' },
+                { en: 'Would I keep this message as evidence?', tr: 'Bu mesaji kanit olarak saklar miydim?' },
+                { en: 'Should I keep my receipts in case I need a refund?', tr: 'Iade gerekirse diye fislerimi saklamali miyim?' },
+                { en: 'May I keep the book for one more week?', tr: 'Kitabi bir hafta daha tutabilir miyim?' },
+                { en: 'Might I keep it simple and focus on the basics?', tr: 'Basit tutup temele odaklanabilir miyim?' },
+                { en: 'Must I keep my promise to my team?', tr: 'Ekibime verdigim sozu tutmak zorunda miyim?' }
+            ],
+            wh: [
+                { en: 'How can I keep my English active every day?', tr: 'Ingilizcemi her gun nasil canli tutabilirim?' },
+                { en: 'How could I keep this from happening again?', tr: 'Bunun tekrar olmasini nasil engelleyebilirdim?' },
+                { en: 'Why would I keep quiet if it\'s unfair?', tr: 'Adaletsizse neden sessiz kalirdim?' },
+                { en: 'What should I keep in my emergency kit?', tr: 'Acil durum cantamda ne bulundurmaliyim?' },
+                { en: 'How long may I keep the rental car?', tr: 'Kiralik arabayi ne kadar sure tutabilirim?' },
+                { en: 'What might I keep as a reminder?', tr: 'Hatira olarak neyi saklayabilirim?' },
+                { en: 'What must I keep secret?', tr: 'Neyi gizli tutmak zorundayim?' }
+            ]
+        },
+        let: {
+            affirmative: [
+                { en: 'She can let you use her laptop for an hour.', tr: 'Dizustu bilgisayarini bir saat kullanmana izin verebilir.' },
+                { en: 'She could let us in if we show our IDs.', tr: 'Kimlik gosterirsek bizi iceri alabilirdi.' },
+                { en: 'She would let you explain if you stayed calm.', tr: 'Sakin kalsaydin aciklamana izin verirdi.' },
+                { en: 'She should let her team know about the change.', tr: 'Degisiklikten ekibini haberdar etmeli.' },
+                { en: 'She may let you resubmit the assignment.', tr: 'Odevi tekrar gondermene izin verebilir.' },
+                { en: 'She might let it go this time.', tr: 'Bu sefer gormezden gelebilir.' },
+                { en: 'She must let the manager know immediately.', tr: 'Hemen muduru bilgilendirmeli.' }
+            ],
+            negative: [
+                { en: 'She can\'t let students leave early without permission.', tr: 'Ogrencilerin izinsiz erken cikmasina izin veremez.' },
+                { en: 'She couldn\'t let me finish my sentence.', tr: 'Cumlemi bitirmeme izin vermedi.' },
+                { en: 'She wouldn\'t let anyone enter without an appointment.', tr: 'Randevusuz kimseyi iceri almazdi.' },
+                { en: 'She shouldn\'t let stress control her life.', tr: 'Stresin hayatini kontrol etmesine izin vermemeli.' },
+                { en: 'She may not let pets in the building.', tr: 'Binaya evcil hayvan sokmaya izin vermeyebilir.' },
+                { en: 'She might not let you join if the group is full.', tr: 'Grup doluysa katilmana izin vermeyebilir.' },
+                { en: 'She mustn\'t let anyone see these documents.', tr: 'Bu belgeleri kimsenin gormesine izin vermemeli.' }
+            ],
+            yesNo: [
+                { en: 'Can she let you use her laptop for an hour?', tr: 'Dizustu bilgisayarini bir saat kullanmana izin verebilir mi?' },
+                { en: 'Could she let us in if we show our IDs?', tr: 'Kimlik gostersek bizi iceri alabilir miydi?' },
+                { en: 'Would she let you explain if you stayed calm?', tr: 'Sakin kalsan aciklamana izin verir miydi?' },
+                { en: 'Should she let her team know about the change?', tr: 'Degisiklikten ekibini haberdar etmeli mi?' },
+                { en: 'May she let you resubmit the assignment?', tr: 'Odevi tekrar gondermene izin verebilir mi?' },
+                { en: 'Might she let it go this time?', tr: 'Bu sefer gormezden gelebilir mi?' },
+                { en: 'Must she let the manager know immediately?', tr: 'Hemen mudure haber vermek zorunda mi?' }
+            ],
+            wh: [
+                { en: 'Who can she let into the meeting?', tr: 'Toplantiya kimi alabilir?' },
+                { en: 'How could she let this happen?', tr: 'Bunun olmasina nasil izin verebildi?' },
+                { en: 'Why would she let him decide alone?', tr: 'Neden onun tek basina karar vermesine izin verirdi?' },
+                { en: 'What should she let go of to feel better?', tr: 'Daha iyi hissetmek icin neyi birakmali?' },
+                { en: 'When may she let us know the result?', tr: 'Sonucu bize ne zaman bildirebilir?' },
+                { en: 'Why might she let you try again?', tr: 'Neden tekrar denemene izin verebilir?' },
+                { en: 'What must she not let people know?', tr: 'Insanlarin bilmesine izin vermemesi gereken sey ne?' }
+            ]
+        },
+        begin: {
+            affirmative: [
+                { en: 'They can begin the training next week.', tr: 'Egitime gelecek hafta baslayabilirler.' },
+                { en: 'They could begin earlier if the room is ready.', tr: 'Oda hazirsa daha erken baslayabilirlerdi.' },
+                { en: 'They would begin on time if everyone arrived early.', tr: 'Herkes erken gelse zamaninda baslarlardi.' },
+                { en: 'They should begin with the easiest exercises.', tr: 'En kolay alistirmalarla baslamalilar.' },
+                { en: 'They may begin the interview after lunch.', tr: 'Mulakata ogle yemeginden sonra baslayabilirler.' },
+                { en: 'They might begin to worry if nobody calls back.', tr: 'Kimse geri aramazsa endiselenmeye baslayabilirler.' },
+                { en: 'They must begin the exam at exactly 9:00.', tr: 'Sinava tam 9:00da baslamak zorundalar.' }
+            ],
+            negative: [
+                { en: 'They can\'t begin without the teacher.', tr: 'Ogretmen olmadan baslayamazlar.' },
+                { en: 'They couldn\'t begin because the system crashed.', tr: 'Sistem coktugu icin baslayamadilar.' },
+                { en: 'They wouldn\'t begin a project without a clear goal.', tr: 'Net bir hedef olmadan projeye baslamazlardi.' },
+                { en: 'They shouldn\'t begin until they read the instructions.', tr: 'Talimatlari okumadan baslamamalilar.' },
+                { en: 'They may not begin today due to the power cut.', tr: 'Elektrik kesintisi nedeniyle bugun baslayamayabilirler.' },
+                { en: 'They might not begin if we don\'t confirm the schedule.', tr: 'Programi onaylamazsak baslamayabilirler.' },
+                { en: 'They mustn\'t begin until the safety briefing ends.', tr: 'Guvenlik bilgilendirmesi bitmeden baslamamalilar.' }
+            ],
+            yesNo: [
+                { en: 'Can they begin the training next week?', tr: 'Egitime gelecek hafta baslayabilirler mi?' },
+                { en: 'Could they begin earlier if the room is ready?', tr: 'Oda hazirsa daha erken baslayabilirler miydi?' },
+                { en: 'Would they begin on time if everyone arrived early?', tr: 'Herkes erken gelse zamaninda baslarlar miydi?' },
+                { en: 'Should they begin with the easiest exercises?', tr: 'En kolay alistirmalarla baslamalilar mi?' },
+                { en: 'May they begin the interview after lunch?', tr: 'Mulakata ogle yemeginden sonra baslayabilirler mi?' },
+                { en: 'Might they begin to worry if nobody calls back?', tr: 'Kimse aramazsa endiselenmeye baslayabilirler mi?' },
+                { en: 'Must they begin the exam at exactly 9:00?', tr: 'Sinava tam 9:00da baslamak zorundalar mi?' }
+            ],
+            wh: [
+                { en: 'When can they begin the next unit?', tr: 'Sonraki uniteye ne zaman baslayabilirler?' },
+                { en: 'How could they begin without preparation?', tr: 'Hazirliksiz nasil baslayabilirlerdi?' },
+                { en: 'Why would they begin such a risky plan?', tr: 'Neden boyle riskli bir plana baslarlardi?' },
+                { en: 'What should they begin with?', tr: 'Neye baslamalilar?' },
+                { en: 'Where may they begin the registration process?', tr: 'Kayit surecine nereden baslayabilirler?' },
+                { en: 'Why might they begin to doubt the plan?', tr: 'Plani sorgulamaya neden baslayabilirler?' },
+                { en: 'What must they begin today?', tr: 'Bugun neye baslamak zorundalar?' }
+            ]
+        },
+        seem: {
+            affirmative: [
+                { en: 'It can seem confusing at first, but you get used to it.', tr: 'Ilk basta kafa karistirici gorunebilir ama alisirsin.' },
+                { en: 'It could seem like a small issue, but it\'s serious.', tr: 'Kucuk bir sorun gibi gorunebilir ama ciddi.' },
+                { en: 'It would seem easier if we had an example.', tr: 'Bir ornegimiz olsa daha kolay gorunurdu.' },
+                { en: 'It should seem familiar after a few lessons.', tr: 'Birkac dersten sonra tanidik gorunmeli.' },
+                { en: 'It may seem unfair, but the rules are the same for everyone.', tr: 'Haksiz gorunebilir ama kurallar herkes icin ayni.' },
+                { en: 'It might seem strange, yet it\'s normal in that culture.', tr: 'Garip gorunebilir ama o kulturde normal.' },
+                { en: 'It must seem frustrating to wait this long.', tr: 'Bu kadar beklemek sinir bozucu gelmis olmali.' }
+            ],
+            negative: [
+                { en: 'It can\'t seem right if the numbers don\'t match.', tr: 'Rakamlar tutmuyorsa dogru gorunemez.' },
+                { en: 'It couldn\'t seem safe in that neighborhood at night.', tr: 'O mahallede gece guvenli gorunemezdi.' },
+                { en: 'It wouldn\'t seem professional to arrive late.', tr: 'Gec gelmek profesyonel gorunmezdi.' },
+                { en: 'It shouldn\'t seem difficult with proper guidance.', tr: 'Dogru yonlendirmeyle zor gorunmemeli.' },
+                { en: 'It may not seem important now, but it will later.', tr: 'Simdi onemli gorunmeyebilir ama sonra olacak.' },
+                { en: 'It might not seem clear because the audio is bad.', tr: 'Ses kotu oldugu icin net gorunmeyebilir.' },
+                { en: 'It mustn\'t seem like a personal attack.', tr: 'Kisisel bir saldiri gibi gorunmemeli.' }
+            ],
+            yesNo: [
+                { en: 'Can it seem confusing at first?', tr: 'Ilk basta kafa karistirici gorunebilir mi?' },
+                { en: 'Could it seem like a small issue, but be serious?', tr: 'Kucuk bir sorun gibi gorunup ciddi olabilir mi?' },
+                { en: 'Would it seem easier if we had an example?', tr: 'Bir ornek olsa daha kolay gorunur muydu?' },
+                { en: 'Should it seem familiar after a few lessons?', tr: 'Birkac dersten sonra tanidik gorunmeli mi?' },
+                { en: 'May it seem unfair to some people?', tr: 'Bazi insanlara haksiz gorunebilir mi?' },
+                { en: 'Might it seem strange to outsiders?', tr: 'Disaridan bakanlara garip gorunebilir mi?' },
+                { en: 'Must it seem frustrating to wait this long?', tr: 'Bu kadar beklemek sinir bozucu gelmis olmali mi?' }
+            ],
+            wh: [
+                { en: 'Why can it seem so hard at the beginning?', tr: 'Basta neden bu kadar zor gorunebilir?' },
+                { en: 'How could it seem so simple to him?', tr: 'Ona nasil bu kadar basit gorunebilirdi?' },
+                { en: 'Why would it seem risky to invest now?', tr: 'Simdi yatirim yapmak neden riskli gorunurdu?' },
+                { en: 'When should it seem easier?', tr: 'Ne zaman daha kolay gorunmeli?' },
+                { en: 'Why may it seem unfair to you?', tr: 'Sana neden haksiz gorunebilir?' },
+                { en: 'What might seem unclear in these instructions?', tr: 'Bu talimatlarda ne net gorunmeyebilir?' },
+                { en: 'Why must it seem so complicated?', tr: 'Neden bu kadar karmasik gorunmek zorunda?' }
+            ]
+        },
+        help: {
+            affirmative: [
+                { en: 'We can help you set up the account.', tr: 'Hesabi kurmana yardimci olabiliriz.' },
+                { en: 'We could help more if we had the full details.', tr: 'Tum detaylar olsa daha cok yardimci olabilirdik.' },
+                { en: 'We would help, but we\'re not trained for that.', tr: 'Yardim ederdik ama bunun icin egitimli degiliz.' },
+                { en: 'We should help new students feel welcome.', tr: 'Yeni ogrencilerin kendini hos karsilanmis hissetmesine yardimci olmaliyiz.' },
+                { en: 'We may help with the event on Saturday.', tr: 'Cumartesi etkinlige yardim edebiliriz.' },
+                { en: 'We might help later if we finish our tasks early.', tr: 'Islerimizi erken bitirirsek sonra yardim edebiliriz.' },
+                { en: 'We must help each other during emergencies.', tr: 'Acil durumlarda birbirimize yardim etmeliyiz.' }
+            ],
+            negative: [
+                { en: 'We can\'t help if we don\'t know the problem.', tr: 'Sorunu bilmezsek yardim edemeyiz.' },
+                { en: 'We couldn\'t help him because he refused support.', tr: 'Destegi reddettigi icin ona yardimci olamadik.' },
+                { en: 'We wouldn\'t help someone who is cheating.', tr: 'Kopya ceken birine yardim etmezdik.' },
+                { en: 'We shouldn\'t help people spread rumors.', tr: 'Insanlarin dedikodu yaymasina yardimci olmamaliyiz.' },
+                { en: 'We may not help today because we\'re short-staffed.', tr: 'Personel eksik oldugumuz icin bugun yardim edemeyebiliriz.' },
+                { en: 'We might not help much if the time is limited.', tr: 'Zaman kisitliysa fazla yardimci olamayabiliriz.' },
+                { en: 'We mustn\'t help others break the rules.', tr: 'Baskalarinin kural cignemesine yardim etmemeliyiz.' }
+            ],
+            yesNo: [
+                { en: 'Can we help you set up the account?', tr: 'Hesabi kurmana yardimci olabilir miyiz?' },
+                { en: 'Could we help more if we had the full details?', tr: 'Tum detaylar olsa daha cok yardimci olabilir miydik?' },
+                { en: 'Would we help if we were trained for that?', tr: 'Bunun icin egitimli olsak yardim eder miydik?' },
+                { en: 'Should we help new students feel welcome?', tr: 'Yeni ogrencilerin hos karsilandigini hissetmesine yardimci olmali miyiz?' },
+                { en: 'May we help with the event on Saturday?', tr: 'Cumartesi etkinlikte yardim edebilir miyiz?' },
+                { en: 'Might we help later if we finish early?', tr: 'Erken bitirirsek sonra yardim edebilir miyiz?' },
+                { en: 'Must we help each other during emergencies?', tr: 'Acil durumlarda birbirimize yardim etmek zorunda miyiz?' }
+            ],
+            wh: [
+                { en: 'How can we help you improve your speaking?', tr: 'Konusmani gelistirmene nasil yardimci olabiliriz?' },
+                { en: 'How could we help him feel less stressed?', tr: 'Onun daha az stresli hissetmesine nasil yardimci olabilirdik?' },
+                { en: 'Why would we help if nobody asks?', tr: 'Kimse istemezse neden yardim ederdik?' },
+                { en: 'Who should we help first?', tr: 'Once kime yardim etmeliyiz?' },
+                { en: 'Where may we help during the event?', tr: 'Etkinlik sirasinda nerede yardimci olabiliriz?' },
+                { en: 'What might help you remember new words?', tr: 'Yeni kelimeleri hatirlamana ne yardimci olabilir?' },
+                { en: 'What must we help you with today?', tr: 'Bugun sana hangi konuda yardimci olmak zorundayiz?' }
+            ]
+        },
+        go: {
+            affirmative: [
+                { en: 'I can go to the bank during my lunch break.', tr: 'Ogle molamda bankaya gidebilirim.' },
+                { en: 'I could go earlier to avoid the crowd.', tr: 'Kalabaliktan kacinmak icin daha erken gidebilirdim.' },
+                { en: 'I would go abroad for a master\'s degree if I had the chance.', tr: 'Firsatim olsa yuksek lisans icin yurt disina giderdim.' },
+                { en: 'I should go over my notes before the quiz.', tr: 'Kisa sinavdan once notlarimi gozden gecirmeliyim.' },
+                { en: 'I may go to the gym after dinner.', tr: 'Aksam yemeginden sonra spor salonuna gidebilirim.' },
+                { en: 'I might go out later if I finish my work.', tr: 'Isimi bitirirsem sonra disari cikabilirim.' },
+                { en: 'I must go to the dentist this week.', tr: 'Bu hafta disciye gitmem gerekiyor.' }
+            ],
+            negative: [
+                { en: 'I can\'t go to the concert because I have an exam.', tr: 'Sinavim oldugu icin konsere gidemem.' },
+                { en: 'I couldn\'t go to the interview because the train was canceled.', tr: 'Tren iptal oldugu icin mulakata gidemedim.' },
+                { en: 'I wouldn\'t go there alone at night.', tr: 'Gece oraya tek basima gitmezdim.' },
+                { en: 'I shouldn\'t go to work if I\'m contagious.', tr: 'Bulasiciysam ise gitmemeliyim.' },
+                { en: 'I may not go to the gym tonight because I\'m exhausted.', tr: 'Cok yorgun oldugum icin bu gece spor salonuna gitmeyebilirim.' },
+                { en: 'I might not go out if the weather gets worse.', tr: 'Hava kotulesirse disari cikmayabilirim.' },
+                { en: 'I mustn\'t go over the speed limit.', tr: 'Hiz sinirini asmamaliyim.' }
+            ],
+            yesNo: [
+                { en: 'Can I go to the bank during my lunch break?', tr: 'Ogle molamda bankaya gidebilir miyim?' },
+                { en: 'Could I go earlier to avoid the crowd?', tr: 'Kalabaliktan kacinmak icin daha erken gidebilir miyim?' },
+                { en: 'Would I go abroad for a master\'s degree if I had the chance?', tr: 'Firsatim olsa yuksek lisans icin yurt disina gider miydim?' },
+                { en: 'Should I go over my notes before the quiz?', tr: 'Kisa sinavdan once notlarimi gozden gecirmeli miyim?' },
+                { en: 'May I go to the gym after dinner?', tr: 'Aksam yemeginden sonra spor salonuna gidebilir miyim?' },
+                { en: 'Might I go out later if I finish my work?', tr: 'Isimi bitirirsem sonra disari cikabilir miyim?' },
+                { en: 'Must I go to the dentist this week?', tr: 'Bu hafta disciye gitmek zorunda miyim?' }
+            ],
+            wh: [
+                { en: 'Where can I go to print these documents?', tr: 'Bu belgeleri yazdirmak icin nereye gidebilirim?' },
+                { en: 'How could I go there without a car?', tr: 'Arabasiz oraya nasil gidebilirdim?' },
+                { en: 'Why would I go back to that place again?', tr: 'Neden o yere tekrar giderdim?' },
+                { en: 'When should I go to the doctor?', tr: 'Ne zaman doktora gitmeliyim?' },
+                { en: 'When may I go inside?', tr: 'Iceri ne zaman girebilirim?' },
+                { en: 'Where might I go to clear my mind?', tr: 'Kafami dagitmak icin nereye gidebilirim?' },
+                { en: 'Where must I go to submit the application?', tr: 'Basvuruyu teslim etmek icin nereye gitmem gerekiyor?' }
+            ]
+        },
+        come: {
+            affirmative: [
+                { en: 'She can come by train if she misses the bus.', tr: 'Otobusu kacirirsa trenle gelebilir.' },
+                { en: 'She could come earlier to help set up the room.', tr: 'Odayi hazirlamaya yardim etmek icin daha erken gelebilirdi.' },
+                { en: 'She would come more often if the schedule was flexible.', tr: 'Program esnek olsa daha sik gelirdi.' },
+                { en: 'She should come with her passport to the appointment.', tr: 'Randevuya pasaportuyla gelmeli.' },
+                { en: 'She may come later because her class ends at five.', tr: 'Dersi beste bittigi icin daha sonra gelebilir.' },
+                { en: 'She might come with her sister if that\'s okay.', tr: 'Uygunsa kiz kardesiyle gelebilir.' },
+                { en: 'She must come in person to confirm her identity.', tr: 'Kimligini dogrulamak icin bizzat gelmek zorunda.' }
+            ],
+            negative: [
+                { en: 'She can\'t come today because she\'s on duty.', tr: 'Nobette oldugu icin bugun gelemez.' },
+                { en: 'She couldn\'t come last week because she was out of town.', tr: 'Sehir disinda oldugu icin gecen hafta gelemedi.' },
+                { en: 'She wouldn\'t come without clear instructions.', tr: 'Net talimatlar olmadan gelmezdi.' },
+                { en: 'She shouldn\'t come if she has a high fever.', tr: 'Yuksek atesi varsa gelmemeli.' },
+                { en: 'She may not come if the weather gets worse.', tr: 'Hava kotulesirse gelmeyebilir.' },
+                { en: 'She might not come on time because of the traffic.', tr: 'Trafik yuzunden zamaninda gelemeyebilir.' },
+                { en: 'She mustn\'t come through the back door.', tr: 'Arka kapidan gelmemeli.' }
+            ],
+            yesNo: [
+                { en: 'Can she come by train if she misses the bus?', tr: 'Otobusu kacirirsa trenle gelebilir mi?' },
+                { en: 'Could she come earlier to help set up the room?', tr: 'Odayi hazirlamaya yardim etmek icin daha erken gelebilir miydi?' },
+                { en: 'Would she come more often if the schedule was flexible?', tr: 'Program esnek olsa daha sik gelir miydi?' },
+                { en: 'Should she come with her passport to the appointment?', tr: 'Randevuya pasaportuyla gelmeli mi?' },
+                { en: 'May she come later because her class ends at five?', tr: 'Dersi beste bitiyor diye daha sonra gelebilir mi?' },
+                { en: 'Might she come with her sister if that\'s okay?', tr: 'Uygunsa kiz kardesiyle gelebilir mi?' },
+                { en: 'Must she come in person to confirm her identity?', tr: 'Kimligini dogrulamak icin bizzat gelmek zorunda mi?' }
+            ],
+            wh: [
+                { en: 'When can she come to pick up the documents?', tr: 'Belgeleri almaya ne zaman gelebilir?' },
+                { en: 'How could she come earlier without missing her class?', tr: 'Dersini kacirmadan nasil daha erken gelebilirdi?' },
+                { en: 'Why would she come if she isn\'t invited?', tr: 'Davet edilmezse neden gelirdi?' },
+                { en: 'What should she come prepared with?', tr: 'Neye hazirlikli gelmeli?' },
+                { en: 'Who may she come with?', tr: 'Yaninda kimi getirebilir?' },
+                { en: 'Why might she come late today?', tr: 'Bugun neden gec gelebilir?' },
+                { en: 'Where must she come to confirm her identity?', tr: 'Kimligini dogrulamak icin nereye gelmek zorunda?' }
+            ]
+        },
+        talk: {
+            affirmative: [
+                { en: 'You can talk to the teacher after class.', tr: 'Dersten sonra ogretmenle konusabilirsin.' },
+                { en: 'You could talk a bit more slowly so I can understand.', tr: 'Daha iyi anlayabilmem icin biraz daha yavas konusabilirdin.' },
+                { en: 'You would talk more confidently if you practiced with a friend.', tr: 'Bir arkadasinla pratik yapsan daha ozguvenli konusurdun.' },
+                { en: 'You should talk to your manager before you decide.', tr: 'Karar vermeden once mudurunle konusmalisin.' },
+                { en: 'You may talk during the break, but not during the exam.', tr: 'Arada konusabilirsin ama sinavda konusamazsin.' },
+                { en: 'You might talk too much when you\'re nervous.', tr: 'Gerilince fazla konusabilirsin.' },
+                { en: 'You must talk clearly during the presentation.', tr: 'Sunum sirasinda net konusmalisin.' }
+            ],
+            negative: [
+                { en: 'You can\'t talk during the listening test.', tr: 'Dinleme sinavi sirasinda konusamazsin.' },
+                { en: 'You couldn\'t talk on the phone because the signal was weak.', tr: 'Sinyal zayif oldugu icin telefonda konusamadin.' },
+                { en: 'You wouldn\'t talk like that if you respected him.', tr: 'Ona saygi duysaydin oyle konusmazdin.' },
+                { en: 'You shouldn\'t talk about private matters at work.', tr: 'Iste ozel konular hakkinda konusmamalisin.' },
+                { en: 'You may not talk to the driver while the bus is moving.', tr: 'Otobus hareket halindeyken soforle konusamazsin.' },
+                { en: 'You might not talk much in a new group at first.', tr: 'Yeni bir grupta ilk basta fazla konusmayabilirsin.' },
+                { en: 'You mustn\'t talk over other people.', tr: 'Baskalarinin sozunu keserek konusmamalisin.' }
+            ],
+            yesNo: [
+                { en: 'Can you talk to the teacher after class?', tr: 'Dersten sonra ogretmenle konusabilir misin?' },
+                { en: 'Could you talk a bit more slowly so I can understand?', tr: 'Daha iyi anlayayim diye biraz daha yavas konusabilir misin?' },
+                { en: 'Would you talk more confidently if you practiced with a friend?', tr: 'Bir arkadasinla pratik yapsan daha ozguvenli konusur muydun?' },
+                { en: 'Should you talk to your manager before you decide?', tr: 'Karar vermeden once mudurunle konusmali misin?' },
+                { en: 'May you talk during the break?', tr: 'Arada konusabilir misin?' },
+                { en: 'Might you talk too much when you\'re nervous?', tr: 'Gerilince fazla konusabilir misin?' },
+                { en: 'Must you talk clearly during the presentation?', tr: 'Sunumda net konusmak zorunda misin?' }
+            ],
+            wh: [
+                { en: 'Who can you talk to about this problem?', tr: 'Bu sorun hakkinda kiminle konusabilirsin?' },
+                { en: 'How could you talk to him without sounding rude?', tr: 'Kaba gorunmeden onunla nasil konusabilirdin?' },
+                { en: 'Why would you talk to him after what he said?', tr: 'O bunlari soyledikten sonra onunla neden konusurdun?' },
+                { en: 'What should you talk about in a job interview?', tr: 'Is gorusmesinde ne hakkinda konusmalisin?' },
+                { en: 'When may you talk to the examiner?', tr: 'Sinav gorevlisiyle ne zaman konusabilirsin?' },
+                { en: 'What might you talk about to break the ice?', tr: 'Ortami yumusatmak icin ne hakkinda konusabilirsin?' },
+                { en: 'What must you talk about in the report?', tr: 'Raporda hangi konudan bahsetmek zorundasin?' }
+            ]
+        },
+        turn: {
+            affirmative: [
+                { en: 'It can turn into a bigger problem if we ignore it.', tr: 'Gormezden gelirsek daha buyuk bir soruna donusebilir.' },
+                { en: 'It could turn out better next time with more practice.', tr: 'Daha cok pratikle bir dahaki sefer daha iyi sonuclanabilirdi.' },
+                { en: 'It would turn cold at night in the mountains.', tr: 'Daglarda gece soguk olurdu.' },
+                { en: 'It should turn green in a few seconds.', tr: 'Birkac saniye icinde yesile donmeli.' },
+                { en: 'It may turn out to be a misunderstanding.', tr: 'Sonunda bir yanlis anlasilma oldugu ortaya cikabilir.' },
+                { en: 'It might turn on if you restart it.', tr: 'Yeniden baslatirsan acilabilir.' },
+                { en: 'It must turn off automatically for safety.', tr: 'Guvenlik icin otomatik kapanmak zorunda.' }
+            ],
+            negative: [
+                { en: 'It can\'t turn on because the battery is dead.', tr: 'Pil bittigi icin acilmaz.' },
+                { en: 'It couldn\'t turn any faster because the motor was weak.', tr: 'Motor zayif oldugu icin daha hizli donemezdi.' },
+                { en: 'It wouldn\'t turn out well without planning.', tr: 'Plansiz iyi sonuclanmazdi.' },
+                { en: 'It shouldn\'t turn red if everything is normal.', tr: 'Her sey normalse kirmiziya donmemeli.' },
+                { en: 'It may not turn out the way we expect.', tr: 'Bekledigimiz gibi sonuclanmayabilir.' },
+                { en: 'It might not turn on if the cable is loose.', tr: 'Kablo gevsekse acilmayabilir.' },
+                { en: 'It mustn\'t turn into a personal argument.', tr: 'Kisisel bir tartismaya donusmemeli.' }
+            ],
+            yesNo: [
+                { en: 'Can it turn into a bigger problem if we ignore it?', tr: 'Gormezden gelirsek daha buyuk soruna donusebilir mi?' },
+                { en: 'Could it turn out better next time with more practice?', tr: 'Daha cok pratikle bir dahaki sefer daha iyi sonuclanabilir miydi?' },
+                { en: 'Would it turn cold at night in the mountains?', tr: 'Daglarda gece soguk olur muydu?' },
+                { en: 'Should it turn green in a few seconds?', tr: 'Birkac saniye icinde yesile donmeli mi?' },
+                { en: 'May it turn out to be a misunderstanding?', tr: 'Bunun yanlis anlasilma oldugu ortaya cikabilir mi?' },
+                { en: 'Might it turn on if you restart it?', tr: 'Yeniden baslatirsan acilabilir mi?' },
+                { en: 'Must it turn off automatically for safety?', tr: 'Guvenlik icin otomatik kapanmak zorunda mi?' }
+            ],
+            wh: [
+                { en: 'How can it turn into such a mess so quickly?', tr: 'Nasil bu kadar cabuk boyle bir karmasaya donusebilir?' },
+                { en: 'Why could it turn out wrong even with a plan?', tr: 'Plan olsa bile neden yanlis sonuclanabilirdi?' },
+                { en: 'When would it turn dark in winter?', tr: 'Kisin ne zaman hava kararirdi?' },
+                { en: 'What should it turn into if we improve it?', tr: 'Iyilestirirsek neye donusmeli?' },
+                { en: 'How may it turn out if we wait?', tr: 'Beklersek nasil sonuclanabilir?' },
+                { en: 'What might it turn into if we don\'t stop it?', tr: 'Durdurmazsak neye donusebilir?' },
+                { en: 'Why must it turn off during overheating?', tr: 'Asiri isinmada neden kapanmak zorunda?' }
+            ]
+        },
+        start: {
+            affirmative: [
+                { en: 'We can start as soon as everyone arrives.', tr: 'Herkes gelince baslayabiliriz.' },
+                { en: 'We could start earlier if the room was ready.', tr: 'Oda hazir olsaydi daha erken baslayabilirdik.' },
+                { en: 'We would start a new project if we had the budget.', tr: 'Butcemiz olsa yeni bir projeye baslardik.' },
+                { en: 'We should start with the most important tasks.', tr: 'En onemli islerle baslamaliyiz.' },
+                { en: 'We may start the meeting at 2 p.m.', tr: 'Toplantiya saat 2de baslayabiliriz.' },
+                { en: 'We might start late because of traffic.', tr: 'Trafik yuzunden gec baslayabiliriz.' },
+                { en: 'We must start on time to finish early.', tr: 'Erken bitirmek icin zamaninda baslamaliyiz.' }
+            ],
+            negative: [
+                { en: 'We can\'t start without the password.', tr: 'Sifre olmadan baslayamayiz.' },
+                { en: 'We couldn\'t start the lesson because the internet was down.', tr: 'Internet olmadigi icin derse baslayamadik.' },
+                { en: 'We wouldn\'t start something we can\'t finish.', tr: 'Bitiremeyecegimiz bir seye baslamazdik.' },
+                { en: 'We shouldn\'t start a fight over small things.', tr: 'Kucuk seyler icin kavga baslatmamaliyiz.' },
+                { en: 'We may not start today if the materials don\'t arrive.', tr: 'Malzemeler gelmezse bugun baslamayabiliriz.' },
+                { en: 'We might not start until we get approval.', tr: 'Onay alana kadar baslamayabiliriz.' },
+                { en: 'We mustn\'t start the machine without training.', tr: 'Egitim olmadan makineyi calistirmaya baslamamaliyiz.' }
+            ],
+            yesNo: [
+                { en: 'Can we start as soon as everyone arrives?', tr: 'Herkes gelir gelmez baslayabilir miyiz?' },
+                { en: 'Could we start earlier if the room was ready?', tr: 'Oda hazir olsaydi daha erken baslayabilir miydik?' },
+                { en: 'Would we start a new project if we had the budget?', tr: 'Butcemiz olsa yeni bir projeye baslar miydik?' },
+                { en: 'Should we start with the most important tasks?', tr: 'En onemli islerle baslamali miyiz?' },
+                { en: 'May we start the meeting at 2 p.m.?', tr: 'Toplantiya saat 2de baslayabilir miyiz?' },
+                { en: 'Might we start late because of traffic?', tr: 'Trafik yuzunden gec baslayabilir miyiz?' },
+                { en: 'Must we start on time to finish early?', tr: 'Erken bitirmek icin zamaninda baslamak zorunda miyiz?' }
+            ],
+            wh: [
+                { en: 'When can we start the next unit?', tr: 'Sonraki uniteye ne zaman baslayabiliriz?' },
+                { en: 'How could we start without a clear plan?', tr: 'Net bir plan olmadan nasil baslayabiliriz?' },
+                { en: 'Why would we start again after failing once?', tr: 'Bir kez basarisiz olduktan sonra neden tekrar baslardik?' },
+                { en: 'What should we start working on first?', tr: 'Once ne uzerinde calismaya baslamaliyiz?' },
+                { en: 'Where may we start the registration?', tr: 'Kayda nereden baslayabiliriz?' },
+                { en: 'What might we start if we want a side income?', tr: 'Ek gelir icin neye baslayabiliriz?' },
+                { en: 'What must we start preparing today?', tr: 'Bugun neyi hazirlamaya baslamamiz gerekiyor?' }
+            ]
+        },
+        play: {
+            affirmative: [
+                { en: 'He can play the guitar well enough for the show.', tr: 'Gosteri icin yeterince iyi gitar calabilir.' },
+                { en: 'He could play for hours when he was a kid.', tr: 'Cocukken saatlerce oynayabilirdi.' },
+                { en: 'He would play basketball every day if he had time.', tr: 'Vakti olsa her gun basketbol oynardi.' },
+                { en: 'He should play more defensively in the next match.', tr: 'Bir sonraki macta daha savunmaci oynamali.' },
+                { en: 'He may play in the final if he recovers.', tr: 'Iyilesirse finalde oynayabilir.' },
+                { en: 'He might play a smaller role in this film.', tr: 'Bu filmde daha kucuk bir rol oynayabilir.' },
+                { en: 'He must play fairly and follow the rules.', tr: 'Adil oynamali ve kurallara uymali.' }
+            ],
+            negative: [
+                { en: 'He can\'t play today because his ankle hurts.', tr: 'Bilegi agrdigi icin bugun oynayamaz.' },
+                { en: 'He couldn\'t play the piano at first.', tr: 'Ilk basta piyano calamiyordu.' },
+                { en: 'He wouldn\'t play that song at a formal event.', tr: 'Resmi bir etkinlikte o sarkiyi calmazdi.' },
+                { en: 'He shouldn\'t play when he has a fever.', tr: 'Atesi varken oynamamali.' },
+                { en: 'He may not play if the coach says no.', tr: 'Koc izin vermezse oynamayabilir.' },
+                { en: 'He might not play well under pressure.', tr: 'Baski altinda iyi oynamayabilir.' },
+                { en: 'He mustn\'t play loud music after midnight.', tr: 'Gece yarisindan sonra yuksek sesle muzik calmamali.' }
+            ],
+            yesNo: [
+                { en: 'Can he play the guitar well enough for the show?', tr: 'Gosteri icin yeterince iyi gitar calabilir mi?' },
+                { en: 'Could he play for hours when he was a kid?', tr: 'Cocukken saatlerce oynayabilir miydi?' },
+                { en: 'Would he play basketball every day if he had time?', tr: 'Vakti olsa her gun basketbol oynar miydi?' },
+                { en: 'Should he play more defensively in the next match?', tr: 'Bir sonraki macta daha savunmaci oynamali mi?' },
+                { en: 'May he play in the final if he recovers?', tr: 'Iyilesirse finalde oynayabilir mi?' },
+                { en: 'Might he play a smaller role in this film?', tr: 'Bu filmde daha kucuk rol oynayabilir mi?' },
+                { en: 'Must he play fairly and follow the rules?', tr: 'Adil oynamak zorunda mi?' }
+            ],
+            wh: [
+                { en: 'What can he play to practice pronunciation?', tr: 'Telaffuz calismak icin ne calabilir?' },
+                { en: 'Where could he play without disturbing anyone?', tr: 'Kimseyi rahatsiz etmeden nerede calabilir?' },
+                { en: 'Why would he play that character in the movie?', tr: 'Filmde o karakteri neden oynardi?' },
+                { en: 'What should he play to improve his skills?', tr: 'Becerilerini gelistirmek icin ne oynamali?' },
+                { en: 'When may he play again after the injury?', tr: 'Sakatliktan sonra ne zaman tekrar oynayabilir?' },
+                { en: 'Who might he play against in the next round?', tr: 'Bir sonraki turda kime karsi oynayabilir?' },
+                { en: 'What must he play for the audition?', tr: 'Secmelerde ne calmak zorunda?' }
+            ]
+        }
+    };
+    let currentTenseId = 0;  // Start with first tense (Simple Present)
+
+    const NEGATIVE_AUX_REPLACEMENTS = {
+        am: 'are not',
+        is: "isn't",
+        are: "aren't",
+        was: "wasn't",
+        were: "weren't",
+        do: "don't",
+        does: "doesn't",
+        did: "didn't",
+        have: "haven't",
+        has: "hasn't",
+        had: "hadn't",
+        will: "won't",
+        can: "can't",
+        could: "couldn't",
+        would: "wouldn't",
+        should: "shouldn't",
+        may: 'may not',
+        might: 'might not',
+        must: 'must not'
+    };
+
+    function makeNegativeQuestionHead(headText) {
+        let text = (headText || '').trim();
+        if (!text) {
+            return text;
+        }
+
+        text = text
+            .replace(/\bam\s+i\s+not\b/gi, 'are not I')
+            .replace(/\bam\s+not\s+i\b/gi, 'are not I');
+
+        const tokens = text.split(/\s+/);
+        if (tokens.length >= 3) {
+            const whWords = new Set(['what', 'where', 'when', 'why', 'how', 'who', 'which']);
+            const first = (tokens[0] || '').toLowerCase();
+            const aux = (tokens[1] || '').toLowerCase();
+            const subject = tokens[2] || '';
+            const tail = tokens.slice(3).join(' ');
+
+            if (whWords.has(first) && NEGATIVE_AUX_REPLACEMENTS[aux]) {
+                if (aux === 'may' || aux === 'might') {
+                    const rest = tail ? `${tail}` : '';
+                    return `${tokens[0]} ${tokens[1]} ${subject} not ${rest}`.replace(/\s+/g, ' ').trim();
+                }
+
+                const replacement = NEGATIVE_AUX_REPLACEMENTS[aux];
+                const rest = tail ? `${tail}` : '';
+                return `${tokens[0]} ${replacement} ${subject} ${rest}`.replace(/\s+/g, ' ').trim();
+            }
+        }
+
+        const auxIndex = tokens.findIndex((token, index) => index > 0 && NEGATIVE_AUX_REPLACEMENTS[token.toLowerCase()]);
+        if (auxIndex === -1) {
+            return text;
+        }
+
+        const replacement = NEGATIVE_AUX_REPLACEMENTS[tokens[auxIndex].toLowerCase()];
+        tokens.splice(auxIndex, 1, ...replacement.split(' '));
+        return tokens.join(' ');
+    }
+
+    function makeNegativeTurkishWh(text) {
+        let value = (text || '').trim();
+        if (!value) {
+            return value;
+        }
+
+        value = value.replace(/\s*\(olumsuz\)\s*/gi, ' ').replace(/\s+/g, ' ').trim();
+        const hadQuestion = /\?$/.test(value);
+        value = value.replace(/\?$/, '').trim();
+
+        const wholeSentenceDirect = [
+            [/\bneredeydim$/i, 'nerede degildim'],
+            [/\bneredeydik$/i, 'nerede degildik'],
+            [/\bburadayim$/i, 'burada degilim'],
+            [/\bburadayiz$/i, 'burada degiliz'],
+            [/\byasamistim$/i, 'yasamamistim'],
+            [/\bolacagim$/i, 'olmayacagim'],
+            [/\bolacagiz$/i, 'olmayacagiz']
+        ];
+
+        for (const [pattern, replacement] of wholeSentenceDirect) {
+            if (pattern.test(value)) {
+                const out = value.replace(pattern, replacement).replace(/\s+/g, ' ').trim();
+                return hadQuestion ? `${out}?` : out;
+            }
+        }
+
+        const words = value.split(' ').filter(Boolean);
+        if (words.length === 0) {
+            return hadQuestion ? `${value}?` : value;
+        }
+
+        const applyPredicateNegation = (word) => {
+            let w = (word || '').trim();
+            if (!w) {
+                return w;
+            }
+
+            const direct = [
+                [/^gidebilirim$/i, 'gidemem'],
+                [/^gidiyorum$/i, 'gitmiyorum'],
+                [/^gittim$/i, 'gitmedim'],
+                [/^gidiyordum$/i, 'gitmiyordum'],
+                [/^gidecegim$/i, 'gitmeyecegim'],
+                [/^gitmistim$/i, 'gitmemistim'],
+                [/^olabilir$/i, 'olmayabilir'],
+                [/^olmali$/i, 'olmamali'],
+                [/^zorundayim$/i, 'zorunda degilim'],
+                [/^zorundayiz$/i, 'zorunda degiliz']
+            ];
+
+            for (const [pattern, replacement] of direct) {
+                if (pattern.test(w)) {
+                    return replacement;
+                }
+            }
+
+            const endingReplacements = [
+                [/([a-z]+)maliyim$/i, '$1mamaliyim'],
+                [/([a-z]+)meliyim$/i, '$1memeliyim'],
+                [/([a-z]+)malilar$/i, '$1mamalilar'],
+                [/([a-z]+)meliler$/i, '$1memeliler'],
+                [/([a-z]+)mali$/i, '$1mamali'],
+                [/([a-z]+)meli$/i, '$1memeli'],
+                [/([a-z]+)abilirlerdi$/i, '$1amazlardi'],
+                [/([a-z]+)ebilirlerdi$/i, '$1emezlerdi'],
+                [/([a-z]+)abilirdi$/i, '$1amazdi'],
+                [/([a-z]+)ebilirdi$/i, '$1emezdi'],
+                [/([a-z]+)abilirler$/i, '$1amazlar'],
+                [/([a-z]+)ebilirler$/i, '$1emezler'],
+                [/([a-z]+)abilirim$/i, '$1amam'],
+                [/([a-z]+)ebilirim$/i, '$1emem'],
+                [/([a-z]+)abilir$/i, '$1amaz'],
+                [/([a-z]+)ebilir$/i, '$1emez'],
+                [/([a-z]+)iyordum$/i, '$1miyordum'],
+                [/([a-z]+)iyordu$/i, '$1miyordu'],
+                [/([a-z]+)acagim$/i, '$1mayacagim'],
+                [/([a-z]+)ecegim$/i, '$1meyecegim'],
+                [/([a-z]+)acaklar$/i, '$1mayacaklar'],
+                [/([a-z]+)ecekler$/i, '$1meyecekler'],
+                [/([a-z]+)acak$/i, '$1mayacak'],
+                [/([a-z]+)ecek$/i, '$1meyecek'],
+                [/([a-z]+)mistim$/i, '$1mamistim'],
+                [/([a-z]+)ardim$/i, '$1mazdim'],
+                [/([a-z]+)erdim$/i, '$1mezdim'],
+                [/([a-z]+)ardi$/i, '$1mazdi'],
+                [/([a-z]+)erdi$/i, '$1mezdi'],
+                [/([a-z]+)iyorum$/i, '$1miyorum'],
+                [/([a-z]+)iyor$/i, '$1miyor']
+            ];
+
+            for (const [pattern, replacement] of endingReplacements) {
+                if (pattern.test(w)) {
+                    return w.replace(pattern, replacement);
+                }
+            }
+
+            return w;
+        };
+
+        // Handle two-word predicate chunks like "yapmak zorundalardi".
+        if (words.length >= 2) {
+            const lastTwo = `${words[words.length - 2]} ${words[words.length - 1]}`;
+            if (/^([a-z]+)mak zorundalardi$/i.test(lastTwo)) {
+                words[words.length - 2] = words[words.length - 2].replace(/mak$/i, 'mamak');
+                const out = words.join(' ').replace(/\s+/g, ' ').trim();
+                return hadQuestion ? `${out}?` : out;
+            }
+
+            if (/^([a-z]+)mek zorundalardi$/i.test(lastTwo)) {
+                words[words.length - 2] = words[words.length - 2].replace(/mek$/i, 'memek');
+                const out = words.join(' ').replace(/\s+/g, ' ').trim();
+                return hadQuestion ? `${out}?` : out;
+            }
+
+            if (/^([a-z]+)mak zorunda$/i.test(lastTwo)) {
+                words[words.length - 2] = words[words.length - 2].replace(/mak$/i, 'mamak');
+                const out = words.join(' ').replace(/\s+/g, ' ').trim();
+                return hadQuestion ? `${out}?` : out;
+            }
+
+            if (/^([a-z]+)mek zorunda$/i.test(lastTwo)) {
+                words[words.length - 2] = words[words.length - 2].replace(/mek$/i, 'memek');
+                const out = words.join(' ').replace(/\s+/g, ' ').trim();
+                return hadQuestion ? `${out}?` : out;
+            }
+        }
+
+        const lastIndex = words.length - 1;
+        const transformedLast = applyPredicateNegation(words[lastIndex]);
+        words[lastIndex] = transformedLast;
+
+        let converted = words.join(' ').replace(/\s+/g, ' ').trim();
+
+        // Never leave a bare "degil" at sentence end; negate predicate instead.
+        if (/\bdegil$/i.test(converted)) {
+            const parts = converted.split(' ').filter(Boolean);
+            parts.pop();
+
+            if (parts.length > 0) {
+                const idx = parts.length - 1;
+                const negated = applyPredicateNegation(parts[idx]);
+                if (negated !== parts[idx]) {
+                    parts[idx] = negated;
+                } else {
+                    parts[idx] = `${parts[idx]} olmaz`;
+                }
+            }
+
+            converted = parts.join(' ').replace(/\s+/g, ' ').trim();
+        }
+
+        if (converted === value) {
+            const fallbackWords = value.split(' ').filter(Boolean);
+            if (fallbackWords.length > 0) {
+                const idx = fallbackWords.length - 1;
+                fallbackWords[idx] = applyPredicateNegation(fallbackWords[idx]);
+                converted = fallbackWords.join(' ').replace(/\s+/g, ' ').trim();
+            }
+
+            if (!converted || converted === value) {
+                converted = `${value} olmaz`;
+            }
+        }
+
+        return hadQuestion ? `${converted}?` : converted;
+    }
+
+    function buildNegativeWhSentences(sentences) {
+        return (sentences || []).map(sentence => ({
+            ...sentence,
+            preposition: makeNegativeQuestionHead(sentence.preposition),
+            trSing: makeNegativeTurkishWh(sentence.trSing),
+            trPlural: makeNegativeTurkishWh(sentence.trPlural || sentence.trSing)
+        }));
+    }
+
+    const sequenceKeys = isVerbMode
+        ? ['headEn', 'tailEn', 'finalTr']
+        : ['headEn', 'headTr', 'tailEn', 'tailTr', 'finalTr'];
+    const chainMarks = isVerbMode
+        ? {
+            headEn: '1',
+            tailEn: '2',
+            finalTr: '3'
+        }
+        : {
+            headEn: '1',
+            headTr: '2',
+            tailEn: '3',
+            tailTr: '4',
+            finalTr: '5'
+        };
+
+    let mode = 'singular';
+
+    function detectVerbMode(sentences) {
+        if (!Array.isArray(sentences) || sentences.length < 3) {
+            return false;
+        }
+
+        const headLikeRegex = /^(i|you|he|she|it|we|they|am|is|are|was|were|will|do|does|did|have|has|had)\b/i;
+        const headLikeCount = sentences.filter(s => headLikeRegex.test((s.preposition || '').trim())).length;
+        return headLikeCount >= Math.ceil(sentences.length * 0.5);
+    }
+
+    function shuffle(arr) {
+        const copy = [...arr];
+        for (let i = copy.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+    }
+
+    function getNounCategory(noun) {
+        const value = (noun || '').toLowerCase().trim();
+        const peopleLike = new Set(['child', 'student', 'teacher', 'person', 'man', 'woman', 'friend', 'doctor', 'nurse', 'patient']);
+        const placeLike = new Set(['school', 'university', 'city', 'country', 'park', 'garden', 'building', 'room', 'street', 'hospital', 'bank', 'shop']);
+        const foodLike = new Set(['food', 'drink', 'coffee', 'tea', 'milk', 'bread', 'egg', 'meat', 'fruit', 'vegetable', 'apple', 'banana', 'orange', 'tomato', 'potato', 'onion', 'water']);
+        const animalLike = new Set(['dog', 'cat', 'bird', 'animal', 'fish']);
+
+        if (peopleLike.has(value)) {
+            return 'people';
+        }
+
+        if (placeLike.has(value)) {
+            return 'place';
+        }
+
+        if (foodLike.has(value)) {
+            return 'food';
+        }
+
+        if (animalLike.has(value)) {
+            return 'animal';
+        }
+
+        return 'general';
+    }
+
+    function getSingleVerbPack() {
+        const category = getNounCategory(currentNounEn);
+
+        if (category === 'people') {
+            return {
+                allowedPrepositions: new Set(['to', 'with', 'about']),
+                enBase: 'speak',
+                enPast: 'spoke',
+                enPastPart: 'spoken',
+                enGerund: 'speaking',
+                trFuture: 'konuşacağım',
+                trFutureNegative: 'konuşmayacağım',
+                trFutureQuestion: 'konuşacak mıyım',
+                trSimplePast: 'konuştum',
+                trSimplePastNegative: 'konuşmadım',
+                trSimplePastQuestion: 'konuştum mu',
+                trPresentPerfect: 'konuştum',
+                trPresentPerfectNegative: 'konuşmadım',
+                trPresentPerfectQuestion: 'konuştum mu',
+                trPastPerfect: 'konuşmuştum',
+                trPastPerfectNegative: 'konuşmamıştım',
+                trPastPerfectQuestion: 'konuşmuş muydum',
+                trPastContinuous: 'konuşuyordum',
+                trPastContinuousNegative: 'konuşmuyordum',
+                trPastContinuousQuestion: 'konuşuyor muydum'
+            };
+        }
+
+        if (category === 'place') {
+            return {
+                allowedPrepositions: new Set(['in', 'at']),
+                enBase: 'work',
+                enPast: 'worked',
+                enPastPart: 'worked',
+                enGerund: 'working',
+                trFuture: 'çalışacağım',
+                trFutureNegative: 'çalışmayacağım',
+                trFutureQuestion: 'çalışacak mıyım',
+                trSimplePast: 'çalıştım',
+                trSimplePastNegative: 'çalışmadım',
+                trSimplePastQuestion: 'çalıştım mı',
+                trPresentPerfect: 'çalıştım',
+                trPresentPerfectNegative: 'çalışmadım',
+                trPresentPerfectQuestion: 'çalıştım mı',
+                trPastPerfect: 'çalışmıştım',
+                trPastPerfectNegative: 'çalışmamıştım',
+                trPastPerfectQuestion: 'çalışmış mıydım',
+                trPastContinuous: 'çalışıyordum',
+                trPastContinuousNegative: 'çalışmıyordum',
+                trPastContinuousQuestion: 'çalışıyor muydum'
+            };
+        }
+
+        if (category === 'food') {
+            return {
+                allowedPrepositions: new Set(['with', 'without']),
+                enBase: 'cook',
+                enPast: 'cooked',
+                enPastPart: 'cooked',
+                enGerund: 'cooking',
+                trFuture: 'yemek yapacağım',
+                trFutureNegative: 'yemek yapmayacağım',
+                trFutureQuestion: 'yemek yapacak mıyım',
+                trSimplePast: 'yemek yaptım',
+                trSimplePastNegative: 'yemek yapmadım',
+                trSimplePastQuestion: 'yemek yaptım mı',
+                trPresentPerfect: 'yemek yaptım',
+                trPresentPerfectNegative: 'yemek yapmadım',
+                trPresentPerfectQuestion: 'yemek yaptım mı',
+                trPastPerfect: 'yemek yapmıştım',
+                trPastPerfectNegative: 'yemek yapmamıştım',
+                trPastPerfectQuestion: 'yemek yapmış mıydım',
+                trPastContinuous: 'yemek yapıyordum',
+                trPastContinuousNegative: 'yemek yapmıyordum',
+                trPastContinuousQuestion: 'yemek yapıyor muydum'
+            };
+        }
+
+        if (category === 'animal') {
+            return {
+                allowedPrepositions: new Set(['with']),
+                enBase: 'play',
+                enPast: 'played',
+                enPastPart: 'played',
+                enGerund: 'playing',
+                trFuture: 'oynayacağım',
+                trFutureNegative: 'oynamayacağım',
+                trFutureQuestion: 'oynayacak mıyım',
+                trSimplePast: 'oynadım',
+                trSimplePastNegative: 'oynamadım',
+                trSimplePastQuestion: 'oynadım mı',
+                trPresentPerfect: 'oynadım',
+                trPresentPerfectNegative: 'oynamadım',
+                trPresentPerfectQuestion: 'oynadım mı',
+                trPastPerfect: 'oynamıştım',
+                trPastPerfectNegative: 'oynamamıştım',
+                trPastPerfectQuestion: 'oynamış mıydım',
+                trPastContinuous: 'oynuyordum',
+                trPastContinuousNegative: 'oynamıyordum',
+                trPastContinuousQuestion: 'oynuyor muydum'
+            };
+        }
+
+        return {
+            allowedPrepositions: new Set(['about', 'with']),
+            enBase: 'talk',
+            enPast: 'talked',
+            enPastPart: 'talked',
+            enGerund: 'talking',
+            trFuture: 'konuşacağım',
+            trFutureNegative: 'konuşmayacağım',
+            trFutureQuestion: 'konuşacak mıyım',
+            trSimplePast: 'konuştum',
+            trSimplePastNegative: 'konuşmadım',
+            trSimplePastQuestion: 'konuştum mu',
+            trPresentPerfect: 'konuştum',
+            trPresentPerfectNegative: 'konuşmadım',
+            trPresentPerfectQuestion: 'konuştum mu',
+            trPastPerfect: 'konuşmuştum',
+            trPastPerfectNegative: 'konuşmamıştım',
+            trPastPerfectQuestion: 'konuşmuş muydum',
+            trPastContinuous: 'konuşuyordum',
+            trPastContinuousNegative: 'konuşmuyordum',
+            trPastContinuousQuestion: 'konuşuyor muydum'
+        };
+    }
+
+    function isTurkishTailCompatible(tailText, preposition, verbPack) {
+        const text = (tailText || '').toLowerCase().trim();
+        const prep = (preposition || '').toLowerCase().trim();
+
+        if (!text || !prep || !verbPack.allowedPrepositions.has(prep)) {
+            return false;
+        }
+
+        if (prep === 'to') {
+            return !text.includes('hakkında') && !text.includes(' ile') && !text.includes(' için')
+                && !text.includes(' yüzünden') && !text.includes(' olmadan') && !text.includes(' sonra')
+                && !text.includes(' önce');
+        }
+
+        if (prep === 'in' || prep === 'at') {
+            return !text.includes('hakkında') && !text.includes(' ile') && !text.includes(' için')
+                && (text.endsWith('da') || text.endsWith('de') || text.endsWith('ta') || text.endsWith('te') || text.includes('daki ') || text.includes('deki '));
+        }
+
+        if (prep === 'with') {
+            return text.includes(' ile') || text.endsWith('ile') || text.endsWith('la') || text.endsWith('le');
+        }
+
+        if (prep === 'without') {
+            return text.includes('olmadan');
+        }
+
+        if (prep === 'about') {
+            return text.includes('hakkında');
+        }
+
+        if (prep === 'for') {
+            return text.includes(' için');
+        }
+
+        return false;
+    }
+
+    // ========== VERB MODE SPECIAL HANDLING ==========
+    function buildVerbHeadPairs() {
+        return rawSentences.map((s, idx) => ({
+            id: idx + 1,
+            en: s.preposition,  // "I go", "I don't go", etc.
+            tr: '',
+            tenseKey: 'verbTense' + idx
+        }));
+    }
+
+    function buildVerbTailPairs(sentencesList) {
+        const sentiList = sentencesList || rawSentences;
+        const uniqueTails = [];
+        const seenTailTexts = new Map(); // text -> id mapping
+        let tailId = 1;
+        
+        sentiList.forEach((s) => {
+            const tailText = (s.detSing + ' ' + s.detPlural).trim();
+            
+            if (!seenTailTexts.has(tailText)) {
+                seenTailTexts.set(tailText, tailId);
+                uniqueTails.push({
+                    id: tailId,
+                    preposition: s.preposition,
+                    en: tailText,
+                    tr: ''
+                });
+                tailId++;
+            }
+        });
+        
+        return uniqueTails;
+    }
+
+    function buildVerbFinalSentences(sentencesList) {
+        const sentiList = sentencesList || rawSentences;
+        const uniqueTails = buildVerbTailPairs(sentiList);
+        const tailTextToId = new Map();
+        uniqueTails.forEach(t => tailTextToId.set(t.en, t.id));
+        
+        return sentiList.map((s, idx) => {
+            const tailText = (s.detSing + ' ' + s.detPlural).trim();
+            const tailId = tailTextToId.get(tailText);
+            
+            return {
+                id: idx + 1,
+                tailId: tailId,
+                headEn: s.preposition,
+                headTr: '',
+                tailEn: tailText,
+                tailTr: '',
+                finalEn: (s.preposition + ' ' + tailText).trim(),
+                finalTr: s.trSing
+            };
+        });
+    }
+
+    function buildVerbSentenceChains() {
+        const ordered = [...rawSentences].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+
+        let startIndex = 0;
+        let itemCount = 3;
+
+        if (currentTenseId === WH_TENSE_ID) {
+            startIndex = 21;
+            itemCount = 7;
+        } else {
+            startIndex = currentTenseId * 3;
+        }
+
+        let filteredSentences = ordered.slice(startIndex, startIndex + itemCount);
+
+        if (currentTenseId === WH_TENSE_ID && currentWhGroup === 'negative') {
+            filteredSentences = buildNegativeWhSentences(filteredSentences);
+        }
+
+        if (currentTenseId === WH_TENSE_ID) {
+            const whoExample = WHO_W_QUESTION_BY_VERB[(currentNounEn || '').toLowerCase()];
+            if (whoExample && filteredSentences.length > 0) {
+                filteredSentences[0] = {
+                    ...filteredSentences[0],
+                    preposition: currentWhGroup === 'negative' ? makeNegativeQuestionHead(whoExample.head) : whoExample.head,
+                    detSing: whoExample.tail,
+                    detPlural: '',
+                    trSing: currentWhGroup === 'negative' ? makeNegativeTurkishWh(whoExample.tr) : whoExample.tr,
+                    trPlural: currentWhGroup === 'negative' ? makeNegativeTurkishWh(whoExample.tr) : whoExample.tr
+                };
+            }
+        }
+
+        return buildVerbFinalSentences(filteredSentences);
+    }
+
+    function getFallbackModalExamples() {
+        const base = (currentNounEn || 'go').trim();
+        const capitalized = base.charAt(0).toUpperCase() + base.slice(1);
+        return {
+            affirmative: [
+                { en: `I can ${base} today.`, tr: `Bugun ${base} yapabilirim.` },
+                { en: `I could ${base} with more time.`, tr: `Daha cok zamanla ${base} yapabilirdim.` },
+                { en: `I would ${base} if needed.`, tr: `Gerekirse ${base} yapardim.` },
+                { en: `I should ${base} now.`, tr: `Simdi ${base} yapmaliyim.` },
+                { en: `I may ${base} later.`, tr: `Sonra ${base} yapabilirim.` },
+                { en: `I might ${base} tomorrow.`, tr: `Yarin ${base} yapabilirim.` },
+                { en: `I must ${base} this week.`, tr: `Bu hafta ${base} yapmaliyim.` }
+            ],
+            negative: [
+                { en: `I can't ${base} today.`, tr: `Bugun ${base} yapamam.` },
+                { en: `I couldn't ${base} yesterday.`, tr: `Dun ${base} yapamadim.` },
+                { en: `I wouldn't ${base} again.`, tr: `Bunu tekrar ${base} yapmazdim.` },
+                { en: `I shouldn't ${base} now.`, tr: `Simdi ${base} yapmamaliyim.` },
+                { en: `I may not ${base} today.`, tr: `Bugun ${base} yapmayabilirim.` },
+                { en: `I might not ${base} this week.`, tr: `Bu hafta ${base} yapmayabilirim.` },
+                { en: `I mustn't ${base} here.`, tr: `Burada ${base} yapmamaliyim.` }
+            ],
+            yesNo: [
+                { en: `Can I ${base} today?`, tr: `Bugun ${base} yapabilir miyim?` },
+                { en: `Could I ${base} with more time?`, tr: `Daha cok zamanla ${base} yapabilir miydim?` },
+                { en: `Would I ${base} if needed?`, tr: `Gerekirse ${base} yapar miydim?` },
+                { en: `Should I ${base} now?`, tr: `Simdi ${base} yapmali miyim?` },
+                { en: `May I ${base} later?`, tr: `Sonra ${base} yapabilir miyim?` },
+                { en: `Might I ${base} tomorrow?`, tr: `Yarin ${base} yapabilir miyim?` },
+                { en: `Must I ${base} this week?`, tr: `Bu hafta ${base} yapmak zorunda miyim?` }
+            ],
+            wh: [
+                { en: `How can I ${base} better?`, tr: `${capitalized} daha iyi nasil yapabilirim?` },
+                { en: `Where could I ${base}?`, tr: `${capitalized} nerede yapabilirdim?` },
+                { en: `Why would I ${base}?`, tr: `Neden ${base} yapardim?` },
+                { en: `What should I ${base} first?`, tr: `Ilk olarak neyi ${base} yapmaliyim?` },
+                { en: `When may I ${base}?`, tr: `${base} ne zaman yapabilirim?` },
+                { en: `What might I ${base}?`, tr: `Neyi ${base} yapabilirim?` },
+                { en: `Why must I ${base}?`, tr: `Neden ${base} yapmak zorundayim?` }
+            ]
+        };
+    }
+
+    function getModalExamplesForCurrentVerb() {
+        const key = (currentNounEn || '').toLowerCase();
+        return MODAL_MATCHING_BY_VERB[key] || getFallbackModalExamples();
+    }
+
+    function splitModalSentenceForChain(enSentence) {
+        const sentence = (enSentence || '').trim();
+        if (!sentence) {
+            return { head: '', tail: '' };
+        }
+
+        const cleaned = sentence.replace(/[?.!]$/, '');
+        const tokens = cleaned.split(' ').filter(Boolean);
+        if (tokens.length < 3) {
+            return { head: cleaned, tail: '' };
+        }
+
+        const first = tokens[0].toLowerCase();
+        const whWords = new Set(['what', 'where', 'when', 'why', 'how', 'who', 'which']);
+        const modalStarters = new Set(['can', 'could', 'would', 'should', 'may', 'might', 'must']);
+        let headLength = 2;
+
+        if (whWords.has(first)) {
+            headLength = 3;
+        } else if (modalStarters.has(first)) {
+            headLength = 2;
+        } else {
+            headLength = 2;
+        }
+
+        if (tokens.length <= headLength) {
+            headLength = Math.max(1, tokens.length - 1);
+        }
+
+        return {
+            head: tokens.slice(0, headLength).join(' '),
+            tail: tokens.slice(headLength).join(' ')
+        };
+    }
+
+    function buildModalSentenceChains() {
+        const modalData = getModalExamplesForCurrentVerb();
+        let items = (modalData[currentModalGroup] || []).slice(0, 7);
+
+        if (currentModalGroup === 'wh') {
+            const key = (currentNounEn || '').toLowerCase();
+            const whoItem = WHO_MODAL_WH_BY_VERB[key];
+            const hasWhoSentence = items.some(item => /^who\b/i.test((item.en || '').trim()));
+            if (whoItem && !hasWhoSentence) {
+                items = [whoItem, ...items.slice(1)];
+            }
+        }
+
+        const tailIdMap = new Map();
+        let nextTailId = 1;
+
+        return items.map((item, idx) => {
+            const parts = splitModalSentenceForChain(item.en);
+            if (!tailIdMap.has(parts.tail)) {
+                tailIdMap.set(parts.tail, nextTailId++);
+            }
+
+            return {
+                id: idx + 1,
+                tailId: tailIdMap.get(parts.tail),
+                headEn: parts.head,
+                headTr: '',
+                tailEn: parts.tail,
+                tailTr: '',
+                finalEn: item.en,
+                finalTr: item.tr || ''
+            };
+        });
+    }
+
+    function buildModalBoardOrder(chainList) {
+        const uniqueTailsMap = new Map();
+        chainList.forEach(chain => {
+            if (!uniqueTailsMap.has(chain.tailEn)) {
+                uniqueTailsMap.set(chain.tailEn, {
+                    id: chain.tailId,
+                    en: chain.tailEn,
+                    tr: ''
+                });
+            }
+        });
+
+        const uniqueTails = Array.from(uniqueTailsMap.values());
+        return {
+            headEn: chainList.map(item => ({ id: item.id, text: item.headEn })),
+            headTr: chainList.map(item => ({ id: item.id, text: '' })),
+            tailEn: shuffle(uniqueTails.map(item => ({ id: item.id, text: item.en }))),
+            tailTr: shuffle(uniqueTails.map(item => ({ id: item.id, text: '' }))),
+            finalEn: shuffle(chainList.map(item => ({ id: item.id, text: item.finalEn }))),
+            finalTr: shuffle(chainList.map(item => ({ id: item.id, text: item.finalTr })))
+        };
+    }
+
+    function setVerbPanelsVisibility(showGamePanels) {
+        const modulesGrid = document.querySelector('.modules-grid');
+        const modalsArea = document.getElementById('modalsArea');
+
+        if (modulesGrid) {
+            modulesGrid.style.display = showGamePanels ? 'grid' : 'none';
+        }
+
+        if (modalsArea) {
+            modalsArea.classList.toggle('hidden', showGamePanels);
+        }
+    }
+
+    function buildVerbBoardOrder(chainList) {
+        // Extract unique tails from the filtered chainList
+        const uniqueTailsMap = new Map();
+        chainList.forEach(chain => {
+            if (!uniqueTailsMap.has(chain.tailEn)) {
+                uniqueTailsMap.set(chain.tailEn, {
+                    id: chain.tailId,
+                    en: chain.tailEn,
+                    tr: ''
+                });
+            }
+        });
+        const uniqueTails = Array.from(uniqueTailsMap.values());
+        
+        return {
+            headEn: chainList.map(item => ({ id: item.id, text: item.headEn })),
+            headTr: chainList.map(item => ({ id: item.id, text: '' })),
+            tailEn: shuffle(uniqueTails.map(item => ({ id: item.id, text: item.en }))),
+            tailTr: shuffle(uniqueTails.map(item => ({ id: item.id, text: '' }))),
+            finalEn: shuffle(chainList.map(item => ({ id: item.id, text: item.finalEn }))),
+            finalTr: shuffle(chainList.map(item => ({ id: item.id, text: item.finalTr })))
+        };
+    }
+    // ========== END VERB MODE SPECIAL HANDLING ==========
+
+    function buildHeadPairs() {
+        const verb = getSingleVerbPack();
+        return [
+            { id: 1, tenseKey: 'futurePositive', en: `I will ${verb.enBase} tomorrow.`, tr: `Ben yarın ${verb.trFuture}.` },
+            { id: 2, tenseKey: 'futureNegative', en: `I will not ${verb.enBase} tomorrow.`, tr: `Ben yarın ${verb.trFutureNegative}.` },
+            { id: 3, tenseKey: 'futureQuestion', en: `Will I ${verb.enBase} tomorrow?`, tr: `Ben yarın ${verb.trFutureQuestion}?` },
+            { id: 4, tenseKey: 'simplePastPositive', en: `I ${verb.enPast} yesterday.`, tr: `Ben dün ${verb.trSimplePast}.` },
+            { id: 5, tenseKey: 'simplePastNegative', en: `I did not ${verb.enBase} yesterday.`, tr: `Ben dün ${verb.trSimplePastNegative}.` },
+            { id: 6, tenseKey: 'simplePastQuestion', en: `Did I ${verb.enBase} yesterday?`, tr: `Ben dün ${verb.trSimplePastQuestion}?` },
+            { id: 7, tenseKey: 'presentPerfectPositive', en: `I have ${verb.enPastPart} before.`, tr: `Ben daha önce ${verb.trPresentPerfect}.` },
+            { id: 8, tenseKey: 'presentPerfectNegative', en: `I have not ${verb.enPastPart} before.`, tr: `Ben daha önce ${verb.trPresentPerfectNegative}.` },
+            { id: 9, tenseKey: 'presentPerfectQuestion', en: `Have I ${verb.enPastPart} before?`, tr: `Ben daha önce ${verb.trPresentPerfectQuestion}?` },
+            { id: 10, tenseKey: 'pastPerfectPositive', en: `I had ${verb.enPastPart} before.`, tr: `Ben daha önce ${verb.trPastPerfect}.` },
+            { id: 11, tenseKey: 'pastPerfectNegative', en: `I had not ${verb.enPastPart} before.`, tr: `Ben daha önce ${verb.trPastPerfectNegative}.` },
+            { id: 12, tenseKey: 'pastPerfectQuestion', en: `Had I ${verb.enPastPart} before?`, tr: `Ben daha önce ${verb.trPastPerfectQuestion}?` },
+            { id: 13, tenseKey: 'pastContinuousPositive', en: `I was ${verb.enGerund} yesterday.`, tr: `Ben dün ${verb.trPastContinuous}.` },
+            { id: 14, tenseKey: 'pastContinuousNegative', en: `I was not ${verb.enGerund} yesterday.`, tr: `Ben dün ${verb.trPastContinuousNegative}.` },
+            { id: 15, tenseKey: 'pastContinuousQuestion', en: `Was I ${verb.enGerund} yesterday?`, tr: `Ben dün ${verb.trPastContinuousQuestion}?` }
+        ];
+    }
+
+    function buildTailPairs(currentMode) {
+        const keyDet = currentMode === 'plural' ? 'detPlural' : 'detSing';
+        const keyNoun = currentMode === 'plural' ? 'nounPlural' : 'nounSing';
+        const keyTr = currentMode === 'plural' ? 'trPlural' : 'trSing';
+        const maxTotal = 5;
+        const verbPack = getSingleVerbPack();
+        const eligibleSentences = rawSentences.filter(sentence => {
+            const prep = (sentence.preposition || '').toLowerCase().trim();
+            const tailText = currentMode === 'plural' ? sentence.trPlural : sentence.trSing;
+            return isTurkishTailCompatible(tailText, prep, verbPack);
+        });
+        const sentencePool = eligibleSentences.length > 0 ? eligibleSentences : rawSentences;
+
+        const groupedByPreposition = new Map();
+        sentencePool.forEach(sentence => {
+            const prepKey = (sentence.preposition || '').toLowerCase().trim();
+            if (!prepKey) {
+                return;
+            }
+
+            if (!groupedByPreposition.has(prepKey)) {
+                groupedByPreposition.set(prepKey, []);
+            }
+
+            groupedByPreposition.get(prepKey).push(sentence);
+        });
+
+        const selectedSentences = [];
+        const prepKeys = shuffle(Array.from(groupedByPreposition.keys()));
+
+        prepKeys.forEach(prepKey => {
+            if (selectedSentences.length >= maxTotal) {
+                return;
+            }
+
+            const bucket = groupedByPreposition.get(prepKey) || [];
+            if (bucket.length > 0) {
+                selectedSentences.push(bucket[0]);
+            }
+        });
+
+        const sourceSentences = selectedSentences.length > 0
+            ? selectedSentences
+            : sentencePool.slice(0, maxTotal);
+
+        return sourceSentences.map((sentence, index) => {
+            const determiner = sentence[keyDet] && sentence[keyDet] !== '-' ? `${sentence[keyDet]} ` : '';
+            return {
+                id: index + 1,
+                preposition: (sentence.preposition || '').toLowerCase(),
+                en: `${sentence.preposition} ${determiner}${sentence[keyNoun]}`.replace(/\s+/g, ' ').trim(),
+                tr: sentence[keyTr]
+            };
+        });
+    }
+
+    function cleanTailForTr(text) {
+        return (text || '').replace(/\s+/g, ' ').trim();
+    }
+
+    function getTurkishPredicateForTail(tenseKey, tail, verb) {
+        const prep = (tail.preposition || '').toLowerCase().trim();
+        const category = getNounCategory(currentNounEn);
+
+        if (category === 'people' && prep === 'to') {
+            switch (tenseKey) {
+                case 'futurePositive': return 'hitap edeceğim';
+                case 'futureNegative': return 'hitap etmeyeceğim';
+                case 'futureQuestion': return 'hitap edecek miyim';
+                case 'simplePastPositive': return 'hitap ettim';
+                case 'simplePastNegative': return 'hitap etmedim';
+                case 'simplePastQuestion': return 'hitap ettim mi';
+                case 'presentPerfectPositive': return 'hitap ettim';
+                case 'presentPerfectNegative': return 'hitap etmedim';
+                case 'presentPerfectQuestion': return 'hitap ettim mi';
+                case 'pastPerfectPositive': return 'hitap etmiştim';
+                case 'pastPerfectNegative': return 'hitap etmemiştim';
+                case 'pastPerfectQuestion': return 'hitap etmiş miydim';
+                case 'pastContinuousPositive': return 'hitap ediyordum';
+                case 'pastContinuousNegative': return 'hitap etmiyordum';
+                case 'pastContinuousQuestion': return 'hitap ediyor muydum';
+                default: return verb.trSimplePast;
+            }
+        }
+
+        switch (tenseKey) {
+            case 'futurePositive': return verb.trFuture;
+            case 'futureNegative': return verb.trFutureNegative;
+            case 'futureQuestion': return verb.trFutureQuestion;
+            case 'simplePastPositive': return verb.trSimplePast;
+            case 'simplePastNegative': return verb.trSimplePastNegative;
+            case 'simplePastQuestion': return verb.trSimplePastQuestion;
+            case 'presentPerfectPositive': return verb.trPresentPerfect;
+            case 'presentPerfectNegative': return verb.trPresentPerfectNegative;
+            case 'presentPerfectQuestion': return verb.trPresentPerfectQuestion;
+            case 'pastPerfectPositive': return verb.trPastPerfect;
+            case 'pastPerfectNegative': return verb.trPastPerfectNegative;
+            case 'pastPerfectQuestion': return verb.trPastPerfectQuestion;
+            case 'pastContinuousPositive': return verb.trPastContinuous;
+            case 'pastContinuousNegative': return verb.trPastContinuousNegative;
+            case 'pastContinuousQuestion': return verb.trPastContinuousQuestion;
+            default: return verb.trSimplePast;
+        }
+    }
+
+    function buildFinalSentence(head, tail) {
+        const verb = getSingleVerbPack();
+        const tailEn = (tail.en || '').trim();
+        const tailTr = cleanTailForTr(tail.tr);
+        const trPredicate = getTurkishPredicateForTail(head.tenseKey, tail, verb);
+
+        switch (head.tenseKey) {
+            case 'futurePositive':
+                return {
+                    en: `I will ${verb.enBase} ${tailEn} tomorrow.`,
+                    tr: `Ben yarın ${tailTr} ${trPredicate}.`
+                };
+            case 'futureNegative':
+                return {
+                    en: `I will not ${verb.enBase} ${tailEn} tomorrow.`,
+                    tr: `Ben yarın ${tailTr} ${trPredicate}.`
+                };
+            case 'futureQuestion':
+                return {
+                    en: `Will I ${verb.enBase} ${tailEn} tomorrow?`,
+                    tr: `Ben yarın ${tailTr} ${trPredicate}?`
+                };
+            case 'simplePastPositive':
+                return {
+                    en: `I ${verb.enPast} ${tailEn} yesterday.`,
+                    tr: `Ben dün ${tailTr} ${trPredicate}.`
+                };
+            case 'simplePastNegative':
+                return {
+                    en: `I did not ${verb.enBase} ${tailEn} yesterday.`,
+                    tr: `Ben dün ${tailTr} ${trPredicate}.`
+                };
+            case 'simplePastQuestion':
+                return {
+                    en: `Did I ${verb.enBase} ${tailEn} yesterday?`,
+                    tr: `Ben dün ${tailTr} ${trPredicate}?`
+                };
+            case 'presentPerfectPositive':
+                return {
+                    en: `I have ${verb.enPastPart} ${tailEn} before.`,
+                    tr: `Ben daha önce ${tailTr} ${trPredicate}.`
+                };
+            case 'presentPerfectNegative':
+                return {
+                    en: `I have not ${verb.enPastPart} ${tailEn} before.`,
+                    tr: `Ben daha önce ${tailTr} ${trPredicate}.`
+                };
+            case 'presentPerfectQuestion':
+                return {
+                    en: `Have I ${verb.enPastPart} ${tailEn} before?`,
+                    tr: `Ben daha önce ${tailTr} ${trPredicate}?`
+                };
+            case 'pastPerfectPositive':
+                return {
+                    en: `I had ${verb.enPastPart} ${tailEn} before.`,
+                    tr: `Ben daha önce ${tailTr} ${trPredicate}.`
+                };
+            case 'pastPerfectNegative':
+                return {
+                    en: `I had not ${verb.enPastPart} ${tailEn} before.`,
+                    tr: `Ben daha önce ${tailTr} ${trPredicate}.`
+                };
+            case 'pastPerfectQuestion':
+                return {
+                    en: `Had I ${verb.enPastPart} ${tailEn} before?`,
+                    tr: `Ben daha önce ${tailTr} ${trPredicate}?`
+                };
+            case 'pastContinuousPositive':
+                return {
+                    en: `I was ${verb.enGerund} ${tailEn} yesterday.`,
+                    tr: `Ben dün ${tailTr} ${trPredicate}.`
+                };
+            case 'pastContinuousNegative':
+                return {
+                    en: `I was not ${verb.enGerund} ${tailEn} yesterday.`,
+                    tr: `Ben dün ${tailTr} ${trPredicate}.`
+                };
+            case 'pastContinuousQuestion':
+                return {
+                    en: `Was I ${verb.enGerund} ${tailEn} yesterday?`,
+                    tr: `Ben dün ${tailTr} ${trPredicate}?`
+                };
+            default:
+                return {
+                    en: `${head.en} ${tail.en}.`,
+                    tr: `${head.tr} ${tail.tr}.`
+                };
+        }
+    }
+
+    function buildSentenceChains(currentMode) {
+        const heads = buildHeadPairs();
+        const tails = buildTailPairs(currentMode);
+
+        if (!tails.length) {
+            return [];
+        }
+
+        const total = heads.length;
+
+        return heads.slice(0, total).map((head, index) => {
+            const tail = tails[index % tails.length];
+            const finalSentence = buildFinalSentence(head, tail);
+
+            return {
+                id: index + 1,
+                tailId: tail.id,
+                headEn: head.en,
+                headTr: head.tr,
+                tailEn: tail.en,
+                tailTr: tail.tr,
+                finalEn: finalSentence.en,
+                finalTr: finalSentence.tr
+            };
+        });
+    }
+
+    function makeBoardOrder(chainList) {
+        const uniqueTails = [];
+        const seenTailIds = new Set();
+
+        chainList.forEach(item => {
+            if (seenTailIds.has(item.tailId)) {
+                return;
+            }
+
+            seenTailIds.add(item.tailId);
+            uniqueTails.push({ id: item.tailId, en: item.tailEn, tr: item.tailTr });
+        });
+
+        return {
+            headEn: shuffle(chainList.map(item => ({ id: item.id, text: item.headEn }))),
+            headTr: shuffle(chainList.map(item => ({ id: item.id, text: item.headTr }))),
+            tailEn: shuffle(uniqueTails.map(item => ({ id: item.id, text: item.en }))),
+            tailTr: shuffle(uniqueTails.map(item => ({ id: item.id, text: item.tr }))),
+            finalEn: shuffle(chainList.map(item => ({ id: item.id, text: item.finalEn }))),
+            finalTr: shuffle(chainList.map(item => ({ id: item.id, text: item.finalTr })))
+        };
+    }
+
+    function createChainState(total) {
+        return {
+            total,
+            completedIds: new Set(),
+            activeChainId: null,
+            passedKeys: new Set(),
+            pointerId: null,
+            pointerPosition: null,
+            chainCompletedNow: false
+        };
+    }
+
+    function getActiveChain() {
+        return chains.find(item => item.id === chainState.activeChainId) || null;
+    }
+
+    function getExpectedItemId(key) {
+        const activeChain = getActiveChain();
+        if (!activeChain) {
+            return null;
+        }
+
+        if (key === 'tailEn' || key === 'tailTr') {
+            return activeChain.tailId;
+        }
+
+        return activeChain.id;
+    }
+
+    function renderColumn(columnId, key, langClass) {
+        const column = document.getElementById(columnId);
+        if (!column) {
+            return;
+        }
+
+        column.querySelectorAll('.pair-item').forEach(item => item.remove());
+
+        boardOrder[key].forEach(item => {
+            const isTailColumn = key === 'tailEn' || key === 'tailTr';
+            const isCompleted = !isTailColumn && chainState.completedIds.has(item.id);
+            const expectedItemId = getExpectedItemId(key);
+            const isPassed = expectedItemId === item.id && chainState.passedKeys.has(key);
+            const showStartMarker = key === 'headEn' && !isCompleted && chainState.activeChainId === null;
+
+            const element = document.createElement('div');
+            element.className = `pair-item chain-item ${langClass}`;
+            element.dataset.itemId = String(item.id);
+            element.dataset.key = key;
+            element.dataset.chainMark = isCompleted ? '✓' : (isPassed || showStartMarker ? chainMarks[key] : '');
+            element.textContent = item.text;
+
+            if (showStartMarker) {
+                element.classList.add('startable');
+                element.addEventListener('pointerdown', event => startChain(event, item.id));
+            }
+
+            if (isPassed) {
+                element.classList.add('in-chain');
+            }
+
+            if (isCompleted) {
+                element.classList.add('matched');
+            }
+
+            if (isCompleted && chainState.chainCompletedNow) {
+                element.classList.add('chain-complete');
+            }
+
+            column.appendChild(element);
+        });
+    }
+
+    function updateTexts() {
+        const completed = chainState.completedIds.size;
+        const total = chainState.total;
+
+        document.getElementById('chainSummaryText').textContent = `${completed} / ${total} zincir tamamlandı`;
+        document.getElementById('headProgressText').textContent = `${completed} / ${total} zincir tamamlandı`;
+        document.getElementById('tailProgressText').textContent = `${completed} / ${total} zincir tamamlandı`;
+        document.getElementById('finalProgressText').textContent = `${completed} / ${total} zincir tamamlandı`;
+
+        const status = document.getElementById('chainStatusText');
+        if (!status) {
+            return;
+        }
+
+        if (completed === total) {
+            status.textContent = 'Tüm zincirler tamamlandı. Son kart yeşile döndü; istersen modu değiştirip yeniden oyna.';
+            return;
+        }
+
+        if (chainState.activeChainId === null) {
+            status.textContent = 'Soldaki İngilizce karttan başla. Doğru yolu kendin bul ve sürüklemeyi son karta kadar bırakma.';
+            return;
+        }
+
+        status.textContent = 'Zincir açık. Parmağı veya mouse tuşunu bırakmadan doğru kutuları sırayla bul.';
+    }
+
+    function updateChainOverlay() {
+        const overlay = document.getElementById('chainOverlay');
+        const grid = document.querySelector('.modules-grid');
+        if (!overlay || !grid) {
+            return;
+        }
+
+        const rect = grid.getBoundingClientRect();
+        overlay.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
+        overlay.innerHTML = '';
+
+        if (chainState.activeChainId === null) {
+            return;
+        }
+
+        const activeKeys = sequenceKeys.filter(key => chainState.passedKeys.has(key));
+        const points = activeKeys
+            .map(key => {
+                const expectedItemId = getExpectedItemId(key);
+                const element = document.querySelector(`.chain-item[data-item-id='${expectedItemId}'][data-key='${key}']`);
+                if (!element) {
+                    return null;
+                }
+
+                const itemRect = element.getBoundingClientRect();
+                return {
+                    x: itemRect.left + (itemRect.width / 2) - rect.left,
+                    y: itemRect.top + (itemRect.height / 2) - rect.top
+                };
+            })
+            .filter(Boolean);
+
+        if (chainState.pointerPosition) {
+            points.push(chainState.pointerPosition);
+        }
+
+        for (let index = 1; index < points.length; index++) {
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', points[index - 1].x);
+            line.setAttribute('y1', points[index - 1].y);
+            line.setAttribute('x2', points[index].x);
+            line.setAttribute('y2', points[index].y);
+            line.setAttribute('stroke', '#ffa000');
+            line.setAttribute('stroke-width', '5');
+            line.setAttribute('stroke-linecap', 'round');
+            line.setAttribute('stroke-dasharray', index === points.length - 1 ? '10 10' : '0');
+            overlay.appendChild(line);
+        }
+
+        points.slice(0, Math.max(points.length - 1, 1)).forEach(point => {
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', point.x);
+            circle.setAttribute('cy', point.y);
+            circle.setAttribute('r', '10');
+            circle.setAttribute('fill', '#ffffff');
+            circle.setAttribute('stroke', '#ffa000');
+            circle.setAttribute('stroke-width', '4');
+            overlay.appendChild(circle);
+        });
+    }
+
+    function renderAll() {
+        const isModalMode = isVerbMode && currentTenseId === MODAL_TENSE_ID;
+        const isWhQuestionsMode = isVerbMode && currentTenseId === WH_TENSE_ID;
+        setVerbPanelsVisibility(true);
+        const modalsArea = document.getElementById('modalsArea');
+        const whQuestionsArea = document.getElementById('whQuestionsArea');
+        if (modalsArea) {
+            modalsArea.classList.toggle('hidden', !isModalMode);
+        }
+        if (whQuestionsArea) {
+            whQuestionsArea.classList.toggle('hidden', !isWhQuestionsMode);
+        }
+
+        const status = document.getElementById('chainStatusText');
+        if (status && isModalMode) {
+            status.textContent = 'Modal kartlarini soldan baslayarak zincir mantigiyla eslestir.';
+        }
+
+        document.getElementById('tailSubtitle').textContent = isModalMode
+            ? 'Modal kalibi + cümle devamı'
+            : isWhQuestionsMode
+                ? (currentWhGroup === 'negative' ? 'Olumsuz W-soru + cümle devamı' : 'Olumlu W-soru + cümle devamı')
+            : (mode === 'singular'
+                ? 'Tekil noun ile cümlenin arka parçası'
+                : 'Çoğul noun ile cümlenin arka parçası');
+
+        renderColumn('headEnglishCol', 'headEn', 'en');
+        if (!isVerbMode) {
+            renderColumn('headTurkishCol', 'headTr', 'tr');
+        }
+        renderColumn('tailEnglishCol', 'tailEn', 'en');
+        if (!isVerbMode) {
+            renderColumn('tailTurkishCol', 'tailTr', 'tr');
+        }
+        renderColumn('finalTurkishCol', 'finalTr', 'tr');
+        updateTexts();
+        requestAnimationFrame(updateChainOverlay);
+        chainState.chainCompletedNow = false;
+    }
+
+    function getPointerPosition(event) {
+        const grid = document.querySelector('.modules-grid');
+        if (!grid) {
+            return null;
+        }
+
+        const rect = grid.getBoundingClientRect();
+        return {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top
+        };
+    }
+
+    function resetActiveChain() {
+        chainState.activeChainId = null;
+        chainState.passedKeys = new Set();
+        chainState.pointerId = null;
+        chainState.pointerPosition = null;
+        document.body.classList.remove('chain-dragging');
+        renderAll();
+    }
+
+    function completeActiveChain() {
+        chainState.completedIds.add(chainState.activeChainId);
+        chainState.chainCompletedNow = true;
+        chainState.activeChainId = null;
+        chainState.passedKeys = new Set();
+        chainState.pointerId = null;
+        chainState.pointerPosition = null;
+        document.body.classList.remove('chain-dragging');
+        renderAll();
+    }
+
+    function startChain(event, chainId) {
+        if (chainState.completedIds.has(chainId) || chainState.activeChainId !== null) {
+            return;
+        }
+
+        event.preventDefault();
+        chainState.activeChainId = chainId;
+        chainState.pointerId = event.pointerId;
+        chainState.passedKeys = new Set(['headEn']);
+        chainState.pointerPosition = getPointerPosition(event);
+        document.body.classList.add('chain-dragging');
+        renderAll();
+    }
+
+    function handlePointerMove(event) {
+        if (chainState.activeChainId === null || chainState.pointerId !== event.pointerId) {
+            return;
+        }
+
+        chainState.pointerPosition = getPointerPosition(event);
+
+        const nextKey = sequenceKeys[chainState.passedKeys.size];
+        if (!nextKey) {
+            updateChainOverlay();
+            return;
+        }
+
+        const hovered = document.elementFromPoint(event.clientX, event.clientY)?.closest('.chain-item');
+        if (!hovered) {
+            updateChainOverlay();
+            return;
+        }
+
+        const expectedItemId = getExpectedItemId(nextKey);
+        const hoveredKey = hovered.dataset.key;
+        const hoveredId = Number.parseInt(hovered.dataset.itemId || '', 10);
+
+        if (hoveredId !== expectedItemId || hoveredKey !== nextKey) {
+            updateChainOverlay();
+            return;
+        }
+
+        chainState.passedKeys.add(nextKey);
+
+        if (nextKey === 'finalTr') {
+            completeActiveChain();
+            return;
+        }
+
+        renderAll();
+    }
+
+    function handlePointerEnd(event) {
+        if (chainState.activeChainId === null || chainState.pointerId !== event.pointerId) {
+            return;
+        }
+
+        resetActiveChain();
+    }
+
+    let chains = isVerbMode ? buildVerbSentenceChains() : buildSentenceChains(mode);
+    let boardOrder = isVerbMode ? buildVerbBoardOrder(chains) : makeBoardOrder(chains);
+    let chainState = createChainState(chains.length);
+
+    function setMode(nextMode) {
+        mode = nextMode;
+        const singularButton = document.getElementById('modeSingularBtn');
+        const pluralButton = document.getElementById('modePluralBtn');
+        if (singularButton && pluralButton) {
+            singularButton.classList.toggle('active', mode === 'singular');
+            pluralButton.classList.toggle('active', mode === 'plural');
+        }
+
+        chains = isVerbMode ? buildVerbSentenceChains() : buildSentenceChains(mode);
+        boardOrder = isVerbMode ? buildVerbBoardOrder(chains) : makeBoardOrder(chains);
+        chainState = createChainState(chains.length);
+        renderAll();
+    }
+
+    window.setMode = setMode;
+
+    window.addEventListener('load', () => {
+        window.addEventListener('pointermove', handlePointerMove);
+        window.addEventListener('pointerup', handlePointerEnd);
+        window.addEventListener('pointercancel', handlePointerEnd);
+        window.addEventListener('resize', updateChainOverlay);
+        renderAll();
+        
+        const tenseTabNav = document.querySelector('.tense-tabs-nav');
+        if (tenseTabNav && !isVerbMode) {
+            tenseTabNav.style.display = 'none';
+        }
+
+        const modalsArea = document.getElementById('modalsArea');
+        if (modalsArea && !isVerbMode) {
+            modalsArea.style.display = 'none';
+        }
+
+        const whQuestionsArea = document.getElementById('whQuestionsArea');
+        if (whQuestionsArea && !isVerbMode) {
+            whQuestionsArea.style.display = 'none';
+        }
+
+        const modalGroups = document.getElementById('modalGroups');
+        if (modalGroups && !isVerbMode) {
+            modalGroups.style.display = 'none';
+        }
+
+        // Setup Tab Listeners (VERB MODE ONLY)
+        if (isVerbMode) {
+            document.querySelectorAll('.tense-tab-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const tenseId = parseInt(e.currentTarget.dataset.tense);
+                    currentTenseId = tenseId;
+                    
+                    // Update active tab
+                    document.querySelectorAll('.tense-tab-btn').forEach(b => b.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+
+                    if (currentTenseId === MODAL_TENSE_ID) {
+                        chains = buildModalSentenceChains();
+                        boardOrder = buildModalBoardOrder(chains);
+                        chainState = createChainState(chains.length);
+                        renderAll();
+                        return;
+                    }
+
+                    if (currentTenseId === WH_TENSE_ID) {
+                        chains = buildVerbSentenceChains();
+                        boardOrder = buildVerbBoardOrder(chains);
+                        chainState = createChainState(chains.length);
+                        renderAll();
+                        return;
+                    }
+                    
+                    // Rebuild and re-render
+                    chains = buildVerbSentenceChains();
+                    boardOrder = buildVerbBoardOrder(chains);
+                    chainState = createChainState(chains.length);
+                    renderAll();
+                });
+            });
+
+            document.querySelectorAll('.modal-group-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    currentModalGroup = e.currentTarget.dataset.modalGroup;
+                    document.querySelectorAll('.modal-group-btn').forEach(b => b.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+
+                    if (currentTenseId !== MODAL_TENSE_ID) {
+                        return;
+                    }
+
+                    chains = buildModalSentenceChains();
+                    boardOrder = buildModalBoardOrder(chains);
+                    chainState = createChainState(chains.length);
+                    renderAll();
+                });
+            });
+
+            document.querySelectorAll('.wh-group-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    currentWhGroup = e.currentTarget.dataset.whGroup;
+                    document.querySelectorAll('.wh-group-btn').forEach(b => b.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+
+                    if (currentTenseId !== WH_TENSE_ID) {
+                        return;
+                    }
+
+                    chains = buildVerbSentenceChains();
+                    boardOrder = buildVerbBoardOrder(chains);
+                    chainState = createChainState(chains.length);
+                    renderAll();
+                });
+            });
+        }
+    });
+</script>
+}

@@ -1,0 +1,78 @@
+@model OzgurSeyhanWebSitesi.Core.Dtos.OzelDersDtos.UpdateOzelDersDto
+
+@{
+    ViewData["Title"] = "Özel Ders Düzenle";
+}
+
+<div class="content-wrapper">
+    <div class="page-header">
+        <h3 class="page-title">Özel Ders Düzenle</h3>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/Admin">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="@Url.Action("Index", "OzelDers")">Özel Dersler</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Düzenle</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Özel Ders Bilgilerini Güncelle</h4>
+                    <p class="card-description">Değiştirmek istediğiniz alanları güncelleyin</p>
+
+                    <form asp-action="Edit" method="post" class="forms-sample">
+                        <input asp-for="Id" type="hidden" />
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="KurSeviyesi">Kur Seviyesi</label>
+                                    <input asp-for="KurSeviyesi" class="form-control" />
+                                    <span asp-validation-for="KurSeviyesi" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="ResimUrl">Resim URL (Opsiyonel)</label>
+                                    <input asp-for="ResimUrl" class="form-control" placeholder="https://example.com/image.jpg" />
+                                    <span asp-validation-for="ResimUrl" class="text-danger"></span>
+                                    <small class="form-text text-muted">Kurs kartında gösterilecek resim</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="YoutubeVideoUrl">YouTube Video URL (Opsiyonel)</label>
+                            <input asp-for="YoutubeVideoUrl" class="form-control" placeholder="https://www.youtube.com/watch?v=xxxxxx" />
+                            <span asp-validation-for="YoutubeVideoUrl" class="text-danger"></span>
+                            <small class="form-text text-muted">Kurs detayında gösterilecek tanıtım videosu</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Aciklama">Açıklama</label>
+                            <textarea asp-for="Aciklama" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="Aciklama" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-success mr-2">
+                                <i class="mdi mdi-check"></i> Güncelle
+                            </button>
+                            <a href="@Url.Action("Index", "OzelDers")" class="btn btn-light">
+                                <i class="mdi mdi-cancel"></i> İptal
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

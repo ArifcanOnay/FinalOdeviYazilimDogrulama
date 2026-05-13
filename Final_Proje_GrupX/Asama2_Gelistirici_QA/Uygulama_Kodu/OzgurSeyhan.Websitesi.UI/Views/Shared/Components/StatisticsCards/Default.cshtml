@@ -1,0 +1,83 @@
+@model OzgurSeyhan.Websitesi.UI.ViewComponents.DashboardComponents.StatisticsViewModel
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card card-stats card-primary">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-5">
+                        <div class="icon-big text-center">
+                            <i class="la la-youtube"></i>
+                        </div>
+                    </div>
+                    <div class="col-7 d-flex align-items-center">
+                        <div class="numbers">
+                            <p class="card-category">YouTube Videoları</p>
+                            <h4 class="card-title">@Model.VideoCount</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card card-stats card-success">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-5">
+                        <div class="icon-big text-center">
+                            <i class="la la-list"></i>
+                        </div>
+                    </div>
+                    <div class="col-7 d-flex align-items-center">
+                        <div class="numbers">
+                            <p class="card-category">Playlist</p>
+                            <h4 class="card-title">@Model.PlaylistCount</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card card-stats card-info">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-5">
+                        <div class="icon-big text-center">
+                            <i class="la la-book"></i>
+                        </div>
+                    </div>
+                    <div class="col-7 d-flex align-items-center">
+                        <div class="numbers">
+                            <p class="card-category">Özel Dersler</p>
+                            <h4 class="card-title">@Model.OzelDersCount</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card card-stats card-warning">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-5">
+                        <div class="icon-big text-center">
+                            <i class="la la-microphone"></i>
+                        </div>
+                    </div>
+                    <div class="col-7 d-flex align-items-center">
+                        <div class="numbers">
+                            <p class="card-category">Podcast</p>
+                            <h4 class="card-title">@Model.PodcastCount</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

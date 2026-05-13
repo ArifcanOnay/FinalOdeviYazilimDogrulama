@@ -1,0 +1,101 @@
+@model OzgurSeyhanWebSitesi.Core.Dtos.ReferansLinkDto
+
+@{
+    ViewData["Title"] = "Web Sitesi Düzenle";
+}
+
+<div class="content">
+    <div class="container-fluid">
+        <h4 class="page-title">Web Sitesi Düzenle</h4>
+
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="card-title">Site Bilgilerini Düzenle</h4>
+                            <a href="@Url.Action("ReferansLinkIndex", "Youtube")" class="btn btn-secondary">
+                                <i class="la la-arrow-left"></i> Geri Dön
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="ReferansLinkEdit" asp-controller="Youtube" asp-route-id="@Model.Id" method="post">
+                            <input type="hidden" asp-for="Id" />
+
+                            <div class="form-group">
+                                <label asp-for="SiteAdi">Site Adı <span class="text-danger">*</span></label>
+                                <input asp-for="SiteAdi" 
+                                       class="form-control" 
+                                       placeholder="Örn: British Council, Duolingo, BBC Learning English" 
+                                       required />
+                                <small class="form-text text-muted">
+                                    Sitenin adını girin (kısa ve öz)
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Link">Site Linki <span class="text-danger">*</span></label>
+                                <input asp-for="Link" 
+                                       type="url"
+                                       class="form-control" 
+                                       placeholder="https://www.example.com" 
+                                       required />
+                                <small class="form-text text-muted">
+                                    Tam URL'yi girin (https:// ile başlamalı)
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Aciklama">Açıklama <span class="text-danger">*</span></label>
+                                <textarea asp-for="Aciklama" 
+                                          class="form-control" 
+                                          rows="3"
+                                          placeholder="Bu site hakkında kısa bir açıklama yazın..."
+                                          required></textarea>
+                                <small class="form-text text-muted">
+                                    Sitenin ne işe yaradığını kısaca açıklayın
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Ikon">İkon (Emoji) <span class="text-muted">(Opsiyonel)</span></label>
+                                <input asp-for="Ikon" 
+                                       class="form-control" 
+                                       placeholder="🌐 📚 🎓 🇬🇧 📖" 
+                                       maxlength="5" />
+                                <small class="form-text text-muted">
+                                    Sitenin yanında gösterilecek emoji (boş bırakılırsa 🌐 kullanılır)
+                                    <br>
+                                    <strong>Örnekler:</strong> 🌐 📚 🎓 🇬🇧 📖 ✍️ 🗣️ 👂 📺 🎧
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label asp-for="Sira">Sıra <span class="text-danger">*</span></label>
+                                <input asp-for="Sira" 
+                                       type="number"
+                                       class="form-control" 
+                                       placeholder="1" 
+                                       min="1"
+                                       required />
+                                <small class="form-text text-muted">
+                                    Sayfada kaçıncı sırada gösterilsin? (Küçük sayı önce gelir)
+                                </small>
+                            </div>
+
+                            <div class="form-group text-right mt-4">
+                                <a href="@Url.Action("ReferansLinkIndex", "Youtube")" class="btn btn-secondary">
+                                    İptal
+                                </a>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="la la-save"></i> Kaydet
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

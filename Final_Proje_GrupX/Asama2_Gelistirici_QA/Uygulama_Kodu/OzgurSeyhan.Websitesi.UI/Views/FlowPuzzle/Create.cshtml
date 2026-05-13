@@ -1,0 +1,89 @@
+@model OzgurSeyhan.Websitesi.UI.Controllers.CreateFlowPuzzleNounDto
+@{
+    ViewData["Title"] = "Yeni İsim Çifti Ekle";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Yeni İsim Çifti Ekle</h4>
+        <ul class="breadcrumbs">
+            <li class="nav-home">
+                <a href="@Url.Action("Index", "AdminLayout")">
+                    <i class="flaticon-home"></i>
+                </a>
+            </li>
+            <li class="separator">
+                <i class="flaticon-right-arrow"></i>
+            </li>
+            <li class="nav-item">
+                <a href="@Url.Action("Index")">Edat İsimleri</a>
+            </li>
+            <li class="separator">
+                <i class="flaticon-right-arrow"></i>
+            </li>
+            <li class="nav-item">
+                <a href="#">Ekle</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">İsim Çifti Bilgileri</div>
+                </div>
+                <form asp-action="Create" method="post">
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="form-group">
+                            <label asp-for="SingularForm">Tekil Form</label>
+                            <input asp-for="SingularForm" class="form-control" placeholder="örn: child" />
+                            <span asp-validation-for="SingularForm" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="PluralForm">Çoğul Form</label>
+                            <input asp-for="PluralForm" class="form-control" placeholder="örn: children" />
+                            <span asp-validation-for="PluralForm" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="TurkishMeaning">Türkçe Anlam</label>
+                            <input asp-for="TurkishMeaning" class="form-control" placeholder="örn: çocuk" />
+                            <span asp-validation-for="TurkishMeaning" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="DisplayOrder">Görüntülenme Sırası</label>
+                            <input asp-for="DisplayOrder" type="number" class="form-control" />
+                            <small class="form-text text-muted">Oyunda görüntülenme sırasını belirler (0'dan başlar)</small>
+                        </div>
+
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                <span class="form-check-sign">Aktif</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="card-action">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fa fa-save"></i> Kaydet
+                        </button>
+                        <a href="@Url.Action("Index")" class="btn btn-danger">
+                            <i class="fa fa-times"></i> İptal
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
